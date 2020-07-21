@@ -1,8 +1,11 @@
+import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class Quick{
+
+
   static Widget makeText(String text, int color, double size, {FontWeight fontWeight = FontWeight.w500}){
     return Text(
       text,
@@ -14,6 +17,22 @@ class Quick{
     );
   }
 
+  static void navigate(BuildContext context, Widget Function() navigatePage){
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context){
+        return navigatePage();
+      })
+    );
+  }
+
+  static void goBack(BuildContext context){
+    Navigator.pop(context);
+  }
+
+  static Size getDeviceSize(BuildContext context){
+    return MediaQuery.of(context).size;
+  }
 
 
 }

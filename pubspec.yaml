@@ -24,6 +24,7 @@ dependencies:
   google_fonts: ^1.0.0
   geolocator: ^5.3.2+2
   weather: ^1.2.0
+  tinycolor: ^1.0.2
   flutter:
     sdk: flutter
 

@@ -7,6 +7,9 @@ import 'package:weather/weather_library.dart';
 
 import 'Model/CurrentLocation.dart';
 import 'Model/Group.dart';
+import 'Model/MyTheme.dart';
+import 'Util/Quick.dart';
+import 'groupPage.dart';
 
 void main() {
   runApp(MyApp());
@@ -19,6 +22,8 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
+        primaryColor: MyTheme.primaryColor,
+        accentColor: MyTheme.accentColor,
         bottomSheetTheme:
             BottomSheetThemeData(backgroundColor: Colors.transparent),
         // This is the theme of your application.
@@ -35,6 +40,7 @@ class MyApp extends StatelessWidget {
         // the app on. For desktop platforms, the controls will be smaller and
         // closer together (more dense) than on mobile platforms.
         visualDensity: VisualDensity.adaptivePlatformDensity,
+
       ),
       home: MyHomePage(title: 'Flutter Demo Home Page'),
     );
@@ -63,6 +69,7 @@ class _MyHomePageState extends State<MyHomePage> {
   final Geolocator geolocator = Geolocator()..forceAndroidLocationManager;
   Weather weather;
   Placemark place;
+  int repeater = 0;
 
   void loadData() {
     // Code possible thanks to https://www.digitalocean.com/community/tutorials/flutter-geolocator-plugin
@@ -108,7 +115,9 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    if (place == null || weather == null) {
+    if (place == null || weather == null && repeater < 8) {
+      repeater++;
+      print(repeater);
       loadData();
     }
 
@@ -228,11 +237,7 @@ class _MyHomePageState extends State<MyHomePage> {
               child: Text(
                 "CURRENT VIBE",
                 textAlign: TextAlign.left,
-                style: GoogleFonts.poppins(
-                  fontSize: 15,
-                  color: Color(0xff90C78A),
-                  fontWeight: FontWeight.w700,
-                ),
+                style: MyTheme.sectionHeader(context),
               ),
             ),
             Row(
@@ -407,11 +412,7 @@ class _MyHomePageState extends State<MyHomePage> {
             child: Text(
               "YOUR GROUPS",
               textAlign: TextAlign.left,
-              style: GoogleFonts.poppins(
-                fontSize: 15,
-                color: Color(0xff90C78A),
-                fontWeight: FontWeight.w700,
-              ),
+              style: MyTheme.sectionHeader(context)
             ),
           ),
           groupListWidget(),
@@ -422,11 +423,12 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Future<List<Group>> fetchGroupData() async {
     List<Group> groupList = new List();
-    groupList.add(new Group(name: "RSD3 dumbass trip LOOL", isActive: true));
-    groupList.add(new Group(name: "test"));
-    groupList.add(new Group(name: "test"));
-    groupList.add(new Group(name: "test"));
-    groupList.add(new Group(name: "test"));
+    groupList.add(new Group(
+        name: "RSD3 dumbass trip LOOL", isActive: true, memberCount: 13));
+    groupList.add(new Group(name: "test", isActive: false, memberCount: 3));
+    groupList.add(new Group(name: "test", isActive: false, memberCount: 3));
+    groupList.add(new Group(name: "test", isActive: false, memberCount: 3));
+    groupList.add(new Group(name: "test", isActive: false, memberCount: 3));
     return groupList;
   }
 
@@ -464,75 +466,82 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Widget groupItem(Group group) {
-    return Container(
-      height: 90,
-      decoration: BoxDecoration(
-          color: group.isActive ? Color(0xffECC68C) : Colors.white,
-          borderRadius: BorderRadius.circular(20),
-          boxShadow: [
-            BoxShadow(
-              blurRadius: 10,
-              color: Colors.grey.withOpacity(0.1),
-            )
-          ]),
-      child: Padding(
-        padding:
-            const EdgeInsets.only(left: 25.0, right: 25.0, top: 15, bottom: 15),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: <Widget>[
-            Container(
-              height: 50,
-              width: 50,
-              decoration: BoxDecoration(
-                  boxShadow: [
-                    BoxShadow(
-                      blurRadius: 7,
-                      color: Colors.black.withOpacity(0.3),
-                    )
-                  ],
-                  shape: BoxShape.circle,
-                  image: DecorationImage(
-                    fit: BoxFit.fill,
-                    image: NetworkImage(
-                        'https://flutter.github.io/assets-for-api-docs/assets/widgets/owl.jpg'),
-                  )),
-            ),
-            SizedBox(
-              width: 16,
-            ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Container(
-                  width: MediaQuery.of(context).size.width * 0.6,
-                  child: Text(
-                    group.name,
-                    maxLines: 1,
-                    softWrap: false,
-                    overflow: TextOverflow.ellipsis,
-                    textAlign: TextAlign.left,
-                    style: GoogleFonts.poppins(
-                      fontSize: 23,
-                      color: group.isActive ? Colors.white : Color(0xff8AB587),
-                      fontWeight: FontWeight.w600,
+    return InkWell(
+      onTap: () {
+        Quick.navigate(context, () => GroupPage(group: group));
+      },
+      child: Container(
+        height: 90,
+        decoration: BoxDecoration(
+            color: group.isActive ? Color(0xffECC68C) : Colors.white,
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(
+                blurRadius: 10,
+                color: Colors.grey.withOpacity(0.1),
+              )
+            ]),
+        child: Padding(
+          padding: const EdgeInsets.only(
+              left: 25.0, right: 25.0, top: 15, bottom: 15),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: <Widget>[
+              Container(
+                height: 50,
+                width: 50,
+                decoration: BoxDecoration(
+                    boxShadow: [
+                      BoxShadow(
+                        blurRadius: 7,
+                        color: Colors.black.withOpacity(0.3),
+                      )
+                    ],
+                    shape: BoxShape.circle,
+                    image: DecorationImage(
+                      fit: BoxFit.fill,
+                      image: NetworkImage(
+                          'https://flutter.github.io/assets-for-api-docs/assets/widgets/owl.jpg'),
+                    )),
+              ),
+              SizedBox(
+                width: 16,
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Container(
+                    width: MediaQuery.of(context).size.width * 0.6,
+                    child: Text(
+                      group.name,
+                      maxLines: 1,
+                      softWrap: false,
+                      overflow: TextOverflow.ellipsis,
+                      textAlign: TextAlign.left,
+                      style: GoogleFonts.poppins(
+                        fontSize: 23,
+                        color:
+                            group.isActive ? Colors.white : Color(0xff8AB587),
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
-                ),
-                Text(
-                  group.hoursSince.toString() + " hrs ago",
-                  textAlign: TextAlign.left,
-                  style: GoogleFonts.poppins(
-                    fontSize: 17,
-                    color:
-                        group.isActive ? Color(0xff9E8259) : Color(0xffC3D6C2),
-                    fontWeight: FontWeight.w600,
-                    height: 1,
-                  ),
-                )
-              ],
-            )
-          ],
+                  Text(
+                    group.hoursSince.toString() + " hrs ago",
+                    textAlign: TextAlign.left,
+                    style: GoogleFonts.poppins(
+                      fontSize: 17,
+                      color: group.isActive
+                          ? Color(0xff9E8259)
+                          : Color(0xffC3D6C2),
+                      fontWeight: FontWeight.w600,
+                      height: 1,
+                    ),
+                  )
+                ],
+              )
+            ],
+          ),
         ),
       ),
     );
@@ -581,94 +590,98 @@ class _MyHomePageState extends State<MyHomePage> {
                   )
                 ]),
             child: Padding(
-              padding: const EdgeInsets.only(left: 28.0, right: 28.0, top: 15),
+              padding: const EdgeInsets.only(top: 15),
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
-                  Row(
-                    children: <Widget>[
-                      //Temp and condition
-                      Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          Text(
-                              weather.temperature.celsius.toStringAsFixed(0) +
-                                  "°C",
-                              style: GoogleFonts.poppins(
-                                fontSize: 65,
-                                fontWeight: FontWeight.w600,
-                                color: Color(0xff64749A),
-                              )),
-                          Text(weather.weatherMain.toUpperCase(),
-                              style: GoogleFonts.poppins(
-                                fontSize: 27,
-                                fontWeight: FontWeight.w600,
-                                color: Color(0xff94A5CB),
-                                height: 0.6,
-                              ))
-                        ],
-                      ),
-                      new Spacer(),
-                      Container(
-                        height: 90,
-                        constraints: BoxConstraints(maxWidth: 150),
-                        decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(20),
-                            boxShadow: [
-                              BoxShadow(
-                                blurRadius: 25,
-                                color: Colors.grey.withOpacity(0.3),
-                              )
-                            ]),
-                        child: Padding(
-                          padding: const EdgeInsets.only(
-                              left: 20.0, right: 20.0, top: 20, bottom: 20),
-                          child: Flexible(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              children: <Widget>[
-                                Text(
-                                  place == null ? "N/A" : place.locality,
-                                  textAlign: TextAlign.left,
-                                  overflow: TextOverflow.ellipsis,
-                                  maxLines: 1,
-                                  style: GoogleFonts.poppins(
-                                    fontSize: 17,
-                                    color: Color(0xff83AFCC),
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                ),
-                                //STATE, COUNTRY
-                                Flexible(
-                                  child: Container(
-                                    constraints: BoxConstraints(
-                                      maxWidth: 110,
-                                    ),
-                                    child: Text(
-                                      place == null
-                                          ? "N/A"
-                                          : place.administrativeArea,
-                                      textAlign: TextAlign.left,
-                                      overflow: TextOverflow.ellipsis,
-                                      maxLines: 1,
-                                      style: GoogleFonts.poppins(
-                                        fontSize: 17,
-                                        color: Color(0xffB8D0DF),
-                                        fontWeight: FontWeight.w700,
-                                        height: 1,
-                                      ),
-                                    ),
-                                  ),
-                                )
-                              ],
-                            ),
-                          ),
-                        ),
-                      )
-                    ],
+                  Padding(
+                    padding: const EdgeInsets.only(left: 28.0),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Text(
+                            weather == null
+                                ? "N/A"
+                                : weather.temperature.celsius
+                                        .toStringAsFixed(0) +
+                                    "°C",
+                            style: GoogleFonts.poppins(
+                              fontSize: 65,
+                              fontWeight: FontWeight.w600,
+                              color: Color(0xff64749A),
+                            )),
+                        Text(weather.weatherMain.toUpperCase(),
+                            style: GoogleFonts.poppins(
+                              fontSize: 27,
+                              fontWeight: FontWeight.w600,
+                              color: Color(0xff94A5CB),
+                              height: 0.6,
+                            ))
+                      ],
+                    ),
                   ),
+                  SizedBox(
+                    height: 20,
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(left: 28.0),
+                    child: Container(
+                      height: 90,
+                      constraints: BoxConstraints(maxWidth: 250),
+                      decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(20),
+                          boxShadow: [
+                            BoxShadow(
+                              blurRadius: 25,
+                              color: Colors.grey.withOpacity(0.3),
+                            )
+                          ]),
+                      child: Padding(
+                        padding: const EdgeInsets.only(
+                            left: 20.0, right: 20.0, top: 20, bottom: 20),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: <Widget>[
+                            Text(
+                              place == null ? "N/A" : place.locality,
+                              textAlign: TextAlign.left,
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 1,
+                              style: GoogleFonts.poppins(
+                                fontSize: 17,
+                                color: Color(0xff83AFCC),
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                            //STATE, COUNTRY
+                            Container(
+                              constraints: BoxConstraints(
+                                maxWidth: 110,
+                              ),
+                              child: Text(
+                                place == null
+                                    ? "N/A"
+                                    : place.administrativeArea,
+                                textAlign: TextAlign.left,
+                                overflow: TextOverflow.ellipsis,
+                                maxLines: 1,
+                                style: GoogleFonts.poppins(
+                                  fontSize: 17,
+                                  color: Color(0xffB8D0DF),
+                                  fontWeight: FontWeight.w700,
+                                  height: 1,
+                                ),
+                              ),
+                            )
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  new Spacer(),
                   detailedWeatherInfo(), //Weather info
                 ],
               ),
@@ -677,32 +690,95 @@ class _MyHomePageState extends State<MyHomePage> {
         });
   }
 
-  Widget weatherBubble(){
-
-  }
+  Widget weatherBubble() {}
 
   Widget detailedWeatherInfo() {
-  List<WeatherBubble> weatherInfo = new List();
-  weatherInfo.add(new WeatherBubble(title: "Humidity", value: (weather.humidity * 100).toStringAsFixed(0)+"%"));
-  weatherInfo.add(new WeatherBubble(title: "Sunrise", amOrPm: "AM", value: (weather.sunrise.hour.toString() + weather.sunrise.minute.toString())));
-  weatherInfo.add(new WeatherBubble(title: "Sunset", amOrPm: "PM", value: ((12-weather.sunset.hour).toString() + weather.sunset.minute.toString())));
-
+    List<WeatherBubble> weatherInfo = new List();
+    weatherInfo.add(new WeatherBubble(
+        title: "Humidity", value: (weather.humidity).toStringAsFixed(0) + "%"));
+    weatherInfo.add(new WeatherBubble(
+        title: "Sunrise",
+        amOrPm: "AM",
+        value: (weather.sunrise.hour.toString() +
+            ":" +
+            (weather.sunrise.minute < 10 ? "0" : "") +
+            weather.sunrise.minute.toString())));
+    weatherInfo.add(new WeatherBubble(
+        title: "Sunset",
+        amOrPm: "PM",
+        value: (((12 - weather.sunset.hour) * -1).toString() +
+            ":" +
+            (weather.sunset.minute < 10 ? "0" : "") +
+            weather.sunset.minute.toString())));
+    print(new DateTime.fromMillisecondsSinceEpoch(
+        weather.sunrise.millisecondsSinceEpoch));
     return Container(
-      child: ListView.separated(
-          itemBuilder: (BuildContext context, int index){
-            print(weatherInfo[index].value);
-
-
-            return Container(
-              height: 10,
-            );
-          },
-          separatorBuilder: (BuildContext context, int index){
-            return SizedBox(height: 10);
-          },
-          itemCount: weatherInfo.length,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Padding(
+            padding: const EdgeInsets.only(left: 28.0),
+            child: Text("WEATHER INFO",
+                style: GoogleFonts.poppins(
+                  color: Colors.white,
+                  fontSize: 20,
+                  fontWeight: FontWeight.w600,
+                )),
+          ),
+          SizedBox(
+            height: 10,
+          ),
+          new Container(
+            height: 150,
+            child: Padding(
+              padding: const EdgeInsets.only(bottom: 28),
+              child: ListView.separated(
+                padding: EdgeInsets.only(left: 23, right: 23),
+                scrollDirection: Axis.horizontal,
+                itemBuilder: (BuildContext context, int index) {
+                  return Container(
+                      height: 120,
+                      width: 125,
+                      decoration: BoxDecoration(
+                          color: Color(0xffE5EDFF),
+                          borderRadius: BorderRadius.circular(20),
+                          boxShadow: [
+                            BoxShadow(
+                              blurRadius: 25,
+                              color: Colors.grey.withOpacity(0.3),
+                            )
+                          ]),
+                      child: Padding(
+                        padding: const EdgeInsets.only(
+                            top: 12.0, left: 12, right: 12),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: <Widget>[
+                            Text(weatherInfo[index].title,
+                                style: GoogleFonts.poppins(
+                                  color: Color(0xff64749A),
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w600,
+                                )),
+                            Text(weatherInfo[index].value,
+                                style: GoogleFonts.poppins(
+                                  color: Color(0xff64749A),
+                                  fontSize: 41,
+                                  fontWeight: FontWeight.w600,
+                                )),
+                          ],
+                        ),
+                      ));
+                },
+                separatorBuilder: (BuildContext context, int index) {
+                  return SizedBox(width: 50);
+                },
+                itemCount: weatherInfo.length,
+              ),
+            ),
+          ),
+        ],
       ),
     );
-
   }
 }
