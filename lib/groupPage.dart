@@ -313,6 +313,9 @@ class _GroupPage extends State<GroupPage> {
                   height: 15,
                 ),
                 Container(
+                  constraints: BoxConstraints(
+                    maxHeight: 100
+                  ),
                   child: Row(
                     children: <Widget>[
                       okOption(event, Icons.directions_run, "otw"),
@@ -598,8 +601,7 @@ class _GroupPage extends State<GroupPage> {
                   textAlign: TextAlign.left,
                   style: GoogleFonts.poppins(
                     fontSize: 20,
-                    color:
-                        group.isActive ? Color(0xff9DC398) : Color(0xffC3D6C2),
+                    color: Color(0xff9DC398),
                     fontWeight: FontWeight.w600,
                     height: 1,
                   ),
