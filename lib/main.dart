@@ -1,3 +1,4 @@
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
@@ -8,6 +9,7 @@ import 'package:weather/weather_library.dart';
 import 'Model/CurrentLocation.dart';
 import 'Model/Group.dart';
 import 'Model/MyTheme.dart';
+import 'Util/DB.dart';
 import 'Util/Quick.dart';
 import 'groupPage.dart';
 
@@ -40,7 +42,6 @@ class MyApp extends StatelessWidget {
         // the app on. For desktop platforms, the controls will be smaller and
         // closer together (more dense) than on mobile platforms.
         visualDensity: VisualDensity.adaptivePlatformDensity,
-
       ),
       home: MyHomePage(title: 'Flutter Demo Home Page'),
     );
@@ -409,11 +410,9 @@ class _MyHomePageState extends State<MyHomePage> {
           Padding(
             // Shift the text to the right a bit
             padding: const EdgeInsets.only(left: 10.0),
-            child: Text(
-              "YOUR GROUPS",
-              textAlign: TextAlign.left,
-              style: MyTheme.sectionHeader(context)
-            ),
+            child: Text("YOUR GROUPS",
+                textAlign: TextAlign.left,
+                style: MyTheme.sectionHeader(context)),
           ),
           groupListWidget(),
         ],
@@ -422,6 +421,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Future<List<Group>> fetchGroupData() async {
+
     List<Group> groupList = new List();
     groupList.add(new Group(
         name: "RSD3 dumbass trip LOOL", isActive: true, memberCount: 13));

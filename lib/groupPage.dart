@@ -38,33 +38,35 @@ class _GroupPage extends State<GroupPage> {
                 padding: const EdgeInsets.only(top: 60, left: 20, right: 20),
                 child: Container(
                   alignment: Alignment.centerLeft,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      MyTheme.backButton(context),
-                      SizedBox(
-                        //Provide responsive design
-                        height: MediaQuery.of(context).size.height * 0.02,
-                      ),
-                      groupInfo(),
-                      SizedBox(
-                        //Provide responsive design
-                        height: MediaQuery.of(context).size.height * 0.04,
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.only(left: 18.0, right: 18),
-                        child: Text(
-                          "LOG",
-                          style: MyTheme.sectionHeader(context),
+                  child: SingleChildScrollView(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        MyTheme.backButton(context),
+                        SizedBox(
+                          //Provide responsive design
+                          height: MediaQuery.of(context).size.height * 0.02,
                         ),
-                      ),
-                      logEventList(),
-                      SizedBox(
-                        //Provide responsive design
-                        height: 10,
-                      ),
-                      actions(),
-                    ],
+                        groupInfo(),
+                        SizedBox(
+                          //Provide responsive design
+                          height: MediaQuery.of(context).size.height * 0.04,
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(left: 18.0, right: 18),
+                          child: Text(
+                            "LOG",
+                            style: MyTheme.sectionHeader(context),
+                          ),
+                        ),
+                        logEventList(),
+                        SizedBox(
+                          //Provide responsive design
+                          height: 10,
+                        ),
+                        actions(),
+                      ],
+                    ),
                   ),
                 ))));
   }

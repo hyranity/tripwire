@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "1016264756679",
+    "firebase_url": "https://tripwire-2a43c.firebaseio.com",
+    "project_id": "tripwire-2a43c",
+    "storage_bucket": "tripwire-2a43c.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1016264756679:android:c5c311d568c7a4fb561de2",
+        "android_client_info": {
+          "package_name": "com.example.tripwire"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1016264756679-qfo2m94a170dm18q2m18ehaa42sgl7b2.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAmx1eYbi1YX1EiNP2lcdaaDXdUNyCuQV4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1016264756679-qfo2m94a170dm18q2m18ehaa42sgl7b2.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
