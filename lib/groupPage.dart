@@ -81,13 +81,13 @@ class _GroupPage extends State<GroupPage> {
                 ))));
   }
 
-  Widget action(context) {
+   action(context) {
     showModalBottomSheet(
         context: context,
         isScrollControlled: true,
         builder: (BuildContext context) {
           return Container(
-            height: Quick.getDeviceSize(context).height * 0.6,
+            height: Quick.getDeviceSize(context).height * 0.65,
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.only(
@@ -137,26 +137,27 @@ class _GroupPage extends State<GroupPage> {
                     padding:
                     const EdgeInsets.only(left: 15.0, right: 15, top: 10, bottom: 10),
                     child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         Text(
                           "Log location",
                           maxLines: 1,
                           softWrap: false,
                           overflow: TextOverflow.ellipsis,
-                          textAlign: TextAlign.left,
+                          textAlign: TextAlign.center,
                           style: GoogleFonts.poppins(
                             fontSize: 30,
                             color: MyTheme.accentColor,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
+
                         Text(
-                         "Sabah, Malaysia",
-                          maxLines: 3,
+                         "Sabah, Malaysia adasdasd asd sa",
+                          maxLines: 1,
                           softWrap: false,
                           overflow: TextOverflow.ellipsis,
-                          textAlign: TextAlign.left,
+                          textAlign: TextAlign.center,
                           style: GoogleFonts.poppins(
                             fontSize: 23,
                             color: MyTheme.accentColor,
@@ -204,7 +205,7 @@ class _GroupPage extends State<GroupPage> {
 
           //Else
           return ListView.separated(
-            padding: EdgeInsets.only(left: 28),
+            padding: EdgeInsets.only(left: 28, right: 28),
               scrollDirection: Axis.horizontal,
               itemBuilder: (BuildContext context, int index) {
                 //Individual button
@@ -241,17 +242,22 @@ class _GroupPage extends State<GroupPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                button.name,
-                maxLines: 1,
-                softWrap: false,
-                overflow: TextOverflow.ellipsis,
-                textAlign: TextAlign.left,
-                style: GoogleFonts.poppins(
-                  fontSize: 40,
-                  color: LogEvent.getColorScheme(button.type, false, 45),
-                  fontWeight: FontWeight.w600,
-                ),
+              Row(
+                children: [
+                  Text(
+                    button.name,
+                    maxLines: 1,
+                    softWrap: false,
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.left,
+                    style: GoogleFonts.poppins(
+                      fontSize: 40,
+                      color: LogEvent.getColorScheme(button.type, false, 45),
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  LogEvent.getIcon(button.type, 40),
+                ],
               ),
               Text(
                 button.description,
@@ -371,7 +377,7 @@ class _GroupPage extends State<GroupPage> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.start,
           children: <Widget>[
-            event.getIcon(40),
+            LogEvent.getIcon(event.type, 40),
             SizedBox(
               width: 16,
             ),
@@ -455,7 +461,7 @@ class _GroupPage extends State<GroupPage> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.start,
           children: <Widget>[
-            event.getIcon(40),
+            LogEvent.getIcon(event.type, 40),
             SizedBox(
               width: 16,
             ),
@@ -554,7 +560,7 @@ class _GroupPage extends State<GroupPage> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.start,
           children: <Widget>[
-            event.getIcon(40),
+            LogEvent.getIcon(event.type, 40),
             SizedBox(
               width: 16,
             ),

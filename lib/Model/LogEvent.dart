@@ -11,7 +11,7 @@ class LogEvent{
   LogEvent({this.title = "Event X", this.triggerPerson = "John Doe", this.type = "location", this.sentTime = null, this.isCommunication = false});
 
   //Returns an icon based on its type
-  Widget getIcon(double size){
+  static Widget getIcon(String type, double size){
     IconData icon = Icons.error_outline;
     Color iconColor = LogEvent.getColorScheme(type, false, 0); // No lightening or darkening
 

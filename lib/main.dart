@@ -435,7 +435,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Widget groupListWidget() {
     return Container(
-      height: MediaQuery.of(context).size.height * 0.4,
+      height: MediaQuery.of(context).size.height * 0.37,
       child: FutureBuilder<List<Group>>(
           future: fetchGroupData(),
           // Get async data of groups
