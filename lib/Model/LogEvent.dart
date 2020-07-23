@@ -13,7 +13,7 @@ class LogEvent{
   //Returns an icon based on its type
   Widget getIcon(double size){
     IconData icon = Icons.error_outline;
-    Color iconColor = getColorScheme(false, 0); // No lightening or darkening
+    Color iconColor = LogEvent.getColorScheme(type, false, 0); // No lightening or darkening
 
     //Whether location or communication type of event, put your icon here
     switch(type){
@@ -26,6 +26,9 @@ class LogEvent{
       case "ping":
         icon = Icons.not_listed_location;
         break;
+      case "summon":
+        icon = Icons.wifi ;
+        break;
     }
 
     return Icon(
@@ -36,7 +39,7 @@ class LogEvent{
   }
 
   //Returns a color scheme based on type
-  Color getColorScheme(bool isLighten, int value){
+  static Color getColorScheme(String type, bool isLighten, int value){
     String iconColor = "A1C7EE";
     //Whether location or communication type of event, put your color scheme here
     switch(type){
@@ -48,6 +51,9 @@ class LogEvent{
         break;
       case "ping":
         iconColor = "6098F6";
+        break;
+      case "summon":
+        iconColor = "9874ed";
         break;
     }
 

@@ -7,6 +7,7 @@ import 'package:tripwire/Util/Quick.dart';
 import 'Model/Group.dart';
 import 'Model/LogEvent.dart';
 import 'Model/MyTheme.dart';
+import 'Model/action.dart';
 
 class GroupPage extends StatefulWidget {
   GroupPage({Key key, this.title, @required this.group}) : super(key: key);
@@ -37,12 +38,12 @@ class _GroupPage extends State<GroupPage> {
             child: Padding(
                 padding: const EdgeInsets.only(top: 60, left: 20, right: 20),
                 child: Container(
-                  alignment: Alignment.centerLeft,
+                  alignment: Alignment.center,
                   child: SingleChildScrollView(
                     child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.center ,
                       children: <Widget>[
-                        MyTheme.backButton(context),
+                        Container(alignment: Alignment.centerLeft, child: MyTheme.backButton(context)),
                         SizedBox(
                           //Provide responsive design
                           height: MediaQuery.of(context).size.height * 0.02,
@@ -54,23 +55,221 @@ class _GroupPage extends State<GroupPage> {
                         ),
                         Padding(
                           padding: const EdgeInsets.only(left: 18.0, right: 18),
-                          child: Text(
-                            "LOG",
-                            style: MyTheme.sectionHeader(context),
+                          child: Container(
+                            alignment: Alignment.centerLeft,
+                            child: Text(
+                              "LOG",
+                              style: MyTheme.sectionHeader(context),
+                            ),
                           ),
                         ),
-                        logEventList(),
+                        logEventList()
+                        ,
                         SizedBox(
                           //Provide responsive design
                           height: 10,
                         ),
-                        InkWell(child: actions(), onTap: (){
-                          action(context);
-                        },),
+                        InkWell(
+                          child: actions(),
+                          onTap: () {
+                            action(context);
+                          },
+                        ),
                       ],
                     ),
                   ),
                 ))));
+  }
+
+  Widget action(context) {
+    showModalBottomSheet(
+        context: context,
+        isScrollControlled: true,
+        builder: (BuildContext context) {
+          return Container(
+            height: Quick.getDeviceSize(context).height * 0.6,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(20), topRight: Radius.circular(20)),
+              boxShadow: [
+                BoxShadow(
+                  blurRadius: 10,
+                  color: Colors.grey.withOpacity(1),
+                )
+              ],
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Container(
+                  padding: const EdgeInsets.only(top: 18.0, left: 35),
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    "Actions",
+                    style: GoogleFonts.poppins(
+                      fontSize: 40,
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xff669260),
+                    ),
+                  ),
+                ),
+                actionList(),
+                SizedBox(
+                  height: Quick.getDeviceSize(context).height * 0.025,
+                ),
+                Container(
+                  alignment: Alignment.center,
+                  height: 100,
+                  width: 300,
+                  decoration: BoxDecoration(
+                    color: MyTheme.primaryColor,
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: [
+                      BoxShadow(
+                        blurRadius: 15,
+                        offset: Offset(0, 10),
+                        color: Colors.grey.withOpacity(1),
+                      )
+                    ],
+                  ),
+                  child: Padding(
+                    padding:
+                    const EdgeInsets.only(left: 15.0, right: 15, top: 10, bottom: 10),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "Log location",
+                          maxLines: 1,
+                          softWrap: false,
+                          overflow: TextOverflow.ellipsis,
+                          textAlign: TextAlign.left,
+                          style: GoogleFonts.poppins(
+                            fontSize: 30,
+                            color: MyTheme.accentColor,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        Text(
+                         "Sabah, Malaysia",
+                          maxLines: 3,
+                          softWrap: false,
+                          overflow: TextOverflow.ellipsis,
+                          textAlign: TextAlign.left,
+                          style: GoogleFonts.poppins(
+                            fontSize: 23,
+                            color: MyTheme.accentColor,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          );
+        });
+  }
+
+  Future<List<ActionButton>> getActionArray() async {
+    List<ActionButton> buttons = new List();
+
+    buttons.add(new ActionButton(
+        name: "Rally", description: "Call all friends", type: "rally"));
+    buttons
+        .add(new ActionButton(name: "Oi!", description: "Get your friend over here.", type: "summon"));
+    buttons
+        .add(new ActionButton(name: "Ping", description: "Request your friend's location", type: "ping"));
+    buttons
+        .add(new ActionButton(name: "Rally", description: "Call your friends"));
+    buttons
+        .add(new ActionButton(name: "Rally", description: "Call your friends"));
+    return buttons;
+  }
+
+  Widget actionList() {
+    return Container(
+      height: 250,
+      child: FutureBuilder(
+        future: getActionArray(),
+        builder: (BuildContext context,
+            AsyncSnapshot<List<ActionButton>> buttonList) {
+          // If no data
+          if (buttonList.connectionState != ConnectionState.done ||
+              !buttonList.hasData) {
+            return new CircularProgressIndicator();
+          }
+
+          //Else
+          return ListView.separated(
+            padding: EdgeInsets.only(left: 28),
+              scrollDirection: Axis.horizontal,
+              itemBuilder: (BuildContext context, int index) {
+                //Individual button
+                return actionButtonItem(buttonList.data[index]);
+              },
+              separatorBuilder: (BuildContext context, int index) {
+                return SizedBox(width: 30);
+              },
+              itemCount: buttonList.data.length);
+        },
+      ),
+    );
+  }
+
+  Widget actionButtonItem(ActionButton button) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 25, bottom: 25),
+      child: Container(
+        width: 200,
+        decoration: BoxDecoration(
+          color: LogEvent.getColorScheme(button.type, true, 20),
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              blurRadius: 15,
+              offset: Offset(0, 10),
+              color: Colors.grey.withOpacity(1),
+            )
+          ],
+        ),
+        child: Padding(
+          padding:
+              const EdgeInsets.only(left: 15.0, right: 15, top: 10, bottom: 10),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                button.name,
+                maxLines: 1,
+                softWrap: false,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.left,
+                style: GoogleFonts.poppins(
+                  fontSize: 40,
+                  color: LogEvent.getColorScheme(button.type, false, 45),
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              Text(
+                button.description,
+                maxLines: 3,
+                softWrap: false,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.left,
+                style: GoogleFonts.poppins(
+                  fontSize: 23,
+                  color: LogEvent.getColorScheme(button.type, false, 45),
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   //Get group data
@@ -109,6 +308,7 @@ class _GroupPage extends State<GroupPage> {
 
   Widget logEventList() {
     return Container(
+      alignment: Alignment.center,
       height: Quick.getDeviceSize(context).height * 0.5,
       child: FutureBuilder<List<LogEvent>>(
         future: getEvents(),
@@ -161,8 +361,8 @@ class _GroupPage extends State<GroupPage> {
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              blurRadius: 10,
-              color: Colors.grey.withOpacity(0.1),
+              blurRadius: 15,
+              color: Colors.grey.withOpacity(0.3),
             )
           ]),
       child: Padding(
@@ -188,7 +388,7 @@ class _GroupPage extends State<GroupPage> {
                     textAlign: TextAlign.left,
                     style: GoogleFonts.poppins(
                       fontSize: 23,
-                      color: event.getColorScheme(false, 45),
+                      color: LogEvent.getColorScheme(event.type, false, 45),
                       fontWeight: FontWeight.w500,
                     ),
                   ),
@@ -207,7 +407,7 @@ class _GroupPage extends State<GroupPage> {
                         style: GoogleFonts.poppins(
                           fontSize:
                               13 + MediaQuery.of(context).size.width * 0.014,
-                          color: event.getColorScheme(false, 10),
+                          color: LogEvent.getColorScheme(event.type, false, 10),
                           fontWeight: FontWeight.w600,
                           height: 1,
                         ),
@@ -222,7 +422,7 @@ class _GroupPage extends State<GroupPage> {
                       style: GoogleFonts.poppins(
                         fontSize:
                             13 + MediaQuery.of(context).size.width * 0.014,
-                        color: event.getColorScheme(true, 4),
+                        color: LogEvent.getColorScheme(event.type, true, 4),
                         fontWeight: FontWeight.w600,
                         height: 1,
                       ),
@@ -241,12 +441,12 @@ class _GroupPage extends State<GroupPage> {
     return Container(
       height: 140,
       decoration: BoxDecoration(
-          color: event.getColorScheme(true, 20),
+          color: LogEvent.getColorScheme(event.type, true, 20),
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              blurRadius: 10,
-              color: Colors.grey.withOpacity(0.1),
+              blurRadius: 15,
+              color: Colors.grey.withOpacity(0.3),
             )
           ]),
       child: Padding(
@@ -272,7 +472,7 @@ class _GroupPage extends State<GroupPage> {
                     textAlign: TextAlign.left,
                     style: GoogleFonts.poppins(
                       fontSize: 23,
-                      color: event.getColorScheme(false, 45),
+                      color: LogEvent.getColorScheme(event.type, false, 45),
                       fontWeight: FontWeight.w500,
                     ),
                   ),
@@ -291,7 +491,7 @@ class _GroupPage extends State<GroupPage> {
                         style: GoogleFonts.poppins(
                           fontSize:
                               13 + MediaQuery.of(context).size.width * 0.014,
-                          color: event.getColorScheme(false, 20),
+                          color: LogEvent.getColorScheme(event.type, false, 20),
                           fontWeight: FontWeight.w600,
                           height: 1,
                         ),
@@ -306,7 +506,7 @@ class _GroupPage extends State<GroupPage> {
                       style: GoogleFonts.poppins(
                         fontSize:
                             13 + MediaQuery.of(context).size.width * 0.014,
-                        color: event.getColorScheme(false, 5),
+                        color: LogEvent.getColorScheme(event.type, false, 5),
                         fontWeight: FontWeight.w600,
                         height: 1,
                       ),
@@ -317,9 +517,7 @@ class _GroupPage extends State<GroupPage> {
                   height: 15,
                 ),
                 Container(
-                  constraints: BoxConstraints(
-                    maxHeight: 100
-                  ),
+                  constraints: BoxConstraints(maxHeight: 100),
                   child: Row(
                     children: <Widget>[
                       okOption(event, Icons.directions_run, "otw"),
@@ -332,7 +530,6 @@ class _GroupPage extends State<GroupPage> {
                 )
               ],
             ),
-
           ],
         ),
       ),
@@ -343,17 +540,17 @@ class _GroupPage extends State<GroupPage> {
     return Container(
       height: 140,
       decoration: BoxDecoration(
-          color: event.getColorScheme(true, 20),
+          color: LogEvent.getColorScheme(event.type, true, 20),
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              blurRadius: 10,
-              color: Colors.grey.withOpacity(0.1),
+              blurRadius: 15,
+              color: Colors.grey.withOpacity(0.3),
             )
           ]),
       child: Padding(
         padding:
-        const EdgeInsets.only(left: 25.0, right: 25.0, top: 15, bottom: 15),
+            const EdgeInsets.only(left: 25.0, right: 25.0, top: 15, bottom: 15),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.start,
           children: <Widget>[
@@ -374,7 +571,7 @@ class _GroupPage extends State<GroupPage> {
                     textAlign: TextAlign.left,
                     style: GoogleFonts.poppins(
                       fontSize: 23,
-                      color: event.getColorScheme(false, 45),
+                      color: LogEvent.getColorScheme(event.type, false, 45),
                       fontWeight: FontWeight.w500,
                     ),
                   ),
@@ -392,8 +589,8 @@ class _GroupPage extends State<GroupPage> {
                         maxLines: 1,
                         style: GoogleFonts.poppins(
                           fontSize:
-                          13 + MediaQuery.of(context).size.width * 0.014,
-                          color: event.getColorScheme(false, 15),
+                              13 + MediaQuery.of(context).size.width * 0.014,
+                          color: LogEvent.getColorScheme(event.type, false, 15),
                           fontWeight: FontWeight.w600,
                           height: 1,
                         ),
@@ -407,8 +604,8 @@ class _GroupPage extends State<GroupPage> {
                       textAlign: TextAlign.left,
                       style: GoogleFonts.poppins(
                         fontSize:
-                        13 + MediaQuery.of(context).size.width * 0.014,
-                        color: event.getColorScheme(false, 5),
+                            13 + MediaQuery.of(context).size.width * 0.014,
+                        color: LogEvent.getColorScheme(event.type, false, 5),
                         fontWeight: FontWeight.w600,
                         height: 1,
                       ),
@@ -431,19 +628,17 @@ class _GroupPage extends State<GroupPage> {
                 )
               ],
             ),
-
           ],
         ),
       ),
     );
   }
 
-  Widget actions(){
+  Widget actions() {
     return Container(
       alignment: Alignment.center,
       child: Container(
         width: Quick.getDeviceSize(context).width * 0.5,
-
         decoration: BoxDecoration(
             color: Color(0xffD5F5D1),
             borderRadius: BorderRadius.circular(10),
@@ -488,14 +683,11 @@ class _GroupPage extends State<GroupPage> {
               icon,
               color: Color(0xff537050),
             ),
-            SizedBox(
-              width: 5
-            ),
+            SizedBox(width: 5),
             Text(
               text,
               style: GoogleFonts.poppins(
-                fontSize:
-                13 + MediaQuery.of(context).size.width * 0.014,
+                fontSize: 13 + MediaQuery.of(context).size.width * 0.014,
                 color: Color(0xff537050),
                 fontWeight: FontWeight.w600,
                 height: 1,
@@ -525,14 +717,12 @@ class _GroupPage extends State<GroupPage> {
             Icon(
               icon,
               color: Color(0xff6A4A4A),
-            ),SizedBox(
-                width: 5
             ),
+            SizedBox(width: 5),
             Text(
               text,
               style: GoogleFonts.poppins(
-                fontSize:
-                13 + MediaQuery.of(context).size.width * 0.014,
+                fontSize: 13 + MediaQuery.of(context).size.width * 0.014,
                 color: Color(0xff6A4A4A),
                 fontWeight: FontWeight.w600,
                 height: 1,
@@ -616,20 +806,5 @@ class _GroupPage extends State<GroupPage> {
         ),
       ),
     );
-  }
-
-  Widget action(context){
-    showModalBottomSheet(context: context, builder: (BuildContext context){
-      return Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-        ),
-        child:Column(
-          children: [
-
-          ],
-        ),
-      );
-    });
   }
 }
