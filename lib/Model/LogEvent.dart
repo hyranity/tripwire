@@ -24,10 +24,13 @@ class LogEvent{
         icon = Icons.assistant_photo;
         break;
       case "ping":
-        icon = Icons.not_listed_location;
+        icon = Icons.my_location;
         break;
       case "summon":
-        icon = Icons.wifi ;
+        icon = Icons.pan_tool ;
+        break;
+      case "poll":
+        icon = Icons.question_answer ;
         break;
     }
 
@@ -55,6 +58,8 @@ class LogEvent{
       case "summon":
         iconColor = "9874ed";
         break;
+      case "poll":
+        iconColor = "de6676";
     }
 
     return isLighten ? TinyColor.fromString("#" + iconColor).lighten(value).color : TinyColor.fromString("#" + iconColor).darken(value).color;

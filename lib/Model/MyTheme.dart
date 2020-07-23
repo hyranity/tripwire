@@ -40,4 +40,15 @@ class MyTheme {
       ),
     );
   }
+
+
+}
+
+//Code possible thanks to https://stackoverflow.com/questions/51119795/how-to-remove-scroll-glow
+class NoGlow extends ScrollBehavior {
+  @override
+  Widget buildViewportChrome(
+      BuildContext context, Widget child, AxisDirection axisDirection) {
+    return child;
+  }
 }
