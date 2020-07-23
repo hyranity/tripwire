@@ -64,7 +64,9 @@ class _GroupPage extends State<GroupPage> {
                           //Provide responsive design
                           height: 10,
                         ),
-                        actions(),
+                        InkWell(child: actions(), onTap: (){
+                          action(context);
+                        },),
                       ],
                     ),
                   ),
@@ -544,7 +546,7 @@ class _GroupPage extends State<GroupPage> {
 
   Widget groupInfo() {
     return Container(
-      height: 120,
+      height: 100,
       decoration: BoxDecoration(
           color: MyTheme.primaryColor,
           borderRadius: BorderRadius.circular(20),
@@ -556,7 +558,7 @@ class _GroupPage extends State<GroupPage> {
           ]),
       child: Padding(
         padding:
-            const EdgeInsets.only(left: 25.0, right: 25.0, top: 25, bottom: 25),
+            const EdgeInsets.only(left: 25.0, right: 25.0, top: 20, bottom: 20),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.start,
           children: <Widget>[
@@ -614,5 +616,20 @@ class _GroupPage extends State<GroupPage> {
         ),
       ),
     );
+  }
+
+  Widget action(context){
+    showModalBottomSheet(context: context, builder: (BuildContext context){
+      return Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+        ),
+        child:Column(
+          children: [
+
+          ],
+        ),
+      );
+    });
   }
 }
