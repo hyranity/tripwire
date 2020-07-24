@@ -87,7 +87,7 @@ class _GroupPage extends State<GroupPage> {
         isScrollControlled: true,
         builder: (BuildContext context) {
           return Container(
-            height: Quick.getDeviceSize(context).height * 0.6,
+            height: Quick.getDeviceSize(context).height * 0.7,
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.only(
@@ -222,55 +222,107 @@ class _GroupPage extends State<GroupPage> {
   Widget actionButtonItem(ActionButton button) {
     return Padding(
       padding: const EdgeInsets.only(top: 25, bottom: 25),
-      child: Container(
-        width: 200,
-        decoration: BoxDecoration(
-          color: LogEvent.getColorScheme(button.type, true, 20),
-          borderRadius: BorderRadius.circular(20),
-          boxShadow: [
-            BoxShadow(
-              blurRadius: 15,
-              offset: Offset(0, 10),
-              color: Colors.grey.withOpacity(1),
-            )
-          ],
-        ),
-        child: Padding(
-          padding:
-              const EdgeInsets.only(left: 15.0, right: 15, top: 10, bottom: 10),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                button.name,
-                maxLines: 1,
-                softWrap: false,
-                overflow: TextOverflow.ellipsis,
-                textAlign: TextAlign.left,
-                style: GoogleFonts.poppins(
-                  fontSize: 40,
-                  color: LogEvent.getColorScheme(button.type, false, 45),
-                  fontWeight: FontWeight.w600,
+      child: InkWell(
+        onTap: () {
+          showDialog(
+            context:context,
+            builder: (BuildContext context){
+              return Dialog(
+                shape:RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(15)
                 ),
-              ),
-              Text(
-                button.description,
-                maxLines: 3,
-                softWrap: false,
-                overflow: TextOverflow.ellipsis,
-                textAlign: TextAlign.left,
-                style: GoogleFonts.poppins(
-                  fontSize: 23,
-                  color: LogEvent.getColorScheme(button.type, false, 45),
-                  fontWeight: FontWeight.w500,
+                child: Container(
+                  height: 200,
+                  child: Column(
+                      children: <Widget> [
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(25.0 ,15.0 ,0.0 ,15.0),
+                          child: Container(
+                            width: MediaQuery.of(context).size.width * 0.6,
+                            child: Text(
+                              "Rally?",
+                              textAlign: TextAlign.left,
+                              style: GoogleFonts.poppins(
+                                fontSize: 23,
+                                color: Colors.black,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(25.0 ,15.0 ,0.0 ,15.0),
+                          child: Container(
+                            width: MediaQuery.of(context).size.width * 0.6,
+                            child: Text(
+                              "Rally all of your family members?",
+                              textAlign: TextAlign.left,
+                              style: GoogleFonts.poppins(
+                                fontSize: 18,
+                                color: Colors.black,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                  ),
                 ),
-              ),
+              );
+            },
+          );
+        },
+        child: Container(
+          width: 200,
+          decoration: BoxDecoration(
+            color: LogEvent.getColorScheme(button.type, true, 20),
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(
+                blurRadius: 15,
+                offset: Offset(0, 10),
+                color: Colors.grey.withOpacity(1),
+              )
             ],
+          ),
+          child: Padding(
+            padding:
+                const EdgeInsets.only(left: 15.0, right: 15, top: 10, bottom: 10),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  button.name,
+                  maxLines: 1,
+                  softWrap: false,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.left,
+                  style: GoogleFonts.poppins(
+                    fontSize: 40,
+                    color: LogEvent.getColorScheme(button.type, false, 45),
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                Text(
+                  button.description,
+                  maxLines: 3,
+                  softWrap: false,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.left,
+                  style: GoogleFonts.poppins(
+                    fontSize: 23,
+                    color: LogEvent.getColorScheme(button.type, false, 45),
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
     );
   }
+
 
   //Get group data
   void loadGroupData() {
