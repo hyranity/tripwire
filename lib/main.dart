@@ -24,8 +24,6 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
-        primaryColor: MyTheme.primaryColor,
-        accentColor: MyTheme.accentColor,
         bottomSheetTheme:
             BottomSheetThemeData(backgroundColor: Colors.transparent),
         // This is the theme of your application.
@@ -43,6 +41,12 @@ class MyApp extends StatelessWidget {
         // closer together (more dense) than on mobile platforms.
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
+      builder: (context, child) {
+        return ScrollConfiguration(
+          behavior: NoGlow(),
+          child: child,
+        );
+      },
       home: MyHomePage(title: 'Flutter Demo Home Page'),
     );
   }
@@ -253,7 +257,6 @@ class _MyHomePageState extends State<MyHomePage> {
                     onTap: () {
                       weatherPopup(context);
                     },
-
                   ),
                 ),
               ],
@@ -422,7 +425,6 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Future<List<Group>> fetchGroupData() async {
-
     List<Group> groupList = new List();
     groupList.add(new Group(
         name: "RSD3 dumbass trip LOOL", isActive: true, memberCount: 13));
@@ -435,7 +437,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Widget groupListWidget() {
     return Container(
-      height: MediaQuery.of(context).size.height * 0.4,
+      height: MediaQuery.of(context).size.height * 0.37,
       child: FutureBuilder<List<Group>>(
           future: fetchGroupData(),
           // Get async data of groups
@@ -577,8 +579,10 @@ class _MyHomePageState extends State<MyHomePage> {
     showModalBottomSheet(
         barrierColor: Color.fromRGBO(0, 0, 0, 0.01),
         context: context,
+        isScrollControlled: true,
         builder: (BuildContext builder) {
           return Container(
+            height: Quick.getDeviceSize(context).height * 0.65,
             decoration: BoxDecoration(
                 color: Color(0xffC4D6FC),
                 borderRadius: BorderRadius.only(
@@ -629,14 +633,16 @@ class _MyHomePageState extends State<MyHomePage> {
                     padding: const EdgeInsets.only(left: 28.0),
                     child: Container(
                       height: 90,
+                      margin: EdgeInsets.only(top: 10),
                       constraints: BoxConstraints(maxWidth: 250),
                       decoration: BoxDecoration(
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(20),
                           boxShadow: [
                             BoxShadow(
-                              blurRadius: 25,
-                              color: Colors.grey.withOpacity(0.3),
+                              blurRadius: 10,
+                              offset: Offset(0, 7),
+                              color: Colors.black.withOpacity(0.4),
                             )
                           ]),
                       child: Padding(
@@ -691,8 +697,6 @@ class _MyHomePageState extends State<MyHomePage> {
         });
   }
 
-  Widget weatherBubble() {}
-
   Widget detailedWeatherInfo() {
     List<WeatherBubble> weatherInfo = new List();
     weatherInfo.add(new WeatherBubble(
@@ -711,8 +715,7 @@ class _MyHomePageState extends State<MyHomePage> {
             ":" +
             (weather.sunset.minute < 10 ? "0" : "") +
             weather.sunset.minute.toString())));
-    print(new DateTime.fromMillisecondsSinceEpoch(
-        weather.sunrise.millisecondsSinceEpoch));
+    print(weather.sunset.toUtc().toLocal().timeZoneName);
     return Container(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -730,52 +733,50 @@ class _MyHomePageState extends State<MyHomePage> {
             height: 10,
           ),
           new Container(
-            height: 150,
-            child: Padding(
-              padding: const EdgeInsets.only(bottom: 28),
-              child: ListView.separated(
-                padding: EdgeInsets.only(left: 23, right: 23),
-                scrollDirection: Axis.horizontal,
-                itemBuilder: (BuildContext context, int index) {
-                  return Container(
-                      height: 120,
-                      width: 125,
-                      decoration: BoxDecoration(
-                          color: Color(0xffE5EDFF),
-                          borderRadius: BorderRadius.circular(20),
-                          boxShadow: [
-                            BoxShadow(
-                              blurRadius: 25,
-                              color: Colors.grey.withOpacity(0.3),
-                            )
-                          ]),
-                      child: Padding(
-                        padding: const EdgeInsets.only(
-                            top: 12.0, left: 12, right: 12),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: <Widget>[
-                            Text(weatherInfo[index].title,
-                                style: GoogleFonts.poppins(
-                                  color: Color(0xff64749A),
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.w600,
-                                )),
-                            Text(weatherInfo[index].value,
-                                style: GoogleFonts.poppins(
-                                  color: Color(0xff64749A),
-                                  fontSize: 41,
-                                  fontWeight: FontWeight.w600,
-                                )),
-                          ],
-                        ),
-                      ));
-                },
-                separatorBuilder: (BuildContext context, int index) {
-                  return SizedBox(width: 50);
-                },
-                itemCount: weatherInfo.length,
-              ),
+            height: 180,
+            child: ListView.separated(
+              padding: EdgeInsets.only(left: 23, right: 23),
+              scrollDirection: Axis.horizontal,
+              itemBuilder: (BuildContext context, int index) {
+                return Container(
+                  margin: EdgeInsets.only(top: 15, bottom: 43),
+                    width: 125,
+                    decoration: BoxDecoration(
+                        color: Color(0xffE5EDFF),
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: [
+                          BoxShadow(
+                            blurRadius: 15,
+                            offset: Offset(0, 10),
+                            color: Colors.black.withOpacity(0.4),
+                          )
+                        ]),
+                    child: Padding(
+                      padding: const EdgeInsets.only(
+                          top: 12.0, left: 12, right: 12),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          Text(weatherInfo[index].title,
+                              style: GoogleFonts.poppins(
+                                color: Color(0xff64749A),
+                                fontSize: 15,
+                                fontWeight: FontWeight.w600,
+                              )),
+                          Text(weatherInfo[index].value,
+                              style: GoogleFonts.poppins(
+                                color: Color(0xff64749A),
+                                fontSize: 41,
+                                fontWeight: FontWeight.w600,
+                              )),
+                        ],
+                      ),
+                    ));
+              },
+              separatorBuilder: (BuildContext context, int index) {
+                return SizedBox(width: 50);
+              },
+              itemCount: weatherInfo.length,
             ),
           ),
         ],

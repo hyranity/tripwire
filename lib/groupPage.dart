@@ -1,3 +1,4 @@
+import 'package:animate_do/animate_do.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -8,6 +9,7 @@ import 'Model/Group.dart';
 import 'Model/LogEvent.dart';
 import 'Model/MyTheme.dart';
 import 'Model/action.dart';
+import 'poll.dart';
 
 class GroupPage extends StatefulWidget {
   GroupPage({Key key, this.title, @required this.group}) : super(key: key);
@@ -36,19 +38,24 @@ class _GroupPage extends State<GroupPage> {
     return Scaffold(
         body: Center(
             child: Padding(
-                padding: const EdgeInsets.only(top: 60, left: 20, right: 20),
+                padding: const EdgeInsets.only(top: 60),
                 child: Container(
                   alignment: Alignment.center,
                   child: SingleChildScrollView(
                     child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.center ,
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: <Widget>[
-                        Container(alignment: Alignment.centerLeft, child: MyTheme.backButton(context)),
+                        Container(
+                            padding: EdgeInsets.only(left: 20, right: 20),
+                            alignment: Alignment.centerLeft,
+                            child: MyTheme.backButton(context)),
                         SizedBox(
                           //Provide responsive design
                           height: MediaQuery.of(context).size.height * 0.02,
                         ),
-                        groupInfo(),
+                        Container(
+                            padding: EdgeInsets.only(left: 20, right: 20),
+                            child: groupInfo()),
                         SizedBox(
                           //Provide responsive design
                           height: MediaQuery.of(context).size.height * 0.04,
@@ -57,14 +64,14 @@ class _GroupPage extends State<GroupPage> {
                           padding: const EdgeInsets.only(left: 18.0, right: 18),
                           child: Container(
                             alignment: Alignment.centerLeft,
+                            padding: EdgeInsets.only(left: 20, right: 20),
                             child: Text(
                               "LOG",
                               style: MyTheme.sectionHeader(context),
                             ),
                           ),
                         ),
-                        logEventList()
-                        ,
+                        logEventList(),
                         SizedBox(
                           //Provide responsive design
                           height: 10,
@@ -81,13 +88,13 @@ class _GroupPage extends State<GroupPage> {
                 ))));
   }
 
-  Widget action(context) {
+  action(context) {
     showModalBottomSheet(
         context: context,
         isScrollControlled: true,
         builder: (BuildContext context) {
           return Container(
-            height: Quick.getDeviceSize(context).height * 0.7,
+            height: Quick.getDeviceSize(context).height * 0.65,
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.only(
@@ -110,7 +117,7 @@ class _GroupPage extends State<GroupPage> {
                     style: GoogleFonts.poppins(
                       fontSize: 40,
                       fontWeight: FontWeight.w600,
-                      color: Color(0xff669260),
+                      color: Colors.black.withOpacity(0.6),
                     ),
                   ),
                 ),
@@ -134,17 +141,17 @@ class _GroupPage extends State<GroupPage> {
                     ],
                   ),
                   child: Padding(
-                    padding:
-                    const EdgeInsets.only(left: 15.0, right: 15, top: 10, bottom: 10),
+                    padding: const EdgeInsets.only(
+                        left: 15.0, right: 15, top: 10, bottom: 10),
                     child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         Text(
                           "Log location",
                           maxLines: 1,
                           softWrap: false,
                           overflow: TextOverflow.ellipsis,
-                          textAlign: TextAlign.left,
+                          textAlign: TextAlign.center,
                           style: GoogleFonts.poppins(
                             fontSize: 30,
                             color: MyTheme.accentColor,
@@ -152,11 +159,11 @@ class _GroupPage extends State<GroupPage> {
                           ),
                         ),
                         Text(
-                         "Sabah, Malaysia",
-                          maxLines: 3,
+                          "Sabah, Malaysia adasdasd asd sa",
+                          maxLines: 1,
                           softWrap: false,
                           overflow: TextOverflow.ellipsis,
-                          textAlign: TextAlign.left,
+                          textAlign: TextAlign.center,
                           style: GoogleFonts.poppins(
                             fontSize: 23,
                             color: MyTheme.accentColor,
@@ -177,15 +184,23 @@ class _GroupPage extends State<GroupPage> {
     List<ActionButton> buttons = new List();
 
     buttons.add(new ActionButton(
-        name: "Rally", description: "Call all friends", type: "rally"));
-    buttons
-        .add(new ActionButton(name: "Oi!", description: "Get your friend over here.", type: "summon"));
-    buttons
-        .add(new ActionButton(name: "Ping", description: "Request your friend's location", type: "ping"));
-    buttons
-        .add(new ActionButton(name: "Rally", description: "Call your friends"));
-    buttons
-        .add(new ActionButton(name: "Rally", description: "Call your friends"));
+        name: "Rally",
+        description: "Ask everyone to gather at your location.",
+        type: "rally",
+        dialogTitle: "Rally?",
+        dialogDesc: "Rally everyone?",));
+    buttons.add(new ActionButton(
+        name: "Poll",
+        description: "Ask everyone a 'yes' and 'no' question.",
+        type: "poll",));
+    buttons.add(new ActionButton(
+        name: "Come",
+        description: "Call a single friend over to your location.",
+        type: "summon",));
+    buttons.add(new ActionButton(
+        name: "Ping",
+        description: "Request your friend's location",
+        type: "ping",));
     return buttons;
   }
 
@@ -204,7 +219,7 @@ class _GroupPage extends State<GroupPage> {
 
           //Else
           return ListView.separated(
-            padding: EdgeInsets.only(left: 28),
+              padding: EdgeInsets.only(left: 28, right: 28),
               scrollDirection: Axis.horizontal,
               itemBuilder: (BuildContext context, int index) {
                 //Individual button
@@ -219,58 +234,79 @@ class _GroupPage extends State<GroupPage> {
     );
   }
 
+  //Dialog Box Widget
+  Widget confirmationDialog(context, String title, String desc){
+    showDialog(
+      context:context,
+      builder: (BuildContext context){
+        return Dialog(
+          shape:RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(15)
+          ),
+          child: Container(
+            height: 300,
+            child: Column(
+              children: <Widget> [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(25.0 ,15.0 ,0.0 ,15.0),
+                  child: Container(
+                    width: MediaQuery.of(context).size.width * 0.6,
+                    child: Text(
+                      title,
+                      textAlign: TextAlign.left,
+                      style: GoogleFonts.poppins(
+                        fontSize: 30,
+                        color: Colors.black,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(25.0 ,15.0 ,0.0 ,60.0),
+                  child: Container(
+                    width: MediaQuery.of(context).size.width * 0.6,
+                    child: Text(
+                      desc,
+                      textAlign: TextAlign.left,
+                      style: GoogleFonts.poppins(
+                        fontSize: 18,
+                        color: Colors.black,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ),
+                Container(
+                  constraints: BoxConstraints(maxHeight: 100),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      confirmOption( Icons.check, "do it"),
+                      SizedBox(
+                        width: 10,
+                      ),
+                      cancelOption( Icons.cancel, "nah"),
+                    ],
+                  ),
+                )
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   Widget actionButtonItem(ActionButton button) {
     return Padding(
       padding: const EdgeInsets.only(top: 25, bottom: 25),
       child: InkWell(
         onTap: () {
-          showDialog(
-            context:context,
-            builder: (BuildContext context){
-              return Dialog(
-                shape:RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(15)
-                ),
-                child: Container(
-                  height: 200,
-                  child: Column(
-                      children: <Widget> [
-                        Padding(
-                          padding: const EdgeInsets.fromLTRB(25.0 ,15.0 ,0.0 ,15.0),
-                          child: Container(
-                            width: MediaQuery.of(context).size.width * 0.6,
-                            child: Text(
-                              "Rally?",
-                              textAlign: TextAlign.left,
-                              style: GoogleFonts.poppins(
-                                fontSize: 23,
-                                color: Colors.black,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.fromLTRB(25.0 ,15.0 ,0.0 ,15.0),
-                          child: Container(
-                            width: MediaQuery.of(context).size.width * 0.6,
-                            child: Text(
-                              "Rally all of your family members?",
-                              textAlign: TextAlign.left,
-                              style: GoogleFonts.poppins(
-                                fontSize: 18,
-                                color: Colors.black,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                  ),
-                ),
-              );
-            },
-          );
+          if (button.type == "rally")
+            confirmationDialog(context, button.dialogTitle, button.dialogDesc);
+          else if (button.type == "poll")
+            Quick.navigate(context, () => PollPage());
         },
         child: Container(
           width: 200,
@@ -291,17 +327,23 @@ class _GroupPage extends State<GroupPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  button.name,
-                  maxLines: 1,
-                  softWrap: false,
-                  overflow: TextOverflow.ellipsis,
-                  textAlign: TextAlign.left,
-                  style: GoogleFonts.poppins(
-                    fontSize: 40,
-                    color: LogEvent.getColorScheme(button.type, false, 45),
-                    fontWeight: FontWeight.w600,
-                  ),
+                Row(
+                  children: [
+                    Text(
+                      button.name,
+                      maxLines: 1,
+                      softWrap: false,
+                      overflow: TextOverflow.clip,
+                      textAlign: TextAlign.left,
+                      style: GoogleFonts.poppins(
+                        fontSize: 35,
+                        color: LogEvent.getColorScheme(button.type, false, 45),
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    new Spacer(),
+                    LogEvent.getIcon(button.type, 50),
+                  ],
                 ),
                 Text(
                   button.description,
@@ -322,7 +364,6 @@ class _GroupPage extends State<GroupPage> {
       ),
     );
   }
-
 
   //Get group data
   void loadGroupData() {
@@ -375,6 +416,7 @@ class _GroupPage extends State<GroupPage> {
             removeTop: true,
             context: context,
             child: ListView.separated(
+                padding: EdgeInsets.only(top: 18, bottom: 18),
                 shrinkWrap: true,
                 itemCount: snapshot.data.length,
                 itemBuilder: (BuildContext context, int index) {
@@ -396,7 +438,7 @@ class _GroupPage extends State<GroupPage> {
                 },
                 separatorBuilder: (BuildContext context, int index) {
                   return SizedBox(
-                    height: MediaQuery.of(context).size.height * 0.02,
+                    height: 20,
                   );
                 }),
           );
@@ -407,6 +449,7 @@ class _GroupPage extends State<GroupPage> {
 
   Widget locationLog(LogEvent event) {
     return Container(
+      margin: EdgeInsets.only(left: 20, right: 20),
       height: 90,
       decoration: BoxDecoration(
           color: Colors.white,
@@ -414,7 +457,8 @@ class _GroupPage extends State<GroupPage> {
           boxShadow: [
             BoxShadow(
               blurRadius: 15,
-              color: Colors.grey.withOpacity(0.3),
+              offset: Offset(0, 7),
+              color: Colors.grey.withOpacity(0.6),
             )
           ]),
       child: Padding(
@@ -423,7 +467,7 @@ class _GroupPage extends State<GroupPage> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.start,
           children: <Widget>[
-            event.getIcon(40),
+            LogEvent.getIcon(event.type, 40),
             SizedBox(
               width: 16,
             ),
@@ -491,6 +535,7 @@ class _GroupPage extends State<GroupPage> {
 
   Widget rally(LogEvent event) {
     return Container(
+      margin: EdgeInsets.only(left: 20, right: 20),
       height: 140,
       decoration: BoxDecoration(
           color: LogEvent.getColorScheme(event.type, true, 20),
@@ -498,7 +543,8 @@ class _GroupPage extends State<GroupPage> {
           boxShadow: [
             BoxShadow(
               blurRadius: 15,
-              color: Colors.grey.withOpacity(0.3),
+              offset: Offset(0, 7),
+              color: Colors.grey.withOpacity(0.6),
             )
           ]),
       child: Padding(
@@ -507,7 +553,7 @@ class _GroupPage extends State<GroupPage> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.start,
           children: <Widget>[
-            event.getIcon(40),
+            LogEvent.getIcon(event.type, 40),
             SizedBox(
               width: 16,
             ),
@@ -590,6 +636,7 @@ class _GroupPage extends State<GroupPage> {
 
   Widget ping(LogEvent event) {
     return Container(
+      margin: EdgeInsets.only(left: 20, right: 20),
       height: 140,
       decoration: BoxDecoration(
           color: LogEvent.getColorScheme(event.type, true, 20),
@@ -597,7 +644,8 @@ class _GroupPage extends State<GroupPage> {
           boxShadow: [
             BoxShadow(
               blurRadius: 15,
-              color: Colors.grey.withOpacity(0.3),
+              offset: Offset(0, 7),
+              color: Colors.grey.withOpacity(0.6),
             )
           ]),
       child: Padding(
@@ -606,7 +654,7 @@ class _GroupPage extends State<GroupPage> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.start,
           children: <Widget>[
-            event.getIcon(40),
+            LogEvent.getIcon(event.type, 40),
             SizedBox(
               width: 16,
             ),
@@ -752,6 +800,76 @@ class _GroupPage extends State<GroupPage> {
   }
 
   Widget noOption(LogEvent event, IconData icon, String text) {
+    return Container(
+      decoration: BoxDecoration(
+          color: Color(0xffECA0A0),
+          borderRadius: BorderRadius.circular(10),
+          boxShadow: [
+            BoxShadow(
+              blurRadius: 10,
+              color: Colors.grey.withOpacity(0.1),
+            )
+          ]),
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Row(
+          children: <Widget>[
+            Icon(
+              icon,
+              color: Color(0xff6A4A4A),
+            ),
+            SizedBox(width: 5),
+            Text(
+              text,
+              style: GoogleFonts.poppins(
+                fontSize: 13 + MediaQuery.of(context).size.width * 0.014,
+                color: Color(0xff6A4A4A),
+                fontWeight: FontWeight.w600,
+                height: 1,
+              ),
+            )
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget confirmOption(IconData icon, String text) {
+    return Container(
+      decoration: BoxDecoration(
+          color: Color(0xffB5E8AF),
+          borderRadius: BorderRadius.circular(10),
+          boxShadow: [
+            BoxShadow(
+              blurRadius: 10,
+              color: Colors.grey.withOpacity(0.1),
+            )
+          ]),
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Row(
+          children: <Widget>[
+            Icon(
+              icon,
+              color: Color(0xff537050),
+            ),
+            SizedBox(width: 5),
+            Text(
+              text,
+              style: GoogleFonts.poppins(
+                fontSize: 13 + MediaQuery.of(context).size.width * 0.014,
+                color: Color(0xff537050),
+                fontWeight: FontWeight.w600,
+                height: 1,
+              ),
+            )
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget cancelOption(IconData icon, String text) {
     return Container(
       decoration: BoxDecoration(
           color: Color(0xffECA0A0),

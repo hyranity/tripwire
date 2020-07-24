@@ -11,7 +11,7 @@ class LogEvent{
   LogEvent({this.title = "Event X", this.triggerPerson = "John Doe", this.type = "location", this.sentTime = null, this.isCommunication = false});
 
   //Returns an icon based on its type
-  Widget getIcon(double size){
+  static Widget getIcon(String type, double size){
     IconData icon = Icons.error_outline;
     Color iconColor = LogEvent.getColorScheme(type, false, 0); // No lightening or darkening
 
@@ -24,10 +24,13 @@ class LogEvent{
         icon = Icons.assistant_photo;
         break;
       case "ping":
-        icon = Icons.not_listed_location;
+        icon = Icons.my_location;
         break;
       case "summon":
-        icon = Icons.wifi ;
+        icon = Icons.pan_tool ;
+        break;
+      case "poll":
+        icon = Icons.question_answer ;
         break;
     }
 
@@ -55,6 +58,8 @@ class LogEvent{
       case "summon":
         iconColor = "9874ed";
         break;
+      case "poll":
+        iconColor = "de6676";
     }
 
     return isLighten ? TinyColor.fromString("#" + iconColor).lighten(value).color : TinyColor.fromString("#" + iconColor).darken(value).color;
