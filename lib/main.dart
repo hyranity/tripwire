@@ -12,6 +12,7 @@ import 'Model/MyTheme.dart';
 import 'Util/DB.dart';
 import 'Util/Quick.dart';
 import 'groupPage.dart';
+import 'login.dart';
 
 void main() {
   runApp(MyApp());
@@ -47,7 +48,7 @@ class MyApp extends StatelessWidget {
           child: child,
         );
       },
-      home: MyHomePage(title: 'Flutter Demo Home Page'),
+      home: Login(title: 'Flutter Demo Home Page'),
     );
   }
 }
