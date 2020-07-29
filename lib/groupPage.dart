@@ -9,6 +9,7 @@ import 'Model/Group.dart';
 import 'Model/LogEvent.dart';
 import 'Model/MyTheme.dart';
 import 'Model/action.dart';
+import 'poll.dart';
 
 class GroupPage extends StatefulWidget {
   GroupPage({Key key, this.title, @required this.group}) : super(key: key);
@@ -185,19 +186,21 @@ class _GroupPage extends State<GroupPage> {
     buttons.add(new ActionButton(
         name: "Rally",
         description: "Ask everyone to gather at your location.",
-        type: "rally"));
+        type: "rally",
+        dialogTitle: "Rally?",
+        dialogDesc: "Rally everyone?",));
     buttons.add(new ActionButton(
         name: "Poll",
         description: "Ask everyone a 'yes' and 'no' question.",
-        type: "poll"));
+        type: "poll",));
     buttons.add(new ActionButton(
         name: "Come",
         description: "Call a single friend over to your location.",
-        type: "summon"));
+        type: "summon",));
     buttons.add(new ActionButton(
         name: "Ping",
         description: "Request your friend's location",
-        type: "ping"));
+        type: "ping",));
     return buttons;
   }
 
@@ -231,59 +234,131 @@ class _GroupPage extends State<GroupPage> {
     );
   }
 
+  //Dialog Box Widget
+  Widget confirmationDialog(context, String title, String desc){
+    showDialog(
+      context:context,
+      builder: (BuildContext context){
+        return Dialog(
+          shape:RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(15)
+          ),
+          child: Container(
+            height: 300,
+            child: Column(
+              children: <Widget> [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(25.0 ,15.0 ,0.0 ,15.0),
+                  child: Container(
+                    width: MediaQuery.of(context).size.width * 0.6,
+                    child: Text(
+                      title,
+                      textAlign: TextAlign.left,
+                      style: GoogleFonts.poppins(
+                        fontSize: 30,
+                        color: Colors.black,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(25.0 ,15.0 ,0.0 ,60.0),
+                  child: Container(
+                    width: MediaQuery.of(context).size.width * 0.6,
+                    child: Text(
+                      desc,
+                      textAlign: TextAlign.left,
+                      style: GoogleFonts.poppins(
+                        fontSize: 18,
+                        color: Colors.black,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ),
+                Container(
+                  constraints: BoxConstraints(maxHeight: 100),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      confirmOption( Icons.check, "do it"),
+                      SizedBox(
+                        width: 10,
+                      ),
+                      cancelOption( Icons.cancel, "nah"),
+                    ],
+                  ),
+                )
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   Widget actionButtonItem(ActionButton button) {
     return Padding(
       padding: const EdgeInsets.only(top: 25, bottom: 25),
-      child: Container(
-        width: 200,
-        decoration: BoxDecoration(
-          color: LogEvent.getColorScheme(button.type, true, 20),
-          borderRadius: BorderRadius.circular(20),
-          boxShadow: [
-            BoxShadow(
-              blurRadius: 15,
-              offset: Offset(0, 10),
-              color: Colors.grey.withOpacity(1),
-            )
-          ],
-        ),
-        child: Padding(
-          padding:
-              const EdgeInsets.only(left: 15.0, right: 15, top: 10, bottom: 10),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Text(
-                    button.name,
-                    maxLines: 1,
-                    softWrap: false,
-                    overflow: TextOverflow.clip,
-                    textAlign: TextAlign.left,
-                    style: GoogleFonts.poppins(
-                      fontSize: 35,
-                      color: LogEvent.getColorScheme(button.type, false, 45),
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  new Spacer(),
-                  LogEvent.getIcon(button.type, 50),
-                ],
-              ),
-              Text(
-                button.description,
-                maxLines: 3,
-                softWrap: false,
-                overflow: TextOverflow.ellipsis,
-                textAlign: TextAlign.left,
-                style: GoogleFonts.poppins(
-                  fontSize: 23,
-                  color: LogEvent.getColorScheme(button.type, false, 45),
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
+      child: InkWell(
+        onTap: () {
+          if (button.type == "rally")
+            confirmationDialog(context, button.dialogTitle, button.dialogDesc);
+          else if (button.type == "poll")
+            Quick.navigate(context, () => PollPage());
+        },
+        child: Container(
+          width: 200,
+          decoration: BoxDecoration(
+            color: LogEvent.getColorScheme(button.type, true, 20),
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(
+                blurRadius: 15,
+                offset: Offset(0, 10),
+                color: Colors.grey.withOpacity(1),
+              )
             ],
+          ),
+          child: Padding(
+            padding:
+                const EdgeInsets.only(left: 15.0, right: 15, top: 10, bottom: 10),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Text(
+                      button.name,
+                      maxLines: 1,
+                      softWrap: false,
+                      overflow: TextOverflow.clip,
+                      textAlign: TextAlign.left,
+                      style: GoogleFonts.poppins(
+                        fontSize: 35,
+                        color: LogEvent.getColorScheme(button.type, false, 45),
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    new Spacer(),
+                    LogEvent.getIcon(button.type, 50),
+                  ],
+                ),
+                Text(
+                  button.description,
+                  maxLines: 3,
+                  softWrap: false,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.left,
+                  style: GoogleFonts.poppins(
+                    fontSize: 23,
+                    color: LogEvent.getColorScheme(button.type, false, 45),
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -725,6 +800,76 @@ class _GroupPage extends State<GroupPage> {
   }
 
   Widget noOption(LogEvent event, IconData icon, String text) {
+    return Container(
+      decoration: BoxDecoration(
+          color: Color(0xffECA0A0),
+          borderRadius: BorderRadius.circular(10),
+          boxShadow: [
+            BoxShadow(
+              blurRadius: 10,
+              color: Colors.grey.withOpacity(0.1),
+            )
+          ]),
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Row(
+          children: <Widget>[
+            Icon(
+              icon,
+              color: Color(0xff6A4A4A),
+            ),
+            SizedBox(width: 5),
+            Text(
+              text,
+              style: GoogleFonts.poppins(
+                fontSize: 13 + MediaQuery.of(context).size.width * 0.014,
+                color: Color(0xff6A4A4A),
+                fontWeight: FontWeight.w600,
+                height: 1,
+              ),
+            )
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget confirmOption(IconData icon, String text) {
+    return Container(
+      decoration: BoxDecoration(
+          color: Color(0xffB5E8AF),
+          borderRadius: BorderRadius.circular(10),
+          boxShadow: [
+            BoxShadow(
+              blurRadius: 10,
+              color: Colors.grey.withOpacity(0.1),
+            )
+          ]),
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Row(
+          children: <Widget>[
+            Icon(
+              icon,
+              color: Color(0xff537050),
+            ),
+            SizedBox(width: 5),
+            Text(
+              text,
+              style: GoogleFonts.poppins(
+                fontSize: 13 + MediaQuery.of(context).size.width * 0.014,
+                color: Color(0xff537050),
+                fontWeight: FontWeight.w600,
+                height: 1,
+              ),
+            )
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget cancelOption(IconData icon, String text) {
     return Container(
       decoration: BoxDecoration(
           color: Color(0xffECA0A0),
