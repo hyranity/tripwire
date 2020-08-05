@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:tinycolor/tinycolor.dart';
 import 'package:tripwire/Util/Quick.dart';
+import 'package:tripwire/ping.dart';
 
 import 'Model/Group.dart';
 import 'Model/LogEvent.dart';
@@ -303,10 +304,13 @@ class _GroupPage extends State<GroupPage> {
       padding: const EdgeInsets.only(top: 25, bottom: 25),
       child: InkWell(
         onTap: () {
+          print("press");
           if (button.type == "rally")
             confirmationDialog(context, button.dialogTitle, button.dialogDesc);
           else if (button.type == "poll")
             Quick.navigate(context, () => PollPage());
+          else if (button.type == "ping")
+            Quick.navigate(context, () => PingPage());
         },
         child: Container(
           width: 200,

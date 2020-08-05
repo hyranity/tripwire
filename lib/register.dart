@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:tripwire/Util/Quick.dart';
 import 'package:tripwire/login.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class Register extends StatefulWidget {
   Register({Key key, this.title}) : super(key: key);
@@ -13,6 +14,8 @@ class Register extends StatefulWidget {
 }
 
 class _Register extends State<Register> {
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
