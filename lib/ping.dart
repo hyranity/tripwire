@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:tinycolor/tinycolor.dart';
 import 'package:tripwire/Model/MyTheme.dart';
-import 'DB.dart';
+import 'Util/DB.dart';
 
 
 class PingPage extends StatefulWidget {
