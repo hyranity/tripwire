@@ -48,7 +48,7 @@ class MyApp extends StatelessWidget {
           child: child,
         );
       },
-      home: MyHomePage(),
+      home: MyHomePage(title: 'Flutter Demo Home Page'),
     );
   }
 }

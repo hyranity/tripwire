@@ -304,6 +304,7 @@ class _GroupPage extends State<GroupPage> {
       padding: const EdgeInsets.only(top: 25, bottom: 25),
       child: InkWell(
         onTap: () {
+          print("press");
           if (button.type == "rally")
             confirmationDialog(context, button.dialogTitle, button.dialogDesc);
           else if (button.type == "poll")
