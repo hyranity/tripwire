@@ -56,18 +56,18 @@ class _PingPage extends State<PingPage> {
   }
 
   Future<List> getMemberArray() async {
-    List memberList = new List();
+
 
     var db =  FirebaseDatabase.instance.reference().child("groups").child("1").child("members");
-    db.once().then((DataSnapshot snapshot){
+    return db.once().then((DataSnapshot snapshot){
+      List memberList = new List();
       Map<dynamic, dynamic> members = snapshot.value;
       members.forEach((key, value) {
         memberList.add(value);
         print(memberList);
       });
+      return memberList;
     });
-    print("hello2");
-    return memberList;
   }
 
 
@@ -136,7 +136,6 @@ class _PingPage extends State<PingPage> {
 
         builder: (BuildContext context, AsyncSnapshot<List> snapshot){
           if (snapshot.connectionState != ConnectionState.done || !snapshot.hasData ) {
-            print("hello1");
             return new CircularProgressIndicator();
           }
 
