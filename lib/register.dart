@@ -15,6 +15,8 @@ class Register extends StatefulWidget {
 
 class _Register extends State<Register> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  final emailController = new TextEditingController();
+  final passwordController = new TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -59,6 +61,7 @@ class _Register extends State<Register> {
                 )
               ]),
           child: TextFormField(
+            controller: emailController,
             decoration: InputDecoration(
               contentPadding: EdgeInsets.fromLTRB(10, 0, 10, 0),
               labelText: 'EMAIL',
@@ -152,6 +155,7 @@ class _Register extends State<Register> {
                 )
               ]),
           child: TextFormField(
+            controller: passwordController,
             obscureText: true,
             decoration: InputDecoration(
               contentPadding: EdgeInsets.fromLTRB(10, 0, 10, 0),
@@ -183,13 +187,18 @@ class _Register extends State<Register> {
               ]),
           child: Padding(
             padding: const EdgeInsets.all(8.0),
-            child: Text(
-              "LET'S GO",
-              textAlign: TextAlign.center,
-              style: GoogleFonts.poppins(
-                fontSize: 17,
-                fontWeight: FontWeight.w600,
-                color: Color(0xff669260),
+            child: InkWell(
+              onTap: () {
+                signUp(emailController.text, passwordController.text);
+              },
+              child: Text(
+                "LET'S GO",
+                textAlign: TextAlign.center,
+                style: GoogleFonts.poppins(
+                  fontSize: 17,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xff669260),
+                ),
               ),
             ),
           ),
@@ -215,5 +224,15 @@ class _Register extends State<Register> {
             ),
           ),
         ));
+  }
+
+  Future<FirebaseUser> signUp (email, password) async {
+    AuthResult result = await _auth.createUserWithEmailAndPassword(email: email.trim(), password: password);
+    final FirebaseUser user = result.user;
+
+    assert (user != null);
+    assert (await user.getIdToken() != null);
+
+    return user;
   }
 }
