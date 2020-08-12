@@ -61,10 +61,8 @@ class _PingPage extends State<PingPage> {
 
     // Return the data obtained from db
     return db.once().then((DataSnapshot snapshot){
-
       //List to hold member data
       List memberList = new List();
-
       // HashMap to store DB data
       Map<dynamic, dynamic> members = snapshot.value;
 
@@ -144,7 +142,6 @@ class _PingPage extends State<PingPage> {
 
         builder: (BuildContext context, AsyncSnapshot<List> snapshot){
           if (snapshot.connectionState != ConnectionState.done && !snapshot.hasData ) {
-            print("hello1");
             return new CircularProgressIndicator();
           }
           print("finished " + snapshot.data.toString());
@@ -161,7 +158,6 @@ class _PingPage extends State<PingPage> {
                 );
               },
               itemBuilder: (BuildContext context, int index){
-                print("hello3");
                 return MemberItem(snapshot.data[index]);
               }
             ),

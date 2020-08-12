@@ -50,7 +50,7 @@ class MyApp extends StatelessWidget {
           child: child,
         );
       },
-      home: MyHomePage(title: 'Flutter Demo Home Page'),
+      home: Login(title: 'Flutter Demo Home Page'),
     );
   }
 }

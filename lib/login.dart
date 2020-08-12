@@ -1,7 +1,11 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:tripwire/Util/Quick.dart';
+import 'package:tripwire/main.dart';
 import 'package:tripwire/register.dart';
+
+
 
 class Login extends StatefulWidget {
   Login({Key key, this.title}) : super(key: key);
@@ -13,6 +17,10 @@ class Login extends StatefulWidget {
 }
 
 class _Login extends State<Login> {
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final emailController = new TextEditingController();
+  final passwordController = new TextEditingController();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -59,6 +67,7 @@ class _Login extends State<Login> {
               ]
           ),
           child: TextFormField(
+            controller: emailController,
             decoration: InputDecoration(
               contentPadding:EdgeInsets.fromLTRB(10,0,10,0),
                 labelText: 'EMAIL',
@@ -94,6 +103,7 @@ class _Login extends State<Login> {
           ),
 
           child: TextFormField(
+            controller: passwordController,
             obscureText: true,
             decoration: InputDecoration(
               contentPadding:EdgeInsets.fromLTRB(10,0,10,0),
@@ -127,13 +137,21 @@ class _Login extends State<Login> {
               ]),
           child: Padding(
             padding: const EdgeInsets.all(8.0),
-            child: Text(
-              "LET'S GO",
-              textAlign: TextAlign.center,
-              style: GoogleFonts.poppins(
-                fontSize: 17,
-                fontWeight: FontWeight.w600,
-                color: Color(0xff669260),
+            child: InkWell(
+              onTap: () {
+                signInUser(emailController.text, passwordController.text)
+                    .then((FirebaseUser user) {
+                  Quick.navigate(context, () => MyHomePage());
+                }).catchError((e) => print(e));
+              },
+              child: Text(
+                "LET'S GO",
+                textAlign: TextAlign.center,
+                style: GoogleFonts.poppins(
+                  fontSize: 17,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xff669260),
+                ),
               ),
             ),
           ),
@@ -161,4 +179,23 @@ class _Login extends State<Login> {
       ),
     );
   }
+
+  Future<FirebaseUser> signInUser(String email, String password) async {
+    AuthResult result = await _auth.signInWithEmailAndPassword(email: email.trim(), password: password);
+    final FirebaseUser user = result.user;
+
+    assert(user != null);
+    assert(await user.getIdToken() != null);
+
+    final FirebaseUser currentUser = await _auth.currentUser();
+    assert(user.uid == currentUser.uid);
+
+    print('signInEmail succeeded: $user');
+
+    return user;
+  }
+
+
+
 }
+
