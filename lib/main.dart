@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:tripwire/Model/classes.dart';
+import 'package:tripwire/Util/Global.dart';
+import 'package:tripwire/stepTracker.dart';
 import 'package:weather/weather_library.dart';
 
 import 'Model/CurrentLocation.dart';
@@ -76,6 +78,13 @@ class _MyHomePageState extends State<MyHomePage> {
   Weather weather;
   Placemark place;
   int repeater = 0;
+
+
+  @override
+  void initState(){
+    // Begin listening for steps
+    Global.beginListening();
+  }
 
   void loadData() {
     // Code possible thanks to https://www.digitalocean.com/community/tutorials/flutter-geolocator-plugin
@@ -208,22 +217,27 @@ class _MyHomePageState extends State<MyHomePage> {
                 ],
               ),
               new Spacer(),
-              Container(
-                height: 60,
-                width: 60,
-                decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(10),
-                    boxShadow: [
-                      BoxShadow(
-                        blurRadius: 25,
-                        color: Colors.grey.withOpacity(0.3),
-                      )
-                    ]),
-                child: Icon(
-                  Icons.menu,
-                  size: 25,
-                  color: Color(0xff669260),
+              InkWell(
+                onTap: (){
+                  Quick.navigate(context, () => StepTracker());
+                },
+                child: Container(
+                  height: 60,
+                  width: 60,
+                  decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(10),
+                      boxShadow: [
+                        BoxShadow(
+                          blurRadius: 25,
+                          color: Colors.grey.withOpacity(0.3),
+                        )
+                      ]),
+                  child: Icon(
+                    Icons.menu,
+                    size: 25,
+                    color: Color(0xff669260),
+                  ),
                 ),
               )
             ],
