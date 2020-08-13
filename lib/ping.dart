@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:tinycolor/tinycolor.dart';
 import 'package:tripwire/Model/MyTheme.dart';
+import 'Model/Member.dart';
 import 'Util/DB.dart';
 
 
@@ -23,6 +24,10 @@ class _PingPage extends State<PingPage> {
             child: Column (
               children: <Widget> [
                 Container(
+                    padding: EdgeInsets.only(left: 20, right: 20),
+                    alignment: Alignment.centerLeft,
+                    child: MyTheme.backButton(context)),
+                Container(
                   padding: EdgeInsets.only(left: 20, right: 20),
                 ),
                 MemberList(),
@@ -34,15 +39,15 @@ class _PingPage extends State<PingPage> {
     );
   }
 
+  //The list view + member
   Widget MemberList() {
     return Container(
       alignment: Alignment.centerLeft,
-      color: Colors.blue,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Padding(
-            padding: const EdgeInsets.only(left: 10.0),
+            padding: const EdgeInsets.only(left: 20.0),
             child: Text(
                 "Members",
                 textAlign: TextAlign.left,
@@ -57,26 +62,26 @@ class _PingPage extends State<PingPage> {
 
   Future<List> getMemberArray() async {
 
-    var db =  FirebaseDatabase.instance.reference().child("groups").child("1").child("members");
+    var db =  FirebaseDatabase.instance.reference().child("member");
 
     // Return the data obtained from db
     return db.once().then((DataSnapshot snapshot){
       //List to hold member data
-      List memberList = new List();
+      List<Member> memberList = new List();
       // HashMap to store DB data
       Map<dynamic, dynamic> members = snapshot.value;
 
       //Get each member from DB and put into list
-      members.forEach((key, value) {
-        memberList.add(value);
-      });
+        members.forEach((key, value) {
+          memberList.add(value);
+        });
 
       // Return the data to the above return
       return memberList;
     });
   }
 
-
+  //member item
   Widget MemberItem(data) {
     return Container(
       height:70,
@@ -135,34 +140,44 @@ class _PingPage extends State<PingPage> {
   }
 
   Widget MemberListWidget() {
-    return Container(
-      height: MediaQuery.of(context).size.height * 0.37,
-      child: FutureBuilder<List>(
-        future: getMemberArray(),
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Container(
+        height: MediaQuery.of(context).size.height * 0.37,
+        child: FutureBuilder<List>(
+          future: getMemberArray(),
 
-        builder: (BuildContext context, AsyncSnapshot<List> snapshot){
-          if (snapshot.connectionState != ConnectionState.done && !snapshot.hasData ) {
-            return new CircularProgressIndicator();
-          }
-          print("finished " + snapshot.data.toString());
-          return MediaQuery.removePadding(
-            context: context,
-            removeTop: true,
-            child: ListView.separated(
-              scrollDirection: Axis.vertical,
-              shrinkWrap: true,
-              itemCount: snapshot.data.length,
-              separatorBuilder: (BuildContext context, int index){
-                return SizedBox(
-                  height: 15,
-                );
-              },
-              itemBuilder: (BuildContext context, int index){
-                return MemberItem(snapshot.data[index]);
-              }
-            ),
-          );
-        }),
+          builder: (BuildContext context, AsyncSnapshot<List> snapshot){
+            if (snapshot.connectionState != ConnectionState.done && !snapshot.hasData ) {
+              return new Container(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget> [
+                    CircularProgressIndicator(),
+                  ],
+                ),
+              );
+            }
+            print("finished " + snapshot.data.toString());
+            return MediaQuery.removePadding(
+              context: context,
+              removeTop: true,
+              child: ListView.separated(
+                scrollDirection: Axis.vertical,
+                shrinkWrap: true,
+                itemCount: snapshot.data.length,
+                separatorBuilder: (BuildContext context, int index){
+                  return SizedBox(
+                    height: 15,
+                  );
+                },
+                itemBuilder: (BuildContext context, int index){
+                  return MemberItem(snapshot.data[index]);
+                }
+              ),
+            );
+          }),
+      ),
     );
   }
 

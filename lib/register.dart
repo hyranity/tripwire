@@ -1,3 +1,4 @@
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:tripwire/Util/Quick.dart';
@@ -15,8 +16,11 @@ class Register extends StatefulWidget {
 
 class _Register extends State<Register> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  final databaseRef = FirebaseDatabase.instance.reference();
   final emailController = new TextEditingController();
   final passwordController = new TextEditingController();
+  final nameController = new TextEditingController();
+  final phoneNumController = new TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -93,6 +97,7 @@ class _Register extends State<Register> {
                 )
               ]),
           child: TextFormField(
+            controller: nameController,
             decoration: InputDecoration(
               contentPadding: EdgeInsets.fromLTRB(10, 0, 10, 0),
               labelText: 'NAME',
@@ -124,6 +129,7 @@ class _Register extends State<Register> {
                 )
               ]),
           child: TextFormField(
+            controller: phoneNumController,
             decoration: InputDecoration(
               contentPadding: EdgeInsets.fromLTRB(10, 0, 10, 0),
               labelText: 'PHONE NUMBER',
@@ -189,7 +195,7 @@ class _Register extends State<Register> {
             padding: const EdgeInsets.all(8.0),
             child: InkWell(
               onTap: () {
-                signUp(emailController.text, passwordController.text);
+                signUp(emailController.text, passwordController.text, nameController.text, phoneNumController.text);
               },
               child: Text(
                 "LET'S GO",
@@ -226,12 +232,19 @@ class _Register extends State<Register> {
         ));
   }
 
-  Future<FirebaseUser> signUp (email, password) async {
+  Future<FirebaseUser> signUp (email, password, name, phoneNum) async {
     AuthResult result = await _auth.createUserWithEmailAndPassword(email: email.trim(), password: password);
     final FirebaseUser user = result.user;
 
     assert (user != null);
     assert (await user.getIdToken() != null);
+
+    // create user in realtime database
+    databaseRef.child("member").set({
+      'email' : email,
+      'name' : name,
+      'phone' : phoneNum
+    });
 
     return user;
   }
