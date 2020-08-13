@@ -29,6 +29,7 @@ dependencies:
   characters: ^1.0.0
   animate_do: ^1.7.2
   firebase_auth: ^0.16.1
+  pedometer: ^2.0.1+2
   flutter:
     sdk: flutter
 
