@@ -60,20 +60,23 @@ class _PingPage extends State<PingPage> {
     );
   }
 
-  Future<List> getMemberArray() async {
+  Future<List<Member>> getMemberArray() {
 
     var db =  FirebaseDatabase.instance.reference().child("member");
 
     // Return the data obtained from db
     return db.once().then((DataSnapshot snapshot){
+
       //List to hold member data
       List<Member> memberList = new List();
+
       // HashMap to store DB data
       Map<dynamic, dynamic> members = snapshot.value;
 
       //Get each member from DB and put into list
         members.forEach((key, value) {
-          memberList.add(value);
+          // For each member
+         memberList.add(new Member(name: value["name"], email: value["email"]));
         });
 
       // Return the data to the above return
@@ -82,7 +85,7 @@ class _PingPage extends State<PingPage> {
   }
 
   //member item
-  Widget MemberItem(data) {
+  Widget MemberItem(Member member) {
     return Container(
       height:70,
       decoration: BoxDecoration(
@@ -123,7 +126,7 @@ class _PingPage extends State<PingPage> {
             Container(
               width: MediaQuery.of(context).size.width * 0.6,
               child: Text(
-                data,
+                member.name,
                 maxLines: 1,
                 softWrap: false,
                 overflow: TextOverflow.ellipsis,
@@ -144,11 +147,13 @@ class _PingPage extends State<PingPage> {
       padding: const EdgeInsets.all(16.0),
       child: Container(
         height: MediaQuery.of(context).size.height * 0.37,
-        child: FutureBuilder<List>(
+        child: FutureBuilder<List<Member>>(
           future: getMemberArray(),
 
-          builder: (BuildContext context, AsyncSnapshot<List> snapshot){
-            if (snapshot.connectionState != ConnectionState.done && !snapshot.hasData ) {
+          builder: (BuildContext context, AsyncSnapshot snapshot){
+
+            // While data is loading
+            if (snapshot.connectionState != ConnectionState.done) {
               return new Container(
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -158,7 +163,17 @@ class _PingPage extends State<PingPage> {
                 ),
               );
             }
-            print("finished " + snapshot.data.toString());
+
+            // If no members
+            if(!snapshot.hasData){
+              return new Container(
+                child: Text(
+                  "No members found."
+                ),
+              );
+            }
+
+            // If members are found and retrieved successfully
             return MediaQuery.removePadding(
               context: context,
               removeTop: true,
