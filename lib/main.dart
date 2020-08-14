@@ -50,7 +50,7 @@ class MyApp extends StatelessWidget {
           child: child,
         );
       },
-      home: MyHomePage()
+      home: Login()
     );
   }
 }

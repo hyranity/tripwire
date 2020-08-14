@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -13,6 +14,8 @@ class PingPage extends StatefulWidget {
 }
 
 class _PingPage extends State<PingPage> {
+  final FirebaseAuth auth = FirebaseAuth.instance;
+
   @override
   Widget build(BuildContext context) {
 
@@ -60,9 +63,10 @@ class _PingPage extends State<PingPage> {
     );
   }
 
-  Future<List<Member>> getMemberArray() {
+  Future<List<Member>> getMemberArray() async {
 
     var db =  FirebaseDatabase.instance.reference().child("member");
+    final FirebaseUser user = await auth.currentUser();
 
     // Return the data obtained from db
     return db.once().then((DataSnapshot snapshot){
@@ -76,6 +80,7 @@ class _PingPage extends State<PingPage> {
       //Get each member from DB and put into list
         members.forEach((key, value) {
           // For each member
+          if (value['name'] != user.displayName.trim())
          memberList.add(new Member(name: value["name"], email: value["email"]));
         });
 
@@ -86,60 +91,65 @@ class _PingPage extends State<PingPage> {
 
   //member item
   Widget MemberItem(Member member) {
-    return Container(
-      height:70,
-      decoration: BoxDecoration(
-        color: Color(0xff6098F6),
-        borderRadius: BorderRadius.circular(20),
-          boxShadow: [
-            BoxShadow(
-              blurRadius: 15,
-              offset: Offset(0, 7),
-              color: Colors.grey.withOpacity(0.6),
-            )
-          ]),
-      child: Padding(
-        padding: EdgeInsets.fromLTRB(10, 10, 0, 10),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: <Widget>[
-            Container(
-              height: 40,
-              width: 40,
-              decoration: BoxDecoration(
-                  boxShadow: [
-                    BoxShadow(
-                      blurRadius: 7,
-                      color: Colors.black.withOpacity(0.3),
-                    )
-                  ],
-                  shape: BoxShape.circle,
-                  image: DecorationImage(
-                    fit: BoxFit.fill,
-                    image: NetworkImage(
-                        'https://flutter.github.io/assets-for-api-docs/assets/widgets/owl.jpg'),
-                  )),
-            ),
-            SizedBox(
-              width: 16,
-            ),
-            Container(
-              width: MediaQuery.of(context).size.width * 0.6,
-              child: Text(
-                member.name,
-                maxLines: 1,
-                softWrap: false,
-                overflow: TextOverflow.ellipsis,
-                textAlign: TextAlign.left,
-                style: GoogleFonts.poppins(
-                  fontSize: 20,
+    return InkWell(
+      onTap: () {
+        PingEvent(member.name);
+      },
+      child: Container(
+        height:70,
+        decoration: BoxDecoration(
+          color: Color(0xff6098F6),
+          borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(
+                blurRadius: 15,
+                offset: Offset(0, 7),
+                color: Colors.grey.withOpacity(0.6),
+              )
+            ]),
+        child: Padding(
+          padding: EdgeInsets.fromLTRB(10, 10, 0, 10),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: <Widget>[
+              Container(
+                height: 40,
+                width: 40,
+                decoration: BoxDecoration(
+                    boxShadow: [
+                      BoxShadow(
+                        blurRadius: 7,
+                        color: Colors.black.withOpacity(0.3),
+                      )
+                    ],
+                    shape: BoxShape.circle,
+                    image: DecorationImage(
+                      fit: BoxFit.fill,
+                      image: NetworkImage(
+                          'https://flutter.github.io/assets-for-api-docs/assets/widgets/owl.jpg'),
+                    )),
+              ),
+              SizedBox(
+                width: 16,
+              ),
+              Container(
+                width: MediaQuery.of(context).size.width * 0.6,
+                child: Text(
+                  member.name,
+                  maxLines: 1,
+                  softWrap: false,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.left,
+                  style: GoogleFonts.poppins(
+                    fontSize: 20,
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
-      ),
-      );
+        ),
+    );
   }
 
   Widget MemberListWidget() {
@@ -196,4 +206,28 @@ class _PingPage extends State<PingPage> {
     );
   }
 
+  Widget RequestingWidget() {
+
+  }
+
+  Future<FirebaseUser> PingEvent(String name) async {
+    var memberDb = FirebaseDatabase.instance.reference().child("member");
+    var eventDb = FirebaseDatabase.instance.reference().child("events");
+    final FirebaseUser user = await auth.currentUser();
+
+    memberDb.once().then((DataSnapshot snapshot) {
+      Map<dynamic, dynamic> members  = snapshot.value;
+
+      members.forEach((key, value) {
+        if (value['name'] == name)
+          eventDb.push().set({
+            'title' : 'Ping to ' + name,
+            'sender' : user.uid,
+            'receiver' : key,
+            'type' : 'ping'
+          });
+      });
+    });
+  }
 }
+

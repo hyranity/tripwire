@@ -16,7 +16,6 @@ class Register extends StatefulWidget {
 
 class _Register extends State<Register> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  final databaseRef = FirebaseDatabase.instance.reference();
   final emailController = new TextEditingController();
   final passwordController = new TextEditingController();
   final nameController = new TextEditingController();
@@ -236,14 +235,19 @@ class _Register extends State<Register> {
     AuthResult result = await _auth.createUserWithEmailAndPassword(email: email.trim(), password: password);
     final FirebaseUser user = result.user;
 
+    //update displayName
+    UserUpdateInfo updateUser = UserUpdateInfo();
+    updateUser.displayName = name;
+    user.updateProfile(updateUser);
+
     assert (user != null);
     assert (await user.getIdToken() != null);
 
-    // create user in realtime database
-    databaseRef.child("member").set({
-      'email' : email,
-      'name' : name,
-      'phone' : phoneNum
+    final memberDatabaseRef = FirebaseDatabase().reference().child("member").child(user.uid);
+    memberDatabaseRef.set({
+      'email' : email.trim(),
+      'name' : name.trim(),
+      'phone' : phoneNum.trim()
     });
 
     return user;
