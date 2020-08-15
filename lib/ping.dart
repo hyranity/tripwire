@@ -225,6 +225,7 @@ class _PingPage extends State<PingPage> {
             'sender' : user.uid,
             'receiver' : key,
             'type' : 'ping'
+            'sentTIme' : 
           });
       });
     });
