@@ -8,7 +8,11 @@ class LogEvent{
   DateTime sentTime;
   String type;
   bool isCommunication;
-  LogEvent({this.title = "Event X", this.triggerPerson = "John Doe", this.type = "location", this.sentTime = null, this.isCommunication = false});
+  String sender;
+  String receiver;
+  String location;
+
+  LogEvent({this.title = "Event X", this.triggerPerson = "John Doe", this.type = "location", this.sentTime = null, this.isCommunication = false, this.sender="sender", this.receiver="receiver", location="location"});
 
   //Returns an icon based on its type
   static Widget getIcon(String type, double size){

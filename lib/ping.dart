@@ -1,8 +1,10 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:tinycolor/tinycolor.dart';
 import 'package:tripwire/Model/MyTheme.dart';
+import 'Model/Member.dart';
 import 'Util/DB.dart';
 
 
@@ -12,6 +14,8 @@ class PingPage extends StatefulWidget {
 }
 
 class _PingPage extends State<PingPage> {
+  final FirebaseAuth auth = FirebaseAuth.instance;
+
   @override
   Widget build(BuildContext context) {
 
@@ -22,6 +26,10 @@ class _PingPage extends State<PingPage> {
           child: Container(
             child: Column (
               children: <Widget> [
+                Container(
+                    padding: EdgeInsets.only(left: 20, right: 20),
+                    alignment: Alignment.centerLeft,
+                    child: MyTheme.backButton(context)),
                 Container(
                   padding: EdgeInsets.only(left: 20, right: 20),
                 ),
@@ -34,15 +42,15 @@ class _PingPage extends State<PingPage> {
     );
   }
 
+  //The list view + member
   Widget MemberList() {
     return Container(
       alignment: Alignment.centerLeft,
-      color: Colors.blue,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Padding(
-            padding: const EdgeInsets.only(left: 10.0),
+            padding: const EdgeInsets.only(left: 20.0),
             child: Text(
                 "Members",
                 textAlign: TextAlign.left,
@@ -55,115 +63,171 @@ class _PingPage extends State<PingPage> {
     );
   }
 
-  Future<List> getMemberArray() async {
+  Future<List<Member>> getMemberArray() async {
 
-    var db =  FirebaseDatabase.instance.reference().child("groups").child("1").child("members");
+    var db =  FirebaseDatabase.instance.reference().child("member");
+    final FirebaseUser user = await auth.currentUser();
 
     // Return the data obtained from db
     return db.once().then((DataSnapshot snapshot){
+
       //List to hold member data
-      List memberList = new List();
+      List<Member> memberList = new List();
+
       // HashMap to store DB data
       Map<dynamic, dynamic> members = snapshot.value;
 
       //Get each member from DB and put into list
-      members.forEach((key, value) {
-        memberList.add(value);
-      });
+        members.forEach((key, value) {
+          // For each member
+          if (value['name'] != user.displayName.trim())
+         memberList.add(new Member(name: value["name"], email: value["email"]));
+        });
 
       // Return the data to the above return
       return memberList;
     });
   }
 
-
-  Widget MemberItem(data) {
-    return Container(
-      height:70,
-      decoration: BoxDecoration(
-        color: Color(0xff6098F6),
-        borderRadius: BorderRadius.circular(20),
-          boxShadow: [
-            BoxShadow(
-              blurRadius: 15,
-              offset: Offset(0, 7),
-              color: Colors.grey.withOpacity(0.6),
-            )
-          ]),
-      child: Padding(
-        padding: EdgeInsets.fromLTRB(10, 10, 0, 10),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: <Widget>[
-            Container(
-              height: 40,
-              width: 40,
-              decoration: BoxDecoration(
-                  boxShadow: [
-                    BoxShadow(
-                      blurRadius: 7,
-                      color: Colors.black.withOpacity(0.3),
-                    )
-                  ],
-                  shape: BoxShape.circle,
-                  image: DecorationImage(
-                    fit: BoxFit.fill,
-                    image: NetworkImage(
-                        'https://flutter.github.io/assets-for-api-docs/assets/widgets/owl.jpg'),
-                  )),
-            ),
-            SizedBox(
-              width: 16,
-            ),
-            Container(
-              width: MediaQuery.of(context).size.width * 0.6,
-              child: Text(
-                data,
-                maxLines: 1,
-                softWrap: false,
-                overflow: TextOverflow.ellipsis,
-                textAlign: TextAlign.left,
-                style: GoogleFonts.poppins(
-                  fontSize: 20,
+  //member item
+  Widget MemberItem(Member member) {
+    return InkWell(
+      onTap: () {
+        PingEvent(member.name);
+      },
+      child: Container(
+        height:70,
+        decoration: BoxDecoration(
+          color: Color(0xff6098F6),
+          borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(
+                blurRadius: 15,
+                offset: Offset(0, 7),
+                color: Colors.grey.withOpacity(0.6),
+              )
+            ]),
+        child: Padding(
+          padding: EdgeInsets.fromLTRB(10, 10, 0, 10),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: <Widget>[
+              Container(
+                height: 40,
+                width: 40,
+                decoration: BoxDecoration(
+                    boxShadow: [
+                      BoxShadow(
+                        blurRadius: 7,
+                        color: Colors.black.withOpacity(0.3),
+                      )
+                    ],
+                    shape: BoxShape.circle,
+                    image: DecorationImage(
+                      fit: BoxFit.fill,
+                      image: NetworkImage(
+                          'https://flutter.github.io/assets-for-api-docs/assets/widgets/owl.jpg'),
+                    )),
+              ),
+              SizedBox(
+                width: 16,
+              ),
+              Container(
+                width: MediaQuery.of(context).size.width * 0.6,
+                child: Text(
+                  member.name,
+                  maxLines: 1,
+                  softWrap: false,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.left,
+                  style: GoogleFonts.poppins(
+                    fontSize: 20,
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
-      ),
-      );
-  }
-
-  Widget MemberListWidget() {
-    return Container(
-      height: MediaQuery.of(context).size.height * 0.37,
-      child: FutureBuilder<List>(
-        future: getMemberArray(),
-
-        builder: (BuildContext context, AsyncSnapshot<List> snapshot){
-          if (snapshot.connectionState != ConnectionState.done && !snapshot.hasData ) {
-            return new CircularProgressIndicator();
-          }
-          print("finished " + snapshot.data.toString());
-          return MediaQuery.removePadding(
-            context: context,
-            removeTop: true,
-            child: ListView.separated(
-              scrollDirection: Axis.vertical,
-              shrinkWrap: true,
-              itemCount: snapshot.data.length,
-              separatorBuilder: (BuildContext context, int index){
-                return SizedBox(
-                  height: 15,
-                );
-              },
-              itemBuilder: (BuildContext context, int index){
-                return MemberItem(snapshot.data[index]);
-              }
-            ),
-          );
-        }),
+        ),
     );
   }
 
+  Widget MemberListWidget() {
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Container(
+        height: MediaQuery.of(context).size.height * 0.37,
+        child: FutureBuilder<List<Member>>(
+          future: getMemberArray(),
+
+          builder: (BuildContext context, AsyncSnapshot snapshot){
+
+            // While data is loading
+            if (snapshot.connectionState != ConnectionState.done) {
+              return new Container(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget> [
+                    CircularProgressIndicator(),
+                  ],
+                ),
+              );
+            }
+
+            // If no members
+            if(!snapshot.hasData){
+              return new Container(
+                child: Text(
+                  "No members found."
+                ),
+              );
+            }
+
+            // If members are found and retrieved successfully
+            return MediaQuery.removePadding(
+              context: context,
+              removeTop: true,
+              child: ListView.separated(
+                scrollDirection: Axis.vertical,
+                shrinkWrap: true,
+                itemCount: snapshot.data.length,
+                separatorBuilder: (BuildContext context, int index){
+                  return SizedBox(
+                    height: 15,
+                  );
+                },
+                itemBuilder: (BuildContext context, int index){
+                  return MemberItem(snapshot.data[index]);
+                }
+              ),
+            );
+          }),
+      ),
+    );
+  }
+
+  Widget RequestingWidget() {
+
+  }
+
+  Future<FirebaseUser> PingEvent(String name) async {
+    var memberDb = FirebaseDatabase.instance.reference().child("member");
+    var eventDb = FirebaseDatabase.instance.reference().child("events");
+    final FirebaseUser user = await auth.currentUser();
+
+    memberDb.once().then((DataSnapshot snapshot) {
+      Map<dynamic, dynamic> members  = snapshot.value;
+
+      members.forEach((key, value) {
+        if (value['name'] == name)
+          eventDb.push().set({
+            'title' : 'Ping to ' + name,
+            'sender' : user.uid,
+            'receiver' : key,
+            'type' : 'ping'
+          });
+      });
+    });
+  }
 }
+
