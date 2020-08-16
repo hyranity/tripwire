@@ -70,8 +70,10 @@ class LogEvent{
   }
 
   timeSinceSet(){
-    int difference = DateTime.now().difference(sentTime).inMinutes;
-
+    int difference = sentTime.difference(DateTime.now()).inMinutes;
+    print('sentTime : $sentTime');
+    print(DateTime.now());
+    print(difference);
     if(difference > 60){
       // Hour
       double hour = difference / 60;

@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:tinycolor/tinycolor.dart';
 import 'package:tripwire/Model/MyTheme.dart';
+import 'package:tripwire/Model/world_time.dart';
 import 'Model/Member.dart';
-import 'Util/DB.dart';
 
 
 class PingPage extends StatefulWidget {
@@ -214,21 +214,70 @@ class _PingPage extends State<PingPage> {
     var memberDb = FirebaseDatabase.instance.reference().child("member");
     var eventDb = FirebaseDatabase.instance.reference().child("events");
     final FirebaseUser user = await auth.currentUser();
+    bool spamDiscovered = false;
 
-    memberDb.once().then((DataSnapshot snapshot) {
-      Map<dynamic, dynamic> members  = snapshot.value;
+    //get time
+    WorldTime instance = WorldTime(url: 'Asia/Kuala_Lumpur');
+    await instance.getTime();
 
-      members.forEach((key, value) {
-        if (value['name'] == name)
-          eventDb.push().set({
-            'title' : 'Ping to ' + name,
-            'sender' : user.uid,
-            'receiver' : key,
-            'type' : 'ping'
-            'sentTIme' : 
+    //Check if sender ping after 5 minutes
+    await eventDb.once().then((DataSnapshot snapshot) async{
+      Map<dynamic, dynamic> events  = snapshot.value;
+      if(events != null) {
+        events.forEach((eventKey, eventValue) async {
+          if (await instance.calcTimeDiff(instance.worldtime.toString(), eventValue['sentTime']) && eventValue['sender'] == user.uid) {
+            //if not spamming within 5 minutes, create a ping event
+            print("Not Spamming");
+          }
+          else {
+            print("Spam");
+            spamDiscovered = true;
+            //return MyTheme.alertMsg(context, 'Failed to Ping', 'Ping again in 5 minutes. ');
+          }
+        });
+      }
+      else{
+        print("no events");
+        memberDb.once().then((DataSnapshot snapshot) {
+          Map<dynamic, dynamic> members = snapshot.value;
+
+          members.forEach((key, value) {
+            if (value['name'] == name) {
+              eventDb.push().set({
+                'title': 'Ping to ' + name,
+                'sender': user.uid,
+                'receiver': key,
+                'type': 'ping',
+                'sentTime': instance.worldtime.toString(),
+              });
+            }
           });
-      });
+        });
+      }
     });
+
+    print('Spam : $spamDiscovered');
+
+    if (spamDiscovered == true) {
+      MyTheme.alertMsg(context, 'Failed to Ping', 'Ping again in 5 minutes. ');
+    }
+    else if (spamDiscovered == false) {
+      memberDb.once().then((DataSnapshot snapshot) {
+        Map<dynamic, dynamic> members = snapshot.value;
+
+        members.forEach((key, value) {
+          if (value['name'] == name) {
+            eventDb.push().set({
+              'title': 'Ping to ' + name,
+              'sender': user.uid,
+              'receiver': key,
+              'type': 'ping',
+              'sentTime': instance.worldtime.toString(),
+            });
+          }
+        });
+      });
+    }
   }
 }
 

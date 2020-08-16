@@ -4,7 +4,9 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
 import 'package:tinycolor/tinycolor.dart';
+import 'package:tripwire/Model/world_time.dart';
 import 'package:tripwire/Util/Quick.dart';
 import 'package:tripwire/ping.dart';
 
@@ -414,19 +416,18 @@ class _GroupPage extends State<GroupPage> {
       Map<dynamic, dynamic> events = snapshot.value;
 
       events.forEach((key, value) {
-       // if(value['receiver'] == user.uid){
-        print("value = " + value['title']);
+        if(value['receiver'] == user.uid){
           eventList.add(new LogEvent(
             title: value['title'],
             triggerPerson: value['receiver'],
             type : value ['type'],
-            sentTime: DateTime(2020, 7, 20, 20, 50),
+            sentTime: DateTime.parse(value['sentTime']),
             isCommunication: true,
             sender: value['sender'],
             receiver: value['receiver'],
             location: "location",
           ));
-       // }
+        }
       });
       return eventList;
     });

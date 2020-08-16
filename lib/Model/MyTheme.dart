@@ -41,6 +41,96 @@ class MyTheme {
     );
   }
 
+  static Widget alertMsg(BuildContext context, String title, String desc) {
+    showDialog(
+      context:context,
+      builder: (BuildContext context){
+        return Dialog(
+          shape:RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(15)
+          ),
+          child: Container(
+            height: 300,
+            child: Column(
+              children: <Widget> [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(25.0 ,15.0 ,0.0 ,15.0),
+                  child: Container(
+                    width: MediaQuery.of(context).size.width * 0.6,
+                    child: Text(
+                      title,
+                      textAlign: TextAlign.left,
+                      style: GoogleFonts.poppins(
+                        fontSize: 30,
+                        color: Colors.black,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(25.0 ,15.0 ,0.0 ,60.0),
+                  child: Container(
+                    width: MediaQuery.of(context).size.width * 0.6,
+                    child: Text(
+                      desc,
+                      textAlign: TextAlign.left,
+                      style: GoogleFonts.poppins(
+                        fontSize: 18,
+                        color: Colors.black,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ),
+                Container(
+                  constraints: BoxConstraints(maxHeight: 100),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      Container(
+                      decoration: BoxDecoration(
+                          color: Color(0xffB5E8AF),
+                        borderRadius: BorderRadius.circular(10),
+                        boxShadow: [
+                          BoxShadow(
+                            blurRadius: 10,
+                            color: Colors.grey.withOpacity(0.1),
+                          )
+                        ]),
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Row(
+                            children: <Widget>[
+                              Icon(
+                                Icons.check,
+                                color: Color(0xff537050),
+                              ),
+                              SizedBox(width: 5),
+                              Text(
+                                "Okay",
+                                style: GoogleFonts.poppins(
+                                  fontSize: 13 + MediaQuery.of(context).size.width * 0.014,
+                                  color: Color(0xff537050),
+                                  fontWeight: FontWeight.w600,
+                                  height: 1,
+                                ),
+                              )
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                )
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
 
 }
 
