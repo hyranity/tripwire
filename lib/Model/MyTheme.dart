@@ -83,46 +83,51 @@ class MyTheme {
                     ),
                   ),
                 ),
-                Container(
-                  constraints: BoxConstraints(maxHeight: 100),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      Container(
-                      decoration: BoxDecoration(
-                          color: Color(0xffB5E8AF),
-                        borderRadius: BorderRadius.circular(10),
-                        boxShadow: [
-                          BoxShadow(
-                            blurRadius: 10,
-                            color: Colors.grey.withOpacity(0.1),
-                          )
-                        ]),
-                        child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Row(
-                            children: <Widget>[
-                              Icon(
-                                Icons.check,
-                                color: Color(0xff537050),
-                              ),
-                              SizedBox(width: 5),
-                              Text(
-                                "Okay",
-                                style: GoogleFonts.poppins(
-                                  fontSize: 13 + MediaQuery.of(context).size.width * 0.014,
+                InkWell(
+                  onTap: () {
+                    Navigator.pop(context);
+                  },
+                  child: Container(
+                    constraints: BoxConstraints(maxHeight: 100),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        Container(
+                        decoration: BoxDecoration(
+                            color: Color(0xffB5E8AF),
+                          borderRadius: BorderRadius.circular(10),
+                          boxShadow: [
+                            BoxShadow(
+                              blurRadius: 10,
+                              color: Colors.grey.withOpacity(0.1),
+                            )
+                          ]),
+                          child: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Row(
+                              children: <Widget>[
+                                Icon(
+                                  Icons.check,
                                   color: Color(0xff537050),
-                                  fontWeight: FontWeight.w600,
-                                  height: 1,
                                 ),
-                              )
-                            ],
+                                SizedBox(width: 5),
+                                Text(
+                                  "Okay",
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 13 + MediaQuery.of(context).size.width * 0.014,
+                                    color: Color(0xff537050),
+                                    fontWeight: FontWeight.w600,
+                                    height: 1,
+                                  ),
+                                )
+                              ],
+                            ),
                           ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                )
+                ),
               ],
             ),
           ),

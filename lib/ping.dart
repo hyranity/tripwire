@@ -236,28 +236,11 @@ class _PingPage extends State<PingPage> {
           }
         });
       }
-      else{
-        print("no events");
-        memberDb.once().then((DataSnapshot snapshot) {
-          Map<dynamic, dynamic> members = snapshot.value;
-
-          members.forEach((key, value) {
-            if (value['name'] == name) {
-              eventDb.push().set({
-                'title': 'Ping to ' + name,
-                'sender': user.uid,
-                'receiver': key,
-                'type': 'ping',
-                'sentTime': instance.worldtime.toString(),
-              });
-            }
-          });
-        });
-      }
     });
 
     print('Spam : $spamDiscovered');
 
+    //if spam within 5 minutes
     if (spamDiscovered == true) {
       MyTheme.alertMsg(context, 'Failed to Ping', 'Ping again in 5 minutes. ');
     }
