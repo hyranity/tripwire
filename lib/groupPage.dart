@@ -1,8 +1,12 @@
 import 'package:animate_do/animate_do.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
 import 'package:tinycolor/tinycolor.dart';
+import 'package:tripwire/Model/world_time.dart';
 import 'package:tripwire/Util/Quick.dart';
 import 'package:tripwire/ping.dart';
 
@@ -25,6 +29,8 @@ class GroupPage extends StatefulWidget {
 class _GroupPage extends State<GroupPage> {
   int retryConnect = 0;
   Group group;
+
+  final FirebaseAuth auth = FirebaseAuth.instance;
 
   @override
   Widget build(BuildContext context) {
@@ -377,30 +383,54 @@ class _GroupPage extends State<GroupPage> {
   }
 
   Future<List<LogEvent>> getEvents() async {
-    List<LogEvent> eventList = new List();
+//    List<LogEvent> eventList = new List();
 
     //Dummy data
-    eventList.add(new LogEvent(
-        title: "KLCC",
-        triggerPerson: "Everyone",
-        type: "location",
-        sentTime: DateTime(2020, 7, 21, 18, 50)));
+//    eventList.add(new LogEvent(
+//        title: "KLCC",
+//        triggerPerson: "Everyone",
+//        type: "location",
+//        sentTime: DateTime(2020, 7, 21, 18, 50)));
+//
+//    eventList.add(new LogEvent(
+//        title: "Rally @ Hilton Hotel Lobby",
+//        triggerPerson: "Johann",
+//        type: "rally",
+//        isCommunication: true,
+//        sentTime: DateTime(2020, 7, 21, 12, 50)));
+//
+//    eventList.add(new LogEvent(
+//        title: "Requesting location",
+//        triggerPerson: "Kelvin",
+//        type: "ping",
+//        isCommunication: true,
+//        sentTime: DateTime(2020, 7, 20, 20, 50)));
 
-    eventList.add(new LogEvent(
-        title: "Rally @ Hilton Hotel Lobby",
-        triggerPerson: "Johann",
-        type: "rally",
-        isCommunication: true,
-        sentTime: DateTime(2020, 7, 21, 12, 50)));
+    //Getting events from firebase
+    var eventDb = FirebaseDatabase.instance.reference().child("events");
+    final FirebaseUser user = await auth.currentUser();
 
-    eventList.add(new LogEvent(
-        title: "Requesting location",
-        triggerPerson: "Kelvin",
-        type: "ping",
-        isCommunication: true,
-        sentTime: DateTime(2020, 7, 20, 20, 50)));
+    return eventDb.once().then((DataSnapshot snapshot) {
+      List<LogEvent> eventList = new List();
 
-    return eventList;
+      Map<dynamic, dynamic> events = snapshot.value;
+
+      events.forEach((key, value) {
+        if(value['receiver'] == user.uid){
+          eventList.add(new LogEvent(
+            title: value['title'],
+            triggerPerson: value['receiver'],
+            type : value ['type'],
+            sentTime: DateTime.parse(value['sentTime']),
+            isCommunication: true,
+            sender: value['sender'],
+            receiver: value['receiver'],
+            location: "location",
+          ));
+        }
+      });
+      return eventList;
+    });
   }
 
   Widget logEventList() {
@@ -410,10 +440,17 @@ class _GroupPage extends State<GroupPage> {
       child: FutureBuilder<List<LogEvent>>(
         future: getEvents(),
         builder:
-            (BuildContext context, AsyncSnapshot<List<LogEvent>> snapshot) {
+            (BuildContext context, AsyncSnapshot snapshot) {
           //If cant obtain event list
-          if (snapshot.connectionState != ConnectionState.done ||
-              !snapshot.hasData) return new CircularProgressIndicator();
+          if (snapshot.connectionState != ConnectionState.done) return new CircularProgressIndicator();
+
+          if(!snapshot.hasData){
+            return new Container(
+              child: Text(
+                "No events found",
+              ),
+            );
+          }
 
           //Has data
           return MediaQuery.removePadding(
@@ -431,7 +468,6 @@ class _GroupPage extends State<GroupPage> {
                     return locationLog(event);
                   } else {
                     //This is a communication event, so the following designs will be used:
-
                     //Rally
                     if (event.type == "rally") return rally(event);
                     if (event.type == "ping") return ping(event);

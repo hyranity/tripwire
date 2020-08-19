@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -75,6 +76,16 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   final Geolocator geolocator = Geolocator()..forceAndroidLocationManager;
+  final FirebaseAuth auth = FirebaseAuth.instance;
+
+  String username = "";
+
+  _MyHomePageState() {
+    getUserName().then((name) => setState(() {
+      username = name;
+    }));
+  }
+
   Weather weather;
   Placemark place;
   int repeater = 0;
@@ -205,7 +216,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     ),
                   ),
                   Text(
-                    "Johann",
+                    username,
                     textAlign: TextAlign.left,
                     style: GoogleFonts.poppins(
                       color: Color(0xff8FBF88),
@@ -797,5 +808,10 @@ class _MyHomePageState extends State<MyHomePage> {
         ],
       ),
     );
+  }
+
+  Future<String> getUserName() async {
+    final FirebaseUser user = await auth.currentUser();
+    return user.displayName;
   }
 }

@@ -1,8 +1,13 @@
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:tinycolor/tinycolor.dart';
 
+import 'Model/LogEvent.dart';
 import 'Model/MyTheme.dart';
+import 'Model/world_time.dart';
 
 class PollPage extends StatefulWidget {
   @override
@@ -10,6 +15,9 @@ class PollPage extends StatefulWidget {
 }
 
 class _PollPage extends State<PollPage> {
+  final questionController = new TextEditingController();
+  final FirebaseAuth auth = FirebaseAuth.instance;
+
   @override
   Widget build(BuildContext context) {
    //Main UI
@@ -70,6 +78,7 @@ class _PollPage extends State<PollPage> {
                           height: MediaQuery.of(context).size.height * 0.02,
                         ),
                         TextField(
+                          controller: questionController,
                           autocorrect: true,
                           maxLines: 3,
                           autofocus: false,
@@ -85,12 +94,52 @@ class _PollPage extends State<PollPage> {
                             color:Colors.black,
                           ),
                         ),
+                        SizedBox(
+                          //Provide responsive design
+                          height: MediaQuery.of(context).size.height * 0.05,
+                        ),
+
+                        //Post button
+                        InkWell(
+                          onTap: () {
+                            PollEvent(questionController.text);
+                          },
+                          child: Container(
+                            decoration: BoxDecoration(
+                                color: LogEvent.getColorScheme("poll", true, 20),
+                                borderRadius: BorderRadius.circular(10),
+                                boxShadow: [
+                                  BoxShadow(
+                                    blurRadius: 10,
+                                    color: Colors.grey.withOpacity(0.1),
+                                  )
+                                ]),
+                            child: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Row(
+                                children: <Widget>[
+                                  Icon(
+                                    Icons.check,
+                                    color: TinyColor.fromString("#de6676").darken(35).color,
+                                  ),
+                                  SizedBox(width: 5),
+                                  Text(
+                                    "Post",
+                                    style: GoogleFonts.poppins(
+                                      fontSize: 13 + MediaQuery.of(context).size.width * 0.014,
+                                      color: TinyColor.fromString("#de6676").darken(35).color,
+                                      fontWeight: FontWeight.w600,
+                                      height: 1,
+                                    ),
+                                  )
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
                       ],
                     ),
                   ),
-
-
-
                 ],
               ),
             ),
@@ -98,6 +147,25 @@ class _PollPage extends State<PollPage> {
         ),
       ),
     );
+  }
+
+  Future<FirebaseUser> PollEvent(String question) async {
+    var eventDb = FirebaseDatabase.instance.reference().child("events");
+    final FirebaseUser user = await auth.currentUser();
+
+    //get time
+    WorldTime wt = WorldTime(url: 'Asia/Kuala_Lumpur');
+    await wt.getTime();
+
+    await eventDb.push().set({
+      'title' : 'Poll Question',
+      'sender' : user.uid,
+      'type' : 'poll',
+      'sentTime' : wt.worldtime.toString(),
+      'question' : question,
+    });
+
+    MyTheme.alertMsg(context, "Polled ", "Your question is sent to everyone in this group.");
   }
 
 }

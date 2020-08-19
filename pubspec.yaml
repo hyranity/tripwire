@@ -30,6 +30,8 @@ dependencies:
   animate_do: ^1.7.2
   firebase_auth: ^0.16.1
   pedometer: ^2.0.1+2
+  http: ^0.12.1
+  intl: ^0.16.1
   flutter:
     sdk: flutter
 

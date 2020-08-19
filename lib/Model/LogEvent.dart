@@ -12,7 +12,7 @@ class LogEvent{
   String receiver;
   String location;
 
-  LogEvent({this.title = "Event X", this.triggerPerson = "John Doe", this.type = "location", this.sentTime = null, this.isCommunication = false, this.sender="sender", this.receiver="receiver", location="location"});
+  LogEvent({this.title = "Event X", this.triggerPerson = "John Doe", this.type = "location", this.sentTime = null, this.isCommunication = false, this.sender="sender", this.receiver="receiver", this.location="location"});
 
   //Returns an icon based on its type
   static Widget getIcon(String type, double size){
@@ -70,8 +70,10 @@ class LogEvent{
   }
 
   timeSinceSet(){
-    int difference = DateTime.now().difference(sentTime).inMinutes;
-
+    int difference = sentTime.difference(DateTime.now()).inMinutes;
+    print('sentTime : $sentTime');
+    print(DateTime.now());
+    print(difference);
     if(difference > 60){
       // Hour
       double hour = difference / 60;
