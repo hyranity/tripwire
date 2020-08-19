@@ -31,6 +31,7 @@ class _GroupPage extends State<GroupPage> {
   Group group;
 
   final FirebaseAuth auth = FirebaseAuth.instance;
+  final replyController = new TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -289,7 +290,9 @@ class _GroupPage extends State<GroupPage> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
-                      confirmOption( Icons.check, "do it"),
+                      InkWell(
+                          onTap: () {},
+                          child: confirmOption( Icons.check, "do it")),
                       SizedBox(
                         width: 10,
                       ),
@@ -416,7 +419,7 @@ class _GroupPage extends State<GroupPage> {
       Map<dynamic, dynamic> events = snapshot.value;
 
       events.forEach((key, value) {
-        if(value['receiver'] == user.uid){
+        if(value['receiver'] == user.uid || value['receiver'] == 'all'){
           eventList.add(new LogEvent(
             title: value['title'],
             triggerPerson: value['receiver'],
@@ -471,6 +474,8 @@ class _GroupPage extends State<GroupPage> {
                     //Rally
                     if (event.type == "rally") return rally(event);
                     if (event.type == "ping") return ping(event);
+                    if (event.type == "come") return come(event);
+                    if (event.type == "poll") return poll(event);
 
                     //Default return (if no communication design is available)
                     return locationLog(event);
@@ -759,6 +764,206 @@ class _GroupPage extends State<GroupPage> {
                   child: Row(
                     children: <Widget>[
                       okOption(event, Icons.my_location, "give"),
+                      SizedBox(
+                        width: 10,
+                      ),
+                      noOption(event, Icons.cancel, "nah"),
+                    ],
+                  ),
+                )
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget poll(LogEvent event) {
+    return Container(
+      margin: EdgeInsets.only(left: 20, right: 20),
+      height: 140,
+      decoration: BoxDecoration(
+          color: LogEvent.getColorScheme(event.type, true, 20),
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              blurRadius: 15,
+              offset: Offset(0, 7),
+              color: Colors.grey.withOpacity(0.6),
+            )
+          ]),
+      child: Padding(
+        padding:
+        const EdgeInsets.only(left: 25.0, right: 25.0, top: 15, bottom: 15),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: <Widget>[
+            LogEvent.getIcon(event.type, 40),
+            SizedBox(
+              width: 16,
+            ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Container(
+                  width: MediaQuery.of(context).size.width * 0.6,
+                  child: Text(
+                    event.title,
+                    maxLines: 1,
+                    softWrap: false,
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.left,
+                    style: GoogleFonts.poppins(
+                      fontSize: 23,
+                      color: LogEvent.getColorScheme(event.type, false, 45),
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+                Row(
+                  children: <Widget>[
+                    Container(
+                      constraints: BoxConstraints(
+                        maxWidth: MediaQuery.of(context).size.width * 0.32,
+                      ),
+                      child: Text(
+                        event.triggerPerson,
+                        textAlign: TextAlign.left,
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
+                        style: GoogleFonts.poppins(
+                          fontSize:
+                          13 + MediaQuery.of(context).size.width * 0.014,
+                          color: LogEvent.getColorScheme(event.type, false, 15),
+                          fontWeight: FontWeight.w600,
+                          height: 1,
+                        ),
+                      ),
+                    ),
+                    SizedBox(
+                      width: 10,
+                    ),
+                    Text(
+                      event.timeSinceSet(),
+                      textAlign: TextAlign.left,
+                      style: GoogleFonts.poppins(
+                        fontSize:
+                        13 + MediaQuery.of(context).size.width * 0.014,
+                        color: LogEvent.getColorScheme(event.type, false, 5),
+                        fontWeight: FontWeight.w600,
+                        height: 1,
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(
+                  height: 15,
+                ),
+                Container(
+                  child: Row(
+                    children: <Widget>[
+                      okOption(event, Icons.my_location, "okay"),
+                      SizedBox(
+                        width: 10,
+                      ),
+                      noOption(event, Icons.cancel, "nah"),
+                    ],
+                  ),
+                )
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget come(LogEvent event) {
+    return Container(
+      margin: EdgeInsets.only(left: 20, right: 20),
+      height: 140,
+      decoration: BoxDecoration(
+          color: LogEvent.getColorScheme(event.type, true, 20),
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              blurRadius: 15,
+              offset: Offset(0, 7),
+              color: Colors.grey.withOpacity(0.6),
+            )
+          ]),
+      child: Padding(
+        padding:
+        const EdgeInsets.only(left: 25.0, right: 25.0, top: 15, bottom: 15),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: <Widget>[
+            LogEvent.getIcon(event.type, 40),
+            SizedBox(
+              width: 16,
+            ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Container(
+                  width: MediaQuery.of(context).size.width * 0.6,
+                  child: Text(
+                    event.title,
+                    maxLines: 1,
+                    softWrap: false,
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.left,
+                    style: GoogleFonts.poppins(
+                      fontSize: 23,
+                      color: LogEvent.getColorScheme(event.type, false, 45),
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+                Row(
+                  children: <Widget>[
+                    Container(
+                      constraints: BoxConstraints(
+                        maxWidth: MediaQuery.of(context).size.width * 0.32,
+                      ),
+                      child: Text(
+                        event.triggerPerson,
+                        textAlign: TextAlign.left,
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
+                        style: GoogleFonts.poppins(
+                          fontSize:
+                          13 + MediaQuery.of(context).size.width * 0.014,
+                          color: LogEvent.getColorScheme(event.type, false, 15),
+                          fontWeight: FontWeight.w600,
+                          height: 1,
+                        ),
+                      ),
+                    ),
+                    SizedBox(
+                      width: 10,
+                    ),
+                    Text(
+                      event.timeSinceSet(),
+                      textAlign: TextAlign.left,
+                      style: GoogleFonts.poppins(
+                        fontSize:
+                        13 + MediaQuery.of(context).size.width * 0.014,
+                        color: LogEvent.getColorScheme(event.type, false, 5),
+                        fontWeight: FontWeight.w600,
+                        height: 1,
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(
+                  height: 15,
+                ),
+                Container(
+                  child: Row(
+                    children: <Widget>[
+                      okOption(event, Icons.my_location, "coming"),
                       SizedBox(
                         width: 10,
                       ),

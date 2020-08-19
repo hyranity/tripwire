@@ -1,48 +1,49 @@
+
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:tinycolor/tinycolor.dart';
-import 'package:tripwire/Model/MyTheme.dart';
-import 'package:tripwire/Model/world_time.dart';
+
 import 'Model/Member.dart';
+import 'Model/MyTheme.dart';
+import 'Model/world_time.dart';
 
-
-class PingPage extends StatefulWidget {
+class ComePage extends StatefulWidget {
   @override
-  _PingPage createState() => _PingPage();
+  _ComePage createState() => _ComePage();
 }
 
-class _PingPage extends State<PingPage> {
+class _ComePage extends State<ComePage> {
   final FirebaseAuth auth = FirebaseAuth.instance;
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
-      body:Center(
-        child:Padding(
-          padding: const EdgeInsets.only(top: 60),
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.only(top:60),
           child: Container(
             child: Column (
-              children: <Widget> [
-                Container(
+              children: <Widget>[
+                Container (
                     padding: EdgeInsets.only(left: 20, right: 20),
                     alignment: Alignment.centerLeft,
-                    child: MyTheme.backButton(context)),
+                    child: MyTheme.backButton(context),
+                ),
                 Container(
                   padding: EdgeInsets.only(left: 20, right: 20),
                 ),
                 MemberList(),
               ],
-            ) ,
+            ),
           ),
         ),
       ),
     );
   }
 
-  //The list view + member
   Widget MemberList() {
     return Container(
       alignment: Alignment.centerLeft,
@@ -78,28 +79,27 @@ class _PingPage extends State<PingPage> {
       Map<dynamic, dynamic> members = snapshot.value;
 
       //Get each member from DB and put into list
-        members.forEach((key, value) {
-          // For each member
-          if (value['name'] != user.displayName.trim())
-         memberList.add(new Member(name: value["name"], email: value["email"]));
-        });
+      members.forEach((key, value) {
+        // For each member
+        if (value['name'] != user.displayName.trim())
+          memberList.add(new Member(name: value["name"], email: value["email"]));
+      });
 
       // Return the data to the above return
       return memberList;
     });
   }
 
-  //member item
   Widget MemberItem(Member member) {
     return InkWell(
       onTap: () {
-        PingEvent(member.name);
+        ComeEvent(member.name);
       },
       child: Container(
         height:70,
         decoration: BoxDecoration(
-          color: Color(0xff6098F6),
-          borderRadius: BorderRadius.circular(20),
+            color: Color(0xff6098F6),
+            borderRadius: BorderRadius.circular(20),
             boxShadow: [
               BoxShadow(
                 blurRadius: 15,
@@ -148,7 +148,7 @@ class _PingPage extends State<PingPage> {
             ],
           ),
         ),
-        ),
+      ),
     );
   }
 
@@ -158,59 +158,55 @@ class _PingPage extends State<PingPage> {
       child: Container(
         height: MediaQuery.of(context).size.height * 0.37,
         child: FutureBuilder<List<Member>>(
-          future: getMemberArray(),
+            future: getMemberArray(),
 
-          builder: (BuildContext context, AsyncSnapshot snapshot){
+            builder: (BuildContext context, AsyncSnapshot snapshot){
 
-            // While data is loading
-            if (snapshot.connectionState != ConnectionState.done) {
-              return new Container(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget> [
-                    CircularProgressIndicator(),
-                  ],
+              // While data is loading
+              if (snapshot.connectionState != ConnectionState.done) {
+                return new Container(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget> [
+                      CircularProgressIndicator(),
+                    ],
+                  ),
+                );
+              }
+
+              // If no members
+              if(!snapshot.hasData){
+                return new Container(
+                  child: Text(
+                      "No members found."
+                  ),
+                );
+              }
+
+              // If members are found and retrieved successfully
+              return MediaQuery.removePadding(
+                context: context,
+                removeTop: true,
+                child: ListView.separated(
+                    scrollDirection: Axis.vertical,
+                    shrinkWrap: true,
+                    itemCount: snapshot.data.length,
+                    separatorBuilder: (BuildContext context, int index){
+                      return SizedBox(
+                        height: 15,
+                      );
+                    },
+                    itemBuilder: (BuildContext context, int index){
+                      return MemberItem(snapshot.data[index]);
+                    }
                 ),
               );
-            }
-
-            // If no members
-            if(!snapshot.hasData){
-              return new Container(
-                child: Text(
-                  "No members found."
-                ),
-              );
-            }
-
-            // If members are found and retrieved successfully
-            return MediaQuery.removePadding(
-              context: context,
-              removeTop: true,
-              child: ListView.separated(
-                scrollDirection: Axis.vertical,
-                shrinkWrap: true,
-                itemCount: snapshot.data.length,
-                separatorBuilder: (BuildContext context, int index){
-                  return SizedBox(
-                    height: 15,
-                  );
-                },
-                itemBuilder: (BuildContext context, int index){
-                  return MemberItem(snapshot.data[index]);
-                }
-              ),
-            );
-          }),
+            }),
       ),
     );
   }
 
-  Widget RequestingWidget() {
-
-  }
-
-  Future<FirebaseUser> PingEvent(String name) async {
+  Future<FirebaseUser> ComeEvent(String name) async {
     var memberDb = FirebaseDatabase.instance.reference().child("member");
     var eventDb = FirebaseDatabase.instance.reference().child("events");
     final FirebaseUser user = await auth.currentUser();
@@ -237,11 +233,9 @@ class _PingPage extends State<PingPage> {
       }
     });
 
-    print('Spam : $spamDiscovered');
-
     //if spam within 5 minutes
     if (spamDiscovered == true) {
-      MyTheme.alertMsg(context, 'Failed to Ping', 'Ping again in 5 minutes. ');
+      MyTheme.alertMsg(context, 'Failed to Summon', 'Summon again in 5 minutes. ');
     }
     else if (spamDiscovered == false) {
       memberDb.once().then((DataSnapshot snapshot) {
@@ -250,10 +244,10 @@ class _PingPage extends State<PingPage> {
         members.forEach((key, value) {
           if (value['name'] == name) {
             eventDb.push().set({
-              'title': 'Ping to ' + name,
+              'title': 'Summoning  ' + name,
               'sender': user.uid,
               'receiver': key,
-              'type': 'ping',
+              'type': 'come',
               'sentTime': instance.worldtime.toString(),
             });
           }
@@ -261,5 +255,6 @@ class _PingPage extends State<PingPage> {
       });
     }
   }
+
 }
 

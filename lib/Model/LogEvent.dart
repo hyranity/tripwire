@@ -30,7 +30,7 @@ class LogEvent{
       case "ping":
         icon = Icons.my_location;
         break;
-      case "summon":
+      case "come":
         icon = Icons.pan_tool ;
         break;
       case "poll":
@@ -59,7 +59,7 @@ class LogEvent{
       case "ping":
         iconColor = "6098F6";
         break;
-      case "summon":
+      case "come":
         iconColor = "9874ed";
         break;
       case "poll":

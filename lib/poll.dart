@@ -160,6 +160,7 @@ class _PollPage extends State<PollPage> {
     await eventDb.push().set({
       'title' : 'Poll Question',
       'sender' : user.uid,
+      'receiver' : 'all',
       'type' : 'poll',
       'sentTime' : wt.worldtime.toString(),
       'question' : question,
