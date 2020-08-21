@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/cupertino.dart';
@@ -6,6 +8,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:tripwire/Model/classes.dart';
 import 'package:tripwire/Util/Global.dart';
+import 'package:tripwire/join.dart';
 import 'package:tripwire/stepTracker.dart';
 import 'package:weather/weather_library.dart';
 
@@ -451,14 +454,37 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Future<List<Group>> fetchGroupData() async {
-    List<Group> groupList = new List();
-    groupList.add(new Group(
-        name: "RSD3 dumbass trip LOOL", isActive: true, memberCount: 13));
-    groupList.add(new Group(name: "test", isActive: false, memberCount: 3));
-    groupList.add(new Group(name: "test", isActive: false, memberCount: 3));
-    groupList.add(new Group(name: "test", isActive: false, memberCount: 3));
-    groupList.add(new Group(name: "test", isActive: false, memberCount: 3));
-    return groupList;
+
+//    groupList.add(new Group(
+//        name: "RSD3 dumbass trip LOOL", isActive: true, memberCount: 13));
+//    groupList.add(new Group(name: "test", isActive: false, memberCount: 3));
+//    groupList.add(new Group(name: "test", isActive: false, memberCount: 3));
+//    groupList.add(new Group(name: "test", isActive: false, memberCount: 3));
+//    groupList.add(new Group(name: "test", isActive: false, memberCount: 3));
+
+    var groupDb = FirebaseDatabase.instance.reference().child("groups");
+    final FirebaseUser user = await auth.currentUser();
+
+    return groupDb.once().then((DataSnapshot snapshot) {
+      List<Group> groupList = new List();
+
+      Map<dynamic, dynamic> groups = snapshot.value;
+
+      groups.forEach((key, value) {
+        String jsonData = value['members'];
+        var parse = jsonDecode(jsonData);
+        print(parse);
+
+     //   if () {
+//          groupList.add(new Group(
+//            name : value['name'],
+//            isActive: false,
+//            memberCount:
+//          ));
+      //  }
+      });
+      return groupList;
+    });
   }
 
   Widget groupListWidget() {
@@ -577,25 +603,30 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Widget joinGroup() {
-    return Container(
-      height: 60,
-      width: 60,
-      decoration: BoxDecoration(
-          color: Color(0xffD5F5D1),
-          borderRadius: BorderRadius.circular(10),
-          boxShadow: [
-            BoxShadow(
-              blurRadius: 25,
-              color: Colors.grey.withOpacity(0.3),
-            )
-          ]),
-      child: Text(
-        "+",
-        textAlign: TextAlign.center,
-        style: GoogleFonts.poppins(
-          fontSize: 40,
-          fontWeight: FontWeight.w700,
-          color: Color(0xff669260),
+    return InkWell(
+      onTap: () {
+        Quick.navigate(context, () => JoinPage());
+      },
+      child: Container(
+        height: 60,
+        width: 60,
+        decoration: BoxDecoration(
+            color: Color(0xffD5F5D1),
+            borderRadius: BorderRadius.circular(10),
+            boxShadow: [
+              BoxShadow(
+                blurRadius: 25,
+                color: Colors.grey.withOpacity(0.3),
+              )
+            ]),
+        child: Text(
+          "+",
+          textAlign: TextAlign.center,
+          style: GoogleFonts.poppins(
+            fontSize: 40,
+            fontWeight: FontWeight.w700,
+            color: Color(0xff669260),
+          ),
         ),
       ),
     );

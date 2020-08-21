@@ -225,7 +225,7 @@ class _PingPage extends State<PingPage> {
       Map<dynamic, dynamic> events  = snapshot.value;
       if(events != null) {
         events.forEach((eventKey, eventValue) async {
-          if (await instance.calcTimeDiff(instance.worldtime.toString(), eventValue['sentTime']) && eventValue['sender'] == user.uid) {
+          if (await instance.calcTimeDiff(instance.worldtime.toString(), eventValue['sentTime']) && eventValue['sender'] == user.uid || eventValue['senderName'] != name) {
             //if not spamming within 5 minutes, create a ping event
             print("Not Spamming");
           }
@@ -252,6 +252,7 @@ class _PingPage extends State<PingPage> {
             eventDb.push().set({
               'title': 'Ping to ' + name,
               'sender': user.uid,
+              'senderName' : name,
               'receiver': key,
               'type': 'ping',
               'sentTime': instance.worldtime.toString(),
