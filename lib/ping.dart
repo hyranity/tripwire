@@ -9,16 +9,23 @@ import 'Model/Member.dart';
 
 
 class PingPage extends StatefulWidget {
+  PingPage({Key key, @required this.id}) : super(key: key);
+
+  final String id;
+
   @override
   _PingPage createState() => _PingPage();
+
 }
 
 class _PingPage extends State<PingPage> {
   final FirebaseAuth auth = FirebaseAuth.instance;
+  final List<String> list = new List();
 
   @override
   Widget build(BuildContext context) {
-
+    //load member in group into an array
+    loadMemberList();
     return Scaffold(
       body:Center(
         child:Padding(
@@ -40,6 +47,18 @@ class _PingPage extends State<PingPage> {
         ),
       ),
     );
+  }
+
+  void loadMemberList() {
+    setState(() {
+      var groupDb = FirebaseDatabase.instance.reference().child("groups").child(widget.id).child("members");
+      groupDb.once().then((DataSnapshot snapshot) {
+        Map<dynamic, dynamic> groups = snapshot.value;
+        groups.forEach((key, value) {
+          list.add(key);
+        });
+      });
+    });
   }
 
   //The list view + member
@@ -66,27 +85,27 @@ class _PingPage extends State<PingPage> {
   Future<List<Member>> getMemberArray() async {
 
     var db =  FirebaseDatabase.instance.reference().child("member");
+    var groupDb = FirebaseDatabase.instance.reference().child("groups").child(widget.id).child("members");
     final FirebaseUser user = await auth.currentUser();
 
-    // Return the data obtained from db
-    return db.once().then((DataSnapshot snapshot){
 
-      //List to hold member data
+    return db.once().then((DataSnapshot snapshot){
       List<Member> memberList = new List();
 
-      // HashMap to store DB data
       Map<dynamic, dynamic> members = snapshot.value;
 
-      //Get each member from DB and put into list
         members.forEach((key, value) {
-          // For each member
-          if (value['name'] != user.displayName.trim())
-         memberList.add(new Member(name: value["name"], email: value["email"]));
+          for (int i=0 ; i<list.length ; i++) {
+            if(list[i] == key) {
+              if (value['name'] != user.displayName.trim())
+                memberList.add( new Member(name: value["name"], email: value["email"]));
+            }
+          }
         });
 
-      // Return the data to the above return
       return memberList;
     });
+
   }
 
   //member item
@@ -225,7 +244,7 @@ class _PingPage extends State<PingPage> {
       Map<dynamic, dynamic> events  = snapshot.value;
       if(events != null) {
         events.forEach((eventKey, eventValue) async {
-          if (await instance.calcTimeDiff(instance.worldtime.toString(), eventValue['sentTime']) && eventValue['sender'] == user.uid || eventValue['senderName'] != name) {
+          if (await instance.calcTimeDiff(instance.worldtime.toString(), eventValue['sentTime']) && eventValue['sender'] == user.uid || eventValue['type'] != "ping" || eventValue['senderName'] != name) {
             //if not spamming within 5 minutes, create a ping event
             print("Not Spamming");
           }
@@ -254,12 +273,14 @@ class _PingPage extends State<PingPage> {
               'sender': user.uid,
               'senderName' : name,
               'receiver': key,
+              'groupId' : widget.id,
               'type': 'ping',
               'sentTime': instance.worldtime.toString(),
             });
           }
         });
       });
+      MyTheme.alertMsg(context, "Ping Success ", "Your ping request has been sent successfully");
     }
   }
 }

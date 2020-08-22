@@ -20,45 +20,23 @@ class _RallyPage extends State<RallyPage> {
 
   }
 
-  Future<FirebaseUser> ComeEvent(String time) async {
+  Future<FirebaseUser> RallyEvent() async {
     var eventDb = FirebaseDatabase.instance.reference().child("events");
     final FirebaseUser user = await auth.currentUser();
-    bool spamDiscovered = false;
 
     //get time
     WorldTime wt = WorldTime(url: 'Asia/Kuala_Lumpur');
     await wt.getTime();
 
-    //Check if sender rally after 5 minutes
-    await eventDb.once().then((DataSnapshot snapshot) async{
-      Map<dynamic, dynamic> events  = snapshot.value;
-      if(events != null) {
-        events.forEach((eventKey, eventValue) async {
-          if (await wt.calcTimeDiff(wt.worldtime.toString(), eventValue['sentTime']) && eventValue['sender'] == user.uid) {
-            //if not spamming within 5 minutes, create a ping event
-            print("Not Spamming");
-          }
-          else {
-            print("Spam");
-            spamDiscovered = true;
-          }
-        });
-      }
+    await eventDb.push().set({
+      'title' : 'Rally Everyone',
+      'sender' : user.uid,
+      'receiver' : 'all',
+      'type' : 'rally',
+      'sentTime' : wt.worldtime.toString(),
     });
 
-    if (spamDiscovered == true) {
-      MyTheme.alertMsg(context, 'Failed to Rally', 'Rally everyone again in 5 minutes. ');
-    }
-    else if(spamDiscovered == false) {
-      eventDb.push().set({
-        'title' : 'Rally Everyone',
-        'sender' : user.uid,
-        'receiver' : 'all',
-        'type' : 'rally',
-        'sentTime' : wt.worldtime.toString(),
-      });
-    }
-
+    MyTheme.alertMsg(context, "Rally ", "You have noticed all your group member to rally");
   }
 }
 

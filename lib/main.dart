@@ -467,21 +467,19 @@ class _MyHomePageState extends State<MyHomePage> {
 
     return groupDb.once().then((DataSnapshot snapshot) {
       List<Group> groupList = new List();
-
       Map<dynamic, dynamic> groups = snapshot.value;
 
-      groups.forEach((key, value) {
-        String jsonData = value['members'];
-        var parse = jsonDecode(jsonData);
-        print(parse);
+      groups.forEach((key, value) async {
+        var member = value['members'];
 
-     //   if () {
-//          groupList.add(new Group(
-//            name : value['name'],
-//            isActive: false,
-//            memberCount:
-//          ));
-      //  }
+        if(member.toString().contains(user.uid)){
+          groupList.add(new Group(
+            name : value['name'],
+            id : value['id'],
+            isActive: false,
+            memberCount: 0,
+          ));
+        }
       });
       return groupList;
     });

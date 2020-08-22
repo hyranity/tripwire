@@ -11,15 +11,20 @@ import 'Model/MyTheme.dart';
 import 'Model/world_time.dart';
 
 class ComePage extends StatefulWidget {
+  ComePage({Key key, @required this.id}) : super(key: key);
+  final String id;
+
   @override
   _ComePage createState() => _ComePage();
 }
 
 class _ComePage extends State<ComePage> {
   final FirebaseAuth auth = FirebaseAuth.instance;
+  final List<String> list = new List();
 
   @override
   Widget build(BuildContext context) {
+    loadMemberList();
     return Scaffold(
       body: Center(
         child: Padding(
@@ -42,6 +47,18 @@ class _ComePage extends State<ComePage> {
         ),
       ),
     );
+  }
+
+  void loadMemberList() {
+    setState(() {
+      var groupDb = FirebaseDatabase.instance.reference().child("groups").child(widget.id).child("members");
+      groupDb.once().then((DataSnapshot snapshot) {
+        Map<dynamic, dynamic> groups = snapshot.value;
+        groups.forEach((key, value) {
+          list.add(key);
+        });
+      });
+    });
   }
 
   Widget MemberList() {
@@ -80,9 +97,14 @@ class _ComePage extends State<ComePage> {
 
       //Get each member from DB and put into list
       members.forEach((key, value) {
-        // For each member
-        if (value['name'] != user.displayName.trim())
-          memberList.add(new Member(name: value["name"], email: value["email"]));
+        for (int i=0 ; i<list.length ; i++) {
+          if(list[i] == key) {
+            // For each member
+            if (value['name'] != user.displayName.trim())
+              memberList.add(
+                  new Member(name: value["name"], email: value["email"]));
+          }
+        }
       });
 
       // Return the data to the above return
@@ -221,7 +243,7 @@ class _ComePage extends State<ComePage> {
       Map<dynamic, dynamic> events  = snapshot.value;
       if(events != null) {
         events.forEach((eventKey, eventValue) async {
-          if (await instance.calcTimeDiff(instance.worldtime.toString(), eventValue['sentTime']) && eventValue['sender'] == user.uid) {
+          if (await instance.calcTimeDiff(instance.worldtime.toString(), eventValue['sentTime']) && eventValue['sender'] == user.uid || eventValue['type'] != "come" || eventValue['senderName'] != name ) {
             //if not spamming within 5 minutes, create a ping event
             print("Not Spamming");
           }
@@ -232,6 +254,8 @@ class _ComePage extends State<ComePage> {
         });
       }
     });
+
+    print('Spam : $spamDiscovered');
 
     //if spam within 5 minutes
     if (spamDiscovered == true) {
@@ -246,6 +270,7 @@ class _ComePage extends State<ComePage> {
             eventDb.push().set({
               'title': 'Summoning  ' + name,
               'sender': user.uid,
+              'senderName' : name,
               'receiver': key,
               'type': 'come',
               'sentTime': instance.worldtime.toString(),
@@ -253,6 +278,7 @@ class _ComePage extends State<ComePage> {
           }
         });
       });
+      MyTheme.alertMsg(context, "Summoning", "Your request has been sent");
     }
   }
 
