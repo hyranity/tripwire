@@ -14,12 +14,14 @@ import 'Model/Group.dart';
 import 'Model/LogEvent.dart';
 import 'Model/MyTheme.dart';
 import 'Model/action.dart';
+import 'come.dart';
 import 'poll.dart';
 
 class GroupPage extends StatefulWidget {
-  GroupPage({Key key, this.title, @required this.group}) : super(key: key);
+  GroupPage({Key key, this.title, this.id, @required this.group}) : super(key: key);
 
   final String title;
+  final String id;
   Group group;
 
   @override
@@ -41,6 +43,7 @@ class _GroupPage extends State<GroupPage> {
       print("Getting group data.... try #" + retryConnect.toString());
       loadGroupData();
     }
+
 
     //Build main UI
     return Scaffold(
@@ -319,7 +322,9 @@ class _GroupPage extends State<GroupPage> {
           else if (button.type == "poll")
             Quick.navigate(context, () => PollPage());
           else if (button.type == "ping")
-            Quick.navigate(context, () => PingPage());
+            Quick.navigate(context, () => PingPage(id : group.id));
+          else if (button.type == "summon")
+            Quick.navigate(context, () => ComePage(id : group.id));
         },
         child: Container(
           width: 200,
@@ -382,6 +387,21 @@ class _GroupPage extends State<GroupPage> {
   void loadGroupData() {
     setState(() {
       group = widget.group;
+      updateGroupData();
+    });
+  }
+
+  void updateGroupData() async{
+    var groupDb = FirebaseDatabase.instance.reference().child("groups").child(group.id).child("members");
+    int countUser = 0;
+
+    await groupDb.once().then((DataSnapshot snapshot) {
+      Map<dynamic, dynamic> groups = snapshot.value;
+
+      groups.forEach((key, value) async {
+        countUser += 1;
+      });
+      group.memberCount = countUser;
     });
   }
 
@@ -419,7 +439,7 @@ class _GroupPage extends State<GroupPage> {
       Map<dynamic, dynamic> events = snapshot.value;
 
       events.forEach((key, value) {
-        if(value['receiver'] == user.uid || value['receiver'] == 'all'){
+        if((value['receiver'] == user.uid || value['receiver'] == 'all' ) && value['groupId'] == group.id){
           eventList.add(new LogEvent(
             title: value['title'],
             triggerPerson: value['receiver'],
