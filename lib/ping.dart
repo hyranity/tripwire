@@ -275,6 +275,8 @@ class _PingPage extends State<PingPage> {
               'receiver': key,
               'groupId' : widget.id,
               'type': 'ping',
+              'pingLocation' : 'no',
+              'location' : 'pinging',
               'sentTime': instance.worldtime.toString(),
             });
           }
