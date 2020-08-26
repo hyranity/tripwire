@@ -1,6 +1,7 @@
 import 'package:animate_do/animate_do.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:tinycolor/tinycolor.dart';
 import 'package:tripwire/Util/Quick.dart';
@@ -25,6 +26,7 @@ class GroupPage extends StatefulWidget {
 class _GroupPage extends State<GroupPage> {
   int retryConnect = 0;
   Group group;
+  Future<Placemark> location = Quick.getLocation();
 
   @override
   Widget build(BuildContext context) {
@@ -159,17 +161,39 @@ class _GroupPage extends State<GroupPage> {
                             fontWeight: FontWeight.w600,
                           ),
                         ),
-                        Text(
-                          "Sabah, Malaysia adasdasd asd sa",
-                          maxLines: 1,
-                          softWrap: false,
-                          overflow: TextOverflow.ellipsis,
-                          textAlign: TextAlign.center,
-                          style: GoogleFonts.poppins(
-                            fontSize: 23,
-                            color: MyTheme.accentColor,
-                            fontWeight: FontWeight.w500,
-                          ),
+                        FutureBuilder<Placemark>(
+                          future: location,
+                          builder: (BuildContext context,
+                              AsyncSnapshot<Placemark> snapshot) {
+                            if (snapshot.connectionState !=
+                                ConnectionState.done) {
+                              return Text(
+                                "Locating...",
+                                maxLines: 1,
+                                softWrap: false,
+                                overflow: TextOverflow.ellipsis,
+                                textAlign: TextAlign.center,
+                                style: GoogleFonts.poppins(
+                                  fontSize: 23,
+                                  color: MyTheme.accentColor,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              );
+                            }
+
+                            return Text(
+                              snapshot.data.subLocality + ", " + snapshot.data.locality,
+                              maxLines: 1,
+                              softWrap: false,
+                              overflow: TextOverflow.ellipsis,
+                              textAlign: TextAlign.center,
+                              style: GoogleFonts.poppins(
+                                fontSize: 23,
+                                color: MyTheme.accentColor,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            );
+                          },
                         ),
                       ],
                     ),
@@ -185,23 +209,27 @@ class _GroupPage extends State<GroupPage> {
     List<ActionButton> buttons = new List();
 
     buttons.add(new ActionButton(
-        name: "Rally",
-        description: "Ask everyone to gather at your location.",
-        type: "rally",
-        dialogTitle: "Rally?",
-        dialogDesc: "Rally everyone?",));
+      name: "Rally",
+      description: "Ask everyone to gather at your location.",
+      type: "rally",
+      dialogTitle: "Rally?",
+      dialogDesc: "Rally everyone?",
+    ));
     buttons.add(new ActionButton(
-        name: "Poll",
-        description: "Ask everyone a 'yes' and 'no' question.",
-        type: "poll",));
+      name: "Poll",
+      description: "Ask everyone a 'yes' and 'no' question.",
+      type: "poll",
+    ));
     buttons.add(new ActionButton(
-        name: "Come",
-        description: "Call a single friend over to your location.",
-        type: "summon",));
+      name: "Come",
+      description: "Call a single friend over to your location.",
+      type: "summon",
+    ));
     buttons.add(new ActionButton(
-        name: "Ping",
-        description: "Request your friend's location",
-        type: "ping",));
+      name: "Ping",
+      description: "Request your friend's location",
+      type: "ping",
+    ));
     return buttons;
   }
 
@@ -236,20 +264,19 @@ class _GroupPage extends State<GroupPage> {
   }
 
   //Dialog Box Widget
-  Widget confirmationDialog(context, String title, String desc){
+  Widget confirmationDialog(context, String title, String desc) {
     showDialog(
-      context:context,
-      builder: (BuildContext context){
+      context: context,
+      builder: (BuildContext context) {
         return Dialog(
-          shape:RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(15)
-          ),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
           child: Container(
             height: 300,
             child: Column(
-              children: <Widget> [
+              children: <Widget>[
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(25.0 ,15.0 ,0.0 ,15.0),
+                  padding: const EdgeInsets.fromLTRB(25.0, 15.0, 0.0, 15.0),
                   child: Container(
                     width: MediaQuery.of(context).size.width * 0.6,
                     child: Text(
@@ -264,7 +291,7 @@ class _GroupPage extends State<GroupPage> {
                   ),
                 ),
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(25.0 ,15.0 ,0.0 ,60.0),
+                  padding: const EdgeInsets.fromLTRB(25.0, 15.0, 0.0, 60.0),
                   child: Container(
                     width: MediaQuery.of(context).size.width * 0.6,
                     child: Text(
@@ -283,11 +310,11 @@ class _GroupPage extends State<GroupPage> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
-                      confirmOption( Icons.check, "do it"),
+                      confirmOption(Icons.check, "do it"),
                       SizedBox(
                         width: 10,
                       ),
-                      cancelOption( Icons.cancel, "nah"),
+                      cancelOption(Icons.cancel, "nah"),
                     ],
                   ),
                 )
@@ -326,8 +353,8 @@ class _GroupPage extends State<GroupPage> {
             ],
           ),
           child: Padding(
-            padding:
-                const EdgeInsets.only(left: 15.0, right: 15, top: 10, bottom: 10),
+            padding: const EdgeInsets.only(
+                left: 15.0, right: 15, top: 10, bottom: 10),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
