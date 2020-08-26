@@ -16,6 +16,7 @@ import 'Model/MyTheme.dart';
 import 'Model/action.dart';
 import 'come.dart';
 import 'poll.dart';
+import 'rally.dart';
 
 class GroupPage extends StatefulWidget {
   GroupPage({Key key, this.title, this.id, @required this.group}) : super(key: key);
@@ -294,7 +295,9 @@ class _GroupPage extends State<GroupPage> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
                       InkWell(
-                          onTap: () {},
+                          onTap: () {
+                            RallyEvent();
+                          },
                           child: confirmOption( Icons.check, "do it")),
                       SizedBox(
                         width: 10,
@@ -496,6 +499,7 @@ class _GroupPage extends State<GroupPage> {
                     if (event.type == "ping") return ping(event);
                     if (event.type == "come") return come(event);
                     if (event.type == "poll") return poll(event);
+                    if (event.type == "ping" && event.pingLocation == "pinging") return pingBack(event);
 
                     //Default return (if no communication design is available)
                     return locationLog(event);
@@ -788,6 +792,125 @@ class _GroupPage extends State<GroupPage> {
                         width: 10,
                       ),
                       noOption(event, Icons.cancel, "nah"),
+                    ],
+                  ),
+                )
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget pingBack(LogEvent event) {
+    return Container(
+      margin: EdgeInsets.only(left: 20, right: 20),
+      height: 140,
+      decoration: BoxDecoration(
+          color: LogEvent.getColorScheme(event.type, true, 20),
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              blurRadius: 15,
+              offset: Offset(0, 7),
+              color: Colors.grey.withOpacity(0.6),
+            )
+          ]),
+      child: Padding(
+        padding:
+        const EdgeInsets.only(left: 25.0, right: 25.0, top: 15, bottom: 15),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: <Widget>[
+            LogEvent.getIcon(event.type, 40),
+            SizedBox(
+              width: 16,
+            ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Container(
+                  width: MediaQuery.of(context).size.width * 0.6,
+                  child: Text(
+                    event.title,
+                    maxLines: 1,
+                    softWrap: false,
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.left,
+                    style: GoogleFonts.poppins(
+                      fontSize: 23,
+                      color: LogEvent.getColorScheme(event.type, false, 45),
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+                Row(
+                  children: <Widget>[
+                    Container(
+                      constraints: BoxConstraints(
+                        maxWidth: MediaQuery.of(context).size.width * 0.32,
+                      ),
+                      child: Text(
+                        event.triggerPerson,
+                        textAlign: TextAlign.left,
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
+                        style: GoogleFonts.poppins(
+                          fontSize:
+                          13 + MediaQuery.of(context).size.width * 0.014,
+                          color: LogEvent.getColorScheme(event.type, false, 15),
+                          fontWeight: FontWeight.w600,
+                          height: 1,
+                        ),
+                      ),
+                    ),
+                    SizedBox(
+                      width: 10,
+                    ),
+                    Text(
+                      event.timeSinceSet(),
+                      textAlign: TextAlign.left,
+                      style: GoogleFonts.poppins(
+                        fontSize:
+                        13 + MediaQuery.of(context).size.width * 0.014,
+                        color: LogEvent.getColorScheme(event.type, false, 5),
+                        fontWeight: FontWeight.w600,
+                        height: 1,
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(
+                  height: 15,
+                ),
+                Container(
+                  child: Row(
+                    children: <Widget>[
+                      Text (
+                        "Location : ",
+                        maxLines: 1,
+                        softWrap: false,
+                        overflow: TextOverflow.ellipsis,
+                        textAlign: TextAlign.left,
+                        style: GoogleFonts.poppins(
+                          fontSize: 23,
+                          color: LogEvent.getColorScheme(event.type, false, 45),
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      Text (
+                        event.location,
+                        maxLines: 1,
+                        softWrap: false,
+                        overflow: TextOverflow.ellipsis,
+                        textAlign: TextAlign.left,
+                        style: GoogleFonts.poppins(
+                          fontSize: 23,
+                          color: LogEvent.getColorScheme(event.type, false, 45),
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
                     ],
                   ),
                 )
@@ -1242,4 +1365,29 @@ class _GroupPage extends State<GroupPage> {
       ),
     );
   }
+
+  Future<FirebaseUser> RallyEvent() async {
+    var eventDb = FirebaseDatabase.instance.reference().child("events");
+    final FirebaseUser user = await auth.currentUser();
+
+    //get time
+    WorldTime wt = WorldTime(url: 'Asia/Kuala_Lumpur');
+    await wt.getTime();
+
+    await eventDb.push().set({
+      'title' : 'Rally Everyone',
+      'sender' : user.uid,
+      'receiver' : 'all',
+      'type' : 'rally',
+      'sentTime' : wt.worldtime.toString(),
+    });
+
+    MyTheme.alertMsg(context, "Rally ", "You have noticed all your group member to rally");
+  }
+
+  void RemoveEvent() {
+
+  }
 }
+
+
