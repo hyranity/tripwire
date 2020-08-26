@@ -1,9 +1,12 @@
 import 'package:animate_do/animate_do.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
 import 'package:tinycolor/tinycolor.dart';
+import 'package:tripwire/Model/world_time.dart';
 import 'package:tripwire/Util/Quick.dart';
 import 'package:tripwire/ping.dart';
 
@@ -11,12 +14,14 @@ import 'Model/Group.dart';
 import 'Model/LogEvent.dart';
 import 'Model/MyTheme.dart';
 import 'Model/action.dart';
+import 'come.dart';
 import 'poll.dart';
 
 class GroupPage extends StatefulWidget {
-  GroupPage({Key key, this.title, @required this.group}) : super(key: key);
+  GroupPage({Key key, this.title, this.id, @required this.group}) : super(key: key);
 
   final String title;
+  final String id;
   Group group;
 
   @override
@@ -26,7 +31,9 @@ class GroupPage extends StatefulWidget {
 class _GroupPage extends State<GroupPage> {
   int retryConnect = 0;
   Group group;
-  Future<Placemark> location = Quick.getLocation();
+
+  final FirebaseAuth auth = FirebaseAuth.instance;
+  final replyController = new TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -36,6 +43,7 @@ class _GroupPage extends State<GroupPage> {
       print("Getting group data.... try #" + retryConnect.toString());
       loadGroupData();
     }
+
 
     //Build main UI
     return Scaffold(
@@ -161,39 +169,17 @@ class _GroupPage extends State<GroupPage> {
                             fontWeight: FontWeight.w600,
                           ),
                         ),
-                        FutureBuilder<Placemark>(
-                          future: location,
-                          builder: (BuildContext context,
-                              AsyncSnapshot<Placemark> snapshot) {
-                            if (snapshot.connectionState !=
-                                ConnectionState.done) {
-                              return Text(
-                                "Locating...",
-                                maxLines: 1,
-                                softWrap: false,
-                                overflow: TextOverflow.ellipsis,
-                                textAlign: TextAlign.center,
-                                style: GoogleFonts.poppins(
-                                  fontSize: 23,
-                                  color: MyTheme.accentColor,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              );
-                            }
-
-                            return Text(
-                              snapshot.data.subLocality + ", " + snapshot.data.locality,
-                              maxLines: 1,
-                              softWrap: false,
-                              overflow: TextOverflow.ellipsis,
-                              textAlign: TextAlign.center,
-                              style: GoogleFonts.poppins(
-                                fontSize: 23,
-                                color: MyTheme.accentColor,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            );
-                          },
+                        Text(
+                          "Sabah, Malaysia adasdasd asd sa",
+                          maxLines: 1,
+                          softWrap: false,
+                          overflow: TextOverflow.ellipsis,
+                          textAlign: TextAlign.center,
+                          style: GoogleFonts.poppins(
+                            fontSize: 23,
+                            color: MyTheme.accentColor,
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
                       ],
                     ),
@@ -209,27 +195,23 @@ class _GroupPage extends State<GroupPage> {
     List<ActionButton> buttons = new List();
 
     buttons.add(new ActionButton(
-      name: "Rally",
-      description: "Ask everyone to gather at your location.",
-      type: "rally",
-      dialogTitle: "Rally?",
-      dialogDesc: "Rally everyone?",
-    ));
+        name: "Rally",
+        description: "Ask everyone to gather at your location.",
+        type: "rally",
+        dialogTitle: "Rally?",
+        dialogDesc: "Rally everyone?",));
     buttons.add(new ActionButton(
-      name: "Poll",
-      description: "Ask everyone a 'yes' and 'no' question.",
-      type: "poll",
-    ));
+        name: "Poll",
+        description: "Ask everyone a 'yes' and 'no' question.",
+        type: "poll",));
     buttons.add(new ActionButton(
-      name: "Come",
-      description: "Call a single friend over to your location.",
-      type: "summon",
-    ));
+        name: "Come",
+        description: "Call a single friend over to your location.",
+        type: "summon",));
     buttons.add(new ActionButton(
-      name: "Ping",
-      description: "Request your friend's location",
-      type: "ping",
-    ));
+        name: "Ping",
+        description: "Request your friend's location",
+        type: "ping",));
     return buttons;
   }
 
@@ -264,19 +246,20 @@ class _GroupPage extends State<GroupPage> {
   }
 
   //Dialog Box Widget
-  Widget confirmationDialog(context, String title, String desc) {
+  Widget confirmationDialog(context, String title, String desc){
     showDialog(
-      context: context,
-      builder: (BuildContext context) {
+      context:context,
+      builder: (BuildContext context){
         return Dialog(
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+          shape:RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(15)
+          ),
           child: Container(
             height: 300,
             child: Column(
-              children: <Widget>[
+              children: <Widget> [
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(25.0, 15.0, 0.0, 15.0),
+                  padding: const EdgeInsets.fromLTRB(25.0 ,15.0 ,0.0 ,15.0),
                   child: Container(
                     width: MediaQuery.of(context).size.width * 0.6,
                     child: Text(
@@ -291,7 +274,7 @@ class _GroupPage extends State<GroupPage> {
                   ),
                 ),
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(25.0, 15.0, 0.0, 60.0),
+                  padding: const EdgeInsets.fromLTRB(25.0 ,15.0 ,0.0 ,60.0),
                   child: Container(
                     width: MediaQuery.of(context).size.width * 0.6,
                     child: Text(
@@ -310,11 +293,13 @@ class _GroupPage extends State<GroupPage> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
-                      confirmOption(Icons.check, "do it"),
+                      InkWell(
+                          onTap: () {},
+                          child: confirmOption( Icons.check, "do it")),
                       SizedBox(
                         width: 10,
                       ),
-                      cancelOption(Icons.cancel, "nah"),
+                      cancelOption( Icons.cancel, "nah"),
                     ],
                   ),
                 )
@@ -337,7 +322,9 @@ class _GroupPage extends State<GroupPage> {
           else if (button.type == "poll")
             Quick.navigate(context, () => PollPage());
           else if (button.type == "ping")
-            Quick.navigate(context, () => PingPage());
+            Quick.navigate(context, () => PingPage(id : group.id));
+          else if (button.type == "summon")
+            Quick.navigate(context, () => ComePage(id : group.id));
         },
         child: Container(
           width: 200,
@@ -353,8 +340,8 @@ class _GroupPage extends State<GroupPage> {
             ],
           ),
           child: Padding(
-            padding: const EdgeInsets.only(
-                left: 15.0, right: 15, top: 10, bottom: 10),
+            padding:
+                const EdgeInsets.only(left: 15.0, right: 15, top: 10, bottom: 10),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -400,34 +387,73 @@ class _GroupPage extends State<GroupPage> {
   void loadGroupData() {
     setState(() {
       group = widget.group;
+      updateGroupData();
+    });
+  }
+
+  void updateGroupData() async{
+    var groupDb = FirebaseDatabase.instance.reference().child("groups").child(group.id).child("members");
+    int countUser = 0;
+
+    await groupDb.once().then((DataSnapshot snapshot) {
+      Map<dynamic, dynamic> groups = snapshot.value;
+
+      groups.forEach((key, value) async {
+        countUser += 1;
+      });
+      group.memberCount = countUser;
     });
   }
 
   Future<List<LogEvent>> getEvents() async {
-    List<LogEvent> eventList = new List();
+//    List<LogEvent> eventList = new List();
 
     //Dummy data
-    eventList.add(new LogEvent(
-        title: "KLCC",
-        triggerPerson: "Everyone",
-        type: "location",
-        sentTime: DateTime(2020, 7, 21, 18, 50)));
+//    eventList.add(new LogEvent(
+//        title: "KLCC",
+//        triggerPerson: "Everyone",
+//        type: "location",
+//        sentTime: DateTime(2020, 7, 21, 18, 50)));
+//
+//    eventList.add(new LogEvent(
+//        title: "Rally @ Hilton Hotel Lobby",
+//        triggerPerson: "Johann",
+//        type: "rally",
+//        isCommunication: true,
+//        sentTime: DateTime(2020, 7, 21, 12, 50)));
+//
+//    eventList.add(new LogEvent(
+//        title: "Requesting location",
+//        triggerPerson: "Kelvin",
+//        type: "ping",
+//        isCommunication: true,
+//        sentTime: DateTime(2020, 7, 20, 20, 50)));
 
-    eventList.add(new LogEvent(
-        title: "Rally @ Hilton Hotel Lobby",
-        triggerPerson: "Johann",
-        type: "rally",
-        isCommunication: true,
-        sentTime: DateTime(2020, 7, 21, 12, 50)));
+    //Getting events from firebase
+    var eventDb = FirebaseDatabase.instance.reference().child("events");
+    final FirebaseUser user = await auth.currentUser();
 
-    eventList.add(new LogEvent(
-        title: "Requesting location",
-        triggerPerson: "Kelvin",
-        type: "ping",
-        isCommunication: true,
-        sentTime: DateTime(2020, 7, 20, 20, 50)));
+    return eventDb.once().then((DataSnapshot snapshot) {
+      List<LogEvent> eventList = new List();
 
-    return eventList;
+      Map<dynamic, dynamic> events = snapshot.value;
+
+      events.forEach((key, value) {
+        if((value['receiver'] == user.uid || value['receiver'] == 'all' ) && value['groupId'] == group.id){
+          eventList.add(new LogEvent(
+            title: value['title'],
+            triggerPerson: value['receiver'],
+            type : value ['type'],
+            sentTime: DateTime.parse(value['sentTime']),
+            isCommunication: true,
+            sender: value['sender'],
+            receiver: value['receiver'],
+            location: "location",
+          ));
+        }
+      });
+      return eventList;
+    });
   }
 
   Widget logEventList() {
@@ -437,10 +463,17 @@ class _GroupPage extends State<GroupPage> {
       child: FutureBuilder<List<LogEvent>>(
         future: getEvents(),
         builder:
-            (BuildContext context, AsyncSnapshot<List<LogEvent>> snapshot) {
+            (BuildContext context, AsyncSnapshot snapshot) {
           //If cant obtain event list
-          if (snapshot.connectionState != ConnectionState.done ||
-              !snapshot.hasData) return new CircularProgressIndicator();
+          if (snapshot.connectionState != ConnectionState.done) return new CircularProgressIndicator();
+
+          if(!snapshot.hasData){
+            return new Container(
+              child: Text(
+                "No events found",
+              ),
+            );
+          }
 
           //Has data
           return MediaQuery.removePadding(
@@ -458,10 +491,11 @@ class _GroupPage extends State<GroupPage> {
                     return locationLog(event);
                   } else {
                     //This is a communication event, so the following designs will be used:
-
                     //Rally
                     if (event.type == "rally") return rally(event);
                     if (event.type == "ping") return ping(event);
+                    if (event.type == "come") return come(event);
+                    if (event.type == "poll") return poll(event);
 
                     //Default return (if no communication design is available)
                     return locationLog(event);
@@ -750,6 +784,206 @@ class _GroupPage extends State<GroupPage> {
                   child: Row(
                     children: <Widget>[
                       okOption(event, Icons.my_location, "give"),
+                      SizedBox(
+                        width: 10,
+                      ),
+                      noOption(event, Icons.cancel, "nah"),
+                    ],
+                  ),
+                )
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget poll(LogEvent event) {
+    return Container(
+      margin: EdgeInsets.only(left: 20, right: 20),
+      height: 140,
+      decoration: BoxDecoration(
+          color: LogEvent.getColorScheme(event.type, true, 20),
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              blurRadius: 15,
+              offset: Offset(0, 7),
+              color: Colors.grey.withOpacity(0.6),
+            )
+          ]),
+      child: Padding(
+        padding:
+        const EdgeInsets.only(left: 25.0, right: 25.0, top: 15, bottom: 15),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: <Widget>[
+            LogEvent.getIcon(event.type, 40),
+            SizedBox(
+              width: 16,
+            ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Container(
+                  width: MediaQuery.of(context).size.width * 0.6,
+                  child: Text(
+                    event.title,
+                    maxLines: 1,
+                    softWrap: false,
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.left,
+                    style: GoogleFonts.poppins(
+                      fontSize: 23,
+                      color: LogEvent.getColorScheme(event.type, false, 45),
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+                Row(
+                  children: <Widget>[
+                    Container(
+                      constraints: BoxConstraints(
+                        maxWidth: MediaQuery.of(context).size.width * 0.32,
+                      ),
+                      child: Text(
+                        event.triggerPerson,
+                        textAlign: TextAlign.left,
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
+                        style: GoogleFonts.poppins(
+                          fontSize:
+                          13 + MediaQuery.of(context).size.width * 0.014,
+                          color: LogEvent.getColorScheme(event.type, false, 15),
+                          fontWeight: FontWeight.w600,
+                          height: 1,
+                        ),
+                      ),
+                    ),
+                    SizedBox(
+                      width: 10,
+                    ),
+                    Text(
+                      event.timeSinceSet(),
+                      textAlign: TextAlign.left,
+                      style: GoogleFonts.poppins(
+                        fontSize:
+                        13 + MediaQuery.of(context).size.width * 0.014,
+                        color: LogEvent.getColorScheme(event.type, false, 5),
+                        fontWeight: FontWeight.w600,
+                        height: 1,
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(
+                  height: 15,
+                ),
+                Container(
+                  child: Row(
+                    children: <Widget>[
+                      okOption(event, Icons.my_location, "okay"),
+                      SizedBox(
+                        width: 10,
+                      ),
+                      noOption(event, Icons.cancel, "nah"),
+                    ],
+                  ),
+                )
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget come(LogEvent event) {
+    return Container(
+      margin: EdgeInsets.only(left: 20, right: 20),
+      height: 140,
+      decoration: BoxDecoration(
+          color: LogEvent.getColorScheme(event.type, true, 20),
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              blurRadius: 15,
+              offset: Offset(0, 7),
+              color: Colors.grey.withOpacity(0.6),
+            )
+          ]),
+      child: Padding(
+        padding:
+        const EdgeInsets.only(left: 25.0, right: 25.0, top: 15, bottom: 15),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: <Widget>[
+            LogEvent.getIcon(event.type, 40),
+            SizedBox(
+              width: 16,
+            ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Container(
+                  width: MediaQuery.of(context).size.width * 0.6,
+                  child: Text(
+                    event.title,
+                    maxLines: 1,
+                    softWrap: false,
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.left,
+                    style: GoogleFonts.poppins(
+                      fontSize: 23,
+                      color: LogEvent.getColorScheme(event.type, false, 45),
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+                Row(
+                  children: <Widget>[
+                    Container(
+                      constraints: BoxConstraints(
+                        maxWidth: MediaQuery.of(context).size.width * 0.32,
+                      ),
+                      child: Text(
+                        event.triggerPerson,
+                        textAlign: TextAlign.left,
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
+                        style: GoogleFonts.poppins(
+                          fontSize:
+                          13 + MediaQuery.of(context).size.width * 0.014,
+                          color: LogEvent.getColorScheme(event.type, false, 15),
+                          fontWeight: FontWeight.w600,
+                          height: 1,
+                        ),
+                      ),
+                    ),
+                    SizedBox(
+                      width: 10,
+                    ),
+                    Text(
+                      event.timeSinceSet(),
+                      textAlign: TextAlign.left,
+                      style: GoogleFonts.poppins(
+                        fontSize:
+                        13 + MediaQuery.of(context).size.width * 0.014,
+                        color: LogEvent.getColorScheme(event.type, false, 5),
+                        fontWeight: FontWeight.w600,
+                        height: 1,
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(
+                  height: 15,
+                ),
+                Container(
+                  child: Row(
+                    children: <Widget>[
+                      okOption(event, Icons.my_location, "coming"),
                       SizedBox(
                         width: 10,
                       ),

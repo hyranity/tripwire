@@ -8,7 +8,11 @@ class LogEvent{
   DateTime sentTime;
   String type;
   bool isCommunication;
-  LogEvent({this.title = "Event X", this.triggerPerson = "John Doe", this.type = "location", this.sentTime = null, this.isCommunication = false});
+  String sender;
+  String receiver;
+  String location;
+
+  LogEvent({this.title = "Event X", this.triggerPerson = "John Doe", this.type = "location", this.sentTime = null, this.isCommunication = false, this.sender="sender", this.receiver="receiver", this.location="location"});
 
   //Returns an icon based on its type
   static Widget getIcon(String type, double size){
@@ -26,7 +30,7 @@ class LogEvent{
       case "ping":
         icon = Icons.my_location;
         break;
-      case "summon":
+      case "come":
         icon = Icons.pan_tool ;
         break;
       case "poll":
@@ -55,7 +59,7 @@ class LogEvent{
       case "ping":
         iconColor = "6098F6";
         break;
-      case "summon":
+      case "come":
         iconColor = "9874ed";
         break;
       case "poll":
@@ -66,8 +70,10 @@ class LogEvent{
   }
 
   timeSinceSet(){
-    int difference = DateTime.now().difference(sentTime).inMinutes;
-
+    int difference = sentTime.difference(DateTime.now()).inMinutes;
+    print('sentTime : $sentTime');
+    print(DateTime.now());
+    print(difference);
     if(difference > 60){
       // Hour
       double hour = difference / 60;
