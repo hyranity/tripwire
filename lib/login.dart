@@ -23,6 +23,17 @@ class _Login extends State<Login> {
 
   @override
   Widget build(BuildContext context) {
+
+// Check if  logged in
+    FirebaseAuth.instance.currentUser().then((user) {
+      if (user != null) {
+        Navigator.of(context).pushReplacement(MaterialPageRoute(
+            builder: (context) => MyHomePage()
+        ));
+        return;
+      }
+    });
+
     return Scaffold(
       body: Center(
         child: Stack(

@@ -149,6 +149,7 @@ class _JoinPage extends State<JoinPage> {
   }
 
   Future<FirebaseUser> JoinEvent(String code) async {
+
     var groupDb = FirebaseDatabase.instance.reference().child("groups");
     final FirebaseUser user = await auth.currentUser();
     bool codeFound = false;
