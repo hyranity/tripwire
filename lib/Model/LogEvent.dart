@@ -13,7 +13,7 @@ class LogEvent{
   String pingLocation;
   String location;
 
-  LogEvent({this.title = "Event X", this.triggerPerson = "John Doe", this.type = "location", this.sentTime = null, this.isCommunication = false, this.sender="sender", this.receiver="receiver", this.pingLocation = "not pinging", this.location="location"});
+  LogEvent({this.title = "Event X", this.triggerPerson = "John Doe", this.type = "location", this.sentTime = null, this.isCommunication = true, this.sender="sender", this.receiver="receiver", this.pingLocation = "not pinging", this.location="location"});
 
   //Returns an icon based on its type
   static Widget getIcon(String type, double size){

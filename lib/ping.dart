@@ -10,7 +10,6 @@ import 'Model/Member.dart';
 
 class PingPage extends StatefulWidget {
   PingPage({Key key, @required this.id}) : super(key: key);
-
   final String id;
 
   @override

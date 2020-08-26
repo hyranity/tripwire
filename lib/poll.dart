@@ -10,6 +10,9 @@ import 'Model/MyTheme.dart';
 import 'Model/world_time.dart';
 
 class PollPage extends StatefulWidget {
+  PollPage({Key key, @required this.id}) : super(key: key);
+  final String id;
+
   @override
   _PollPage createState() => _PollPage();
 }
@@ -161,6 +164,7 @@ class _PollPage extends State<PollPage> {
       'title' : 'Poll Question',
       'sender' : user.uid,
       'receiver' : 'all',
+      'groupId' : widget.id,
       'type' : 'poll',
       'sentTime' : wt.worldtime.toString(),
       'question' : question,

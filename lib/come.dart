@@ -272,6 +272,7 @@ class _ComePage extends State<ComePage> {
               'sender': user.uid,
               'senderName' : name,
               'receiver': key,
+              'groupId' : widget.id,
               'type': 'come',
               'sentTime': instance.worldtime.toString(),
             });

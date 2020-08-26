@@ -8,6 +8,8 @@ import 'Model/MyTheme.dart';
 import 'Model/world_time.dart';
 
 class RallyPage extends StatefulWidget {
+  RallyPage({Key key, @required this.id}) : super(key: key);
+  final String id;
   @override
   _RallyPage createState() => _RallyPage();
 }
@@ -32,6 +34,7 @@ class _RallyPage extends State<RallyPage> {
       'title' : 'Rally Everyone',
       'sender' : user.uid,
       'receiver' : 'all',
+      'groupId' : widget.id,
       'type' : 'rally',
       'sentTime' : wt.worldtime.toString(),
     });

@@ -323,7 +323,7 @@ class _GroupPage extends State<GroupPage> {
           if (button.type == "rally")
             confirmationDialog(context, button.dialogTitle, button.dialogDesc);
           else if (button.type == "poll")
-            Quick.navigate(context, () => PollPage());
+            Quick.navigate(context, () => PollPage(id : group.id));
           else if (button.type == "ping")
             Quick.navigate(context, () => PingPage(id : group.id));
           else if (button.type == "summon")
@@ -1106,7 +1106,7 @@ class _GroupPage extends State<GroupPage> {
                 Container(
                   child: Row(
                     children: <Widget>[
-                      okOption(event, Icons.my_location, "coming"),
+                      InkWell(child: okOption(event, Icons.my_location, "coming"), onTap: () { RemoveEvent(event.sentTime.toString()); },),
                       SizedBox(
                         width: 10,
                       ),
@@ -1385,8 +1385,19 @@ class _GroupPage extends State<GroupPage> {
     MyTheme.alertMsg(context, "Rally ", "You have noticed all your group member to rally");
   }
 
-  void RemoveEvent() {
+  Future<void> RemoveEvent(String time) async {
+    var eventDb = FirebaseDatabase.instance.reference().child("events");
+    final FirebaseUser user = await auth.currentUser();
 
+    await eventDb.once().then((DataSnapshot snapshot) async{
+      Map<dynamic, dynamic> events  = snapshot.value;
+
+      events.forEach((eventKey, eventValue) {
+        if(eventValue['sentTime'] == time && eventValue['sender'] == user.uid) {
+          eventDb.child(eventKey).remove();
+        }
+      });
+    });
   }
 }
 
