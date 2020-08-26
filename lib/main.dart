@@ -29,33 +29,32 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        bottomSheetTheme:
-            BottomSheetThemeData(backgroundColor: Colors.transparent),
-        // This is the theme of your application.
-        //
-        // Try running your application with "flutter run". You'll see the
-        // application has a blue toolbar. Then, without quitting the app, try
-        // changing the primarySwatch below to Colors.green and then invoke
-        // "hot reload" (press "r" in the console where you ran "flutter run",
-        // or simply save your changes to "hot reload" in a Flutter IDE).
-        // Notice that the counter didn't reset back to zero; the application
-        // is not restarted.
-        primarySwatch: Colors.blue,
-        // This makes the visual density adapt to the platform that you run
-        // the app on. For desktop platforms, the controls will be smaller and
-        // closer together (more dense) than on mobile platforms.
-        visualDensity: VisualDensity.adaptivePlatformDensity,
-      ),
-      builder: (context, child) {
-        return ScrollConfiguration(
-          behavior: NoGlow(),
-          child: child,
-        );
-      },
-      home: Login()
-    );
+        title: 'Flutter Demo',
+        theme: ThemeData(
+          bottomSheetTheme:
+              BottomSheetThemeData(backgroundColor: Colors.transparent),
+          // This is the theme of your application.
+          //
+          // Try running your application with "flutter run". You'll see the
+          // application has a blue toolbar. Then, without quitting the app, try
+          // changing the primarySwatch below to Colors.green and then invoke
+          // "hot reload" (press "r" in the console where you ran "flutter run",
+          // or simply save your changes to "hot reload" in a Flutter IDE).
+          // Notice that the counter didn't reset back to zero; the application
+          // is not restarted.
+          primarySwatch: Colors.blue,
+          // This makes the visual density adapt to the platform that you run
+          // the app on. For desktop platforms, the controls will be smaller and
+          // closer together (more dense) than on mobile platforms.
+          visualDensity: VisualDensity.adaptivePlatformDensity,
+        ),
+        builder: (context, child) {
+          return ScrollConfiguration(
+            behavior: NoGlow(),
+            child: child,
+          );
+        },
+        home: Login());
   }
 }
 
@@ -81,26 +80,22 @@ class _MyHomePageState extends State<MyHomePage> {
   final Geolocator geolocator = Geolocator()..forceAndroidLocationManager;
   final FirebaseAuth auth = FirebaseAuth.instance;
 
-  String username = "";
-
-  _MyHomePageState() {
-    getUserName().then((name) => setState(() {
-      username = name;
-    }));
-  }
+  String username = "test";
 
   Weather weather;
   Placemark place;
   int repeater = 0;
 
-
   @override
-  void initState(){
+  void initState() {
     // Begin listening for steps
     Global.beginListening();
   }
 
   void loadData() {
+
+
+    getUserName();
     // Code possible thanks to https://www.digitalocean.com/community/tutorials/flutter-geolocator-plugin
 
     geolocator
@@ -232,7 +227,7 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
               new Spacer(),
               InkWell(
-                onTap: (){
+                onTap: () {
                   Quick.navigate(context, () => StepTracker());
                 },
                 child: Container(
@@ -454,7 +449,6 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Future<List<Group>> fetchGroupData() async {
-
 //    groupList.add(new Group(
 //        name: "RSD3 dumbass trip LOOL", isActive: true, memberCount: 13));
 //    groupList.add(new Group(name: "test", isActive: false, memberCount: 3));
@@ -472,10 +466,10 @@ class _MyHomePageState extends State<MyHomePage> {
       groups.forEach((key, value) async {
         var member = value['members'];
 
-        if(member.toString().contains(user.uid)){
+        if (member.toString().contains(user.uid)) {
           groupList.add(new Group(
-            name : value['name'],
-            id : value['id'],
+            name: value['name'],
+            id: value['id'],
             isActive: false,
             memberCount: 0,
           ));
@@ -495,6 +489,21 @@ class _MyHomePageState extends State<MyHomePage> {
             //If data not loaded
             if (snapshot.connectionState != ConnectionState.done) {
               return new CircularProgressIndicator();
+            }
+
+            // if no groups found
+            if (snapshot.data.length == 0) {
+              return Padding(
+                padding: const EdgeInsets.only(left: 10.0),
+                child: Text(
+                  "Looks like you're not in any group",
+                  style: GoogleFonts.poppins(
+                    fontSize: 17,
+                    color: MyTheme.accentColor,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              );
             }
 
             //Else, return the listview itself
@@ -794,7 +803,7 @@ class _MyHomePageState extends State<MyHomePage> {
               scrollDirection: Axis.horizontal,
               itemBuilder: (BuildContext context, int index) {
                 return Container(
-                  margin: EdgeInsets.only(top: 15, bottom: 43),
+                    margin: EdgeInsets.only(top: 15, bottom: 43),
                     width: 125,
                     decoration: BoxDecoration(
                         color: Color(0xffE5EDFF),
@@ -807,8 +816,8 @@ class _MyHomePageState extends State<MyHomePage> {
                           )
                         ]),
                     child: Padding(
-                      padding: const EdgeInsets.only(
-                          top: 12.0, left: 12, right: 12),
+                      padding:
+                          const EdgeInsets.only(top: 12.0, left: 12, right: 12),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
@@ -839,8 +848,15 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-  Future<String> getUserName() async {
+  getUserName() async {
+    print("getting username");
     final FirebaseUser user = await auth.currentUser();
-    return user.displayName;
+    DB
+        .get(DB.db().reference().child("member").child(user.uid))
+        .then((var value) {
+      setState(() {
+        username = value["name"];
+      });
+    });
   }
 }
