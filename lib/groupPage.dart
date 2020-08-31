@@ -35,6 +35,7 @@ class _GroupPage extends State<GroupPage> {
   int retryConnect = 0;
   Group group;
   Placemark location;
+  TextEditingController locationText = new TextEditingController();
 
   final FirebaseAuth auth = FirebaseAuth.instance;
   final replyController = new TextEditingController();
@@ -108,6 +109,8 @@ class _GroupPage extends State<GroupPage> {
     Quick.getLocation().then((location) {
       setState(() {
         this.location = location;
+        locationText.text = location.subLocality + ", " + location.locality;
+        print(locationText.text);
       });
     });
   }
@@ -116,11 +119,11 @@ class _GroupPage extends State<GroupPage> {
   logLocation(context) {
     showModalBottomSheet(
         context: context,
-        builder: (BuildContext context) {
+        builder: (BuildContext innerContext) {
           return Container(
-            height: Quick.getDeviceSize(context).height * 0.65,
+            height: Quick.getDeviceSize(context).height * 0.45,
             decoration: BoxDecoration(
-              color: MyTheme.primaryColor,
+              color: Colors.white,
               borderRadius: BorderRadius.only(
                   topLeft: Radius.circular(20), topRight: Radius.circular(20)),
               boxShadow: [
@@ -130,39 +133,135 @@ class _GroupPage extends State<GroupPage> {
                 )
               ],
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Text(
-                  "Log location",
-                  maxLines: 1,
-                  softWrap: false,
-                  overflow: TextOverflow.ellipsis,
-                  textAlign: TextAlign.center,
-                  style: GoogleFonts.poppins(
-                    fontSize: 30,
-                    color: MyTheme.accentColor,
-                    fontWeight: FontWeight.w600,
+            child: Padding(
+              padding: const EdgeInsets.only(left: 35, right: 35, top: 18.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      "Log location",
+                      style: GoogleFonts.poppins(
+                        fontSize: 40,
+                        fontWeight: FontWeight.w600,
+                        color: MyTheme.accentColor,
+                      ),
+                    ),
                   ),
-                ),
-                Text(
-                  location != null
-                      ? location.subLocality + "," + location.locality
-                      : "No location found", // Load current location
-                  maxLines: 1,
-                  softWrap: false,
-                  overflow: TextOverflow.ellipsis,
-                  textAlign: TextAlign.center,
-                  style: GoogleFonts.poppins(
-                    fontSize: 23,
-                    color: MyTheme.accentColor,
-                    fontWeight: FontWeight.w500,
+                  Text(
+                    "Log your location into the group journal, accessible on the website.",
+                    style: GoogleFonts.poppins(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w500,
+                      color: MyTheme.accentColor.withOpacity(0.7),
+                    ),
                   ),
-                ),
-              ],
+                  SizedBox(
+                    height: 30,
+                  ),
+                  Text(
+                    "Your location:",
+                    maxLines: 1,
+                    softWrap: false,
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.left,
+                    style: GoogleFonts.poppins(
+                      fontSize: 20,
+                      color: MyTheme.accentColor,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  Container(
+                    padding: EdgeInsets.only(left: 10, right: 10),
+                    decoration: BoxDecoration(
+                      color: MyTheme.primaryColor,
+                      borderRadius: BorderRadius.all(Radius.circular(12)),
+                    ),
+                    child: Padding(
+                       padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+                      child: TextField(
+                        controller: locationText,
+                        maxLines: 1,
+                        textAlign: TextAlign.left,
+                        decoration: InputDecoration(
+                            hintText: "Your current location",
+                            hintStyle: GoogleFonts.poppins(
+                              fontSize: 20,
+                              color: MyTheme.accentColor.withOpacity(0.7),
+                              fontWeight: FontWeight.w500,
+                            ),
+                            enabledBorder: UnderlineInputBorder(
+                                borderSide:
+                                    BorderSide(color: Colors.transparent)),
+                            focusedBorder: UnderlineInputBorder(
+                                borderSide:
+                                    BorderSide(color: Colors.transparent))),
+                        style: GoogleFonts.poppins(
+                          fontSize: 20,
+                          color: MyTheme.accentColor,
+                          fontWeight: FontWeight.w500,
+                        ),
+                        onChanged: (text) {
+                          setState(() {});
+                        },
+
+                      ),
+                    ),
+                  ),
+                  SizedBox(
+                    height: 20,
+                  ),
+                  // LET'S GO BUTTON
+                  logButton(),
+                ],
+              ),
             ),
           );
         });
+  }
+
+// LET'S GO BUTTON
+  Widget logButton() {
+    return InkWell(
+      child: Container(
+        width: Quick.getDeviceSize(context).width,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.check_circle,
+              color: MyTheme.accentColor,
+            ),
+            SizedBox(
+              width: 10,
+            ),
+            InkWell(
+              onTap: () {
+                performLogLocation(context);
+              },
+              child: Text(
+                "Let's go >",
+                textAlign: TextAlign.center,
+                style: GoogleFonts.poppins(
+                  fontSize: 25,
+                  fontWeight: FontWeight.w500,
+                  color: MyTheme.accentColor,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  performLogLocation(context) {
+    if (locationText.text.length == 0) {
+      logError(context);
+    } else {
+      logSuccess(context);
+    }
   }
 
   action(context) {
@@ -319,6 +418,56 @@ class _GroupPage extends State<GroupPage> {
               itemCount: buttonList.data.length);
         },
       ),
+    );
+  }
+
+  // Show unable to log location error
+  Widget logError(context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Dialog(
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+          child: Container(
+            height: 300,
+            child: Text(
+              "Your location cannot be empty",
+              textAlign: TextAlign.left,
+              style: GoogleFonts.poppins(
+                fontSize: 18,
+                color: Colors.black,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  // Show log success
+  Widget logSuccess(context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Dialog(
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+          child: Container(
+            height: 300,
+            child: Text(
+              "Location logged successfully",
+              textAlign: TextAlign.left,
+              style: GoogleFonts.poppins(
+                fontSize: 18,
+                color: Colors.black,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 
