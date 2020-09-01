@@ -1,5 +1,3 @@
-
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/cupertino.dart';
@@ -21,10 +19,10 @@ class _JoinPage extends State<JoinPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center (
+      body: Center(
         child: Padding(
           padding: const EdgeInsets.only(top: 60),
-          child: Container (
+          child: Container(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: <Widget>[
@@ -36,7 +34,7 @@ class _JoinPage extends State<JoinPage> {
                   //Provide responsive design
                   height: MediaQuery.of(context).size.height * 0.02,
                 ),
-                Container (
+                Container(
                   padding: EdgeInsets.fromLTRB(25, 0, 25, 0),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -84,12 +82,11 @@ class _JoinPage extends State<JoinPage> {
                                 offset: Offset(0, 5),
                                 color: Colors.grey.withOpacity(0.3),
                               )
-                            ]
-                        ),
+                            ]),
                         child: TextFormField(
                           controller: codeController,
                           decoration: InputDecoration(
-                            contentPadding:EdgeInsets.fromLTRB(10,0,10,0),
+                            contentPadding: EdgeInsets.fromLTRB(10, 0, 10, 0),
                             labelText: 'CODE',
                             border: InputBorder.none,
                             focusColor: Colors.red,
@@ -149,30 +146,39 @@ class _JoinPage extends State<JoinPage> {
   }
 
   Future<FirebaseUser> JoinEvent(String code) async {
-
     var groupDb = FirebaseDatabase.instance.reference().child("groups");
     final FirebaseUser user = await auth.currentUser();
     bool codeFound = false;
 
-    await groupDb.once().then((DataSnapshot snapshot) async{
-      Map<dynamic, dynamic> groups  = snapshot.value;
+    await groupDb.once().then((DataSnapshot snapshot) async {
+      Map<dynamic, dynamic> groups = snapshot.value;
 
       groups.forEach((key, value) async {
-        if(key == code) {
+        if (key == code) {
           codeFound = true;
         }
       });
     });
 
     if (codeFound == true) {
-      var joinGroupDb = FirebaseDatabase.instance.reference().child("groups").child(code);
-      await joinGroupDb.child('members').update({
-        user.uid : user.email,
+      var joinGroupDb =
+          FirebaseDatabase.instance.reference().child("groups").child(code);
+      joinGroupDb.child("members").once().then((DataSnapshot snapshot) {
+        // Ensure not joined yet
+        if (snapshot.value[user.uid] != null) {
+          MyTheme.alertMsg(
+              context, "Already joined", "You are already in this group");
+        } else {
+           joinGroupDb.child('members').update({
+            user.uid: user.email,
+          });
+          MyTheme.alertMsg(
+              context, "Joined", "You joined the group successfully");
+        }
       });
-      MyTheme.alertMsg(context, "Joined", "You joined the group successfully");
-    }
-    else {
-      MyTheme.alertMsg(context, "Wrong Group Code ", "Group is not Found, Try again.");
+    } else {
+      MyTheme.alertMsg(
+          context, "Wrong Group Code ", "Group is not Found, Try again.");
     }
   }
 }

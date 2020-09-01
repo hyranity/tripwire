@@ -71,7 +71,7 @@ class LogEvent{
   }
 
   timeSinceSet(){
-    int difference = sentTime.difference(DateTime.now()).inMinutes;
+    int difference = DateTime.now().difference(sentTime).inMinutes;
     print('sentTime : $sentTime');
     print(DateTime.now());
     print(difference);
