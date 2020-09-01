@@ -1,7 +1,10 @@
 import 'dart:async';
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:pedometer/pedometer.dart';
+
+import 'DB.dart';
 
 class Global {
   static Pedometer pedometer; // Pedometer
@@ -24,6 +27,16 @@ class Global {
     // To store steps in stepCount variable
     stepCountStream.listen((event) {
       stepCount = event.steps;
+    });
+  }
+
+  static Future<dynamic> getUserName() async {
+    FirebaseAuth auth = FirebaseAuth.instance;
+    final FirebaseUser user = await auth.currentUser();
+    return DB
+        .get(DB.db().reference().child("member").child(user.uid))
+        .then((var value) {
+      return value["name"];
     });
   }
 }
