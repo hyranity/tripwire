@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:marquee_widget/marquee_widget.dart';
 import 'package:tinycolor/tinycolor.dart';
 import 'package:tripwire/Model/world_time.dart';
 import 'package:tripwire/Util/Global.dart';
@@ -336,27 +337,27 @@ class _GroupPage extends State<GroupPage> {
 
     // Find today's date in journal
     var date = DateTime.now();
-    var todayJournal = FirebaseDatabase.instance
+    var events = FirebaseDatabase.instance
         .reference()
         .child("groups")
         .child(group.id)
-        .child("journal")
+        .child("events")
         .child(date.day.toString() +
             "-" +
             date.month.toString() +
             "-" +
             date.year.toString());
 
-    // Loop through each logged event in journal
-    todayJournal.once().then((DataSnapshot snapshot) {
+
+    events.once().then((DataSnapshot snapshot) {
       var eventLocationExists = false; // If a location already logged today
 
-      Map<dynamic, dynamic> events = snapshot.value;
+      Map<dynamic, dynamic> eventList = snapshot.value;
 
-      // Check if a journal day already created
-      if (events != null) {
+      // Check if an event day already created
+      if (eventList != null) {
         // Loop through each event
-        for (var event in events.values) {
+        for (var event in eventList.values) {
           print(event["location"]);
 
           if (event["type"] == "location") {
@@ -388,7 +389,7 @@ class _GroupPage extends State<GroupPage> {
                       .reference()
                       .child("groups")
                       .child(group.id)
-                      .child("journal")
+                      .child("event")
                       .child(date.day.toString() +
                           "-" +
                           date.month.toString() +
@@ -424,7 +425,7 @@ class _GroupPage extends State<GroupPage> {
               .reference()
               .child("groups")
               .child(group.id)
-              .child("journal")
+              .child("events")
               .child(date.day.toString() +
                   "-" +
                   date.month.toString() +
@@ -612,9 +613,8 @@ class _GroupPage extends State<GroupPage> {
         builder: (BuildContext innerContext) {
           return Dialog(
             shape:
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
             child: Container(
-
               child: Padding(
                 padding: const EdgeInsets.only(
                     left: 35, right: 35, top: 18.0, bottom: 18),
@@ -647,11 +647,11 @@ class _GroupPage extends State<GroupPage> {
                             decoration: BoxDecoration(
                               color: MyTheme.accentColor,
                               borderRadius:
-                              BorderRadius.all(Radius.circular(12)),
+                                  BorderRadius.all(Radius.circular(12)),
                             ),
                             child: Padding(
                               padding:
-                              const EdgeInsets.only(top: 4.0, bottom: 4),
+                                  const EdgeInsets.only(top: 4.0, bottom: 4),
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
@@ -959,36 +959,78 @@ class _GroupPage extends State<GroupPage> {
 //        sentTime: DateTime(2020, 7, 20, 20, 50)));
 
     //Getting events from firebase
-    var eventDb = FirebaseDatabase.instance.reference().child("events");
+    var eventDb = FirebaseDatabase.instance
+        .reference()
+        .child("groups")
+        .child(group.id)
+        .child("events");
     final FirebaseUser user = await auth.currentUser();
+
+
 
     return eventDb.once().then((DataSnapshot snapshot) {
       List<LogEvent> eventList = new List();
 
-      Map<dynamic, dynamic> events = snapshot.value;
+      // Loop through each day
+      snapshot.value.forEach((key, value) {
+        Map<dynamic, dynamic> events = value;
 
-      events.forEach((key, value) {
-        if ((value['receiver'] == user.uid || value['receiver'] == 'all') &&
-            value['groupId'] == group.id) {
-          eventList.add(new LogEvent(
-            title: value['title'],
-            triggerPerson: value['receiver'],
-            type: value['type'],
-            sentTime: DateTime.parse(value['sentTime']),
-            isCommunication: true,
-            sender: value['sender'],
-            receiver: value['receiver'],
-            location: "location",
-          ));
-        }
+        events.forEach((key, value) {
+
+
+          // For location logs
+          if (value["type"] == "location") {
+            String attendStr = "";
+
+            //Trigger person is taken from attendees
+            if (value["attendees"] != null) {
+              // Add initial name
+              attendStr = value["attendees"].values.toList()[0];
+
+              // Add "and others"
+              if(value["attendees"].length > 1){
+                attendStr = value["attendees"].length.toString() + " pax";
+              }
+            }
+            eventList.add(new LogEvent(
+              title: value["location"],
+              triggerPerson: attendStr,
+              type: value['type'],
+              sentTime: DateTime.parse(value['logTime']),
+              isCommunication: false,
+            ));
+          } else if (((value['receiver'] == user.uid ||
+                  value['receiver'] == 'all') &&
+              value['groupId'] == group.id)) {
+            eventList.add(new LogEvent(
+              title: value['title'],
+              triggerPerson: value['receiver'],
+              type: value['type'],
+              sentTime: DateTime.parse(value['sentTime']),
+              isCommunication: true,
+              sender: value['sender'],
+              receiver: value['receiver'],
+              location: "location",
+            ));
+          } else {
+            // Don't show anything
+          }
+        });
       });
-      return eventList;
+      return new List.from(eventList.reversed);
     });
   }
 
   Widget logEventList() {
+
+    FirebaseDatabase.instance.reference().child("groups").child(group.id).onChildChanged.listen((event) {
+      setState(() {
+
+      });
+    });
     return Container(
-      alignment: Alignment.center,
+
+      alignment: Alignment.topCenter,
       height: Quick.getDeviceSize(context).height * 0.5,
       child: FutureBuilder<List<LogEvent>>(
         future: getEvents(),
