@@ -848,15 +848,13 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-  getUserName() async {
+  Future<String >getUserName() async {
     print("getting username");
     final FirebaseUser user = await auth.currentUser();
     DB
         .get(DB.db().reference().child("member").child(user.uid))
         .then((var value) {
-      setState(() {
-        username = value["name"];
-      });
+      return value["name"];
     });
   }
 }

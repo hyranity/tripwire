@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:animate_do/animate_do.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
@@ -8,6 +10,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:tinycolor/tinycolor.dart';
 import 'package:tripwire/Model/world_time.dart';
+import 'package:tripwire/Util/Global.dart';
 import 'package:tripwire/Util/Quick.dart';
 import 'package:tripwire/ping.dart';
 
@@ -25,6 +28,7 @@ class GroupPage extends StatefulWidget {
 
   final String title;
   final String id;
+
   Group group;
 
   @override
@@ -36,9 +40,10 @@ class _GroupPage extends State<GroupPage> {
   Group group;
   Placemark location;
   TextEditingController locationText = new TextEditingController();
-
+  String logResult = "Successful log";
   final FirebaseAuth auth = FirebaseAuth.instance;
   final replyController = new TextEditingController();
+  bool logButtonEnabled = true;
 
   @override
   Widget build(BuildContext context) {
@@ -52,6 +57,7 @@ class _GroupPage extends State<GroupPage> {
 
     //Build main UI
     return Scaffold(
+        resizeToAvoidBottomInset: false,
         body: Center(
             child: Padding(
                 padding: const EdgeInsets.only(top: 60),
@@ -117,104 +123,112 @@ class _GroupPage extends State<GroupPage> {
 
   // Show log location window
   logLocation(context) {
-    showModalBottomSheet(
+    loadLocation();
+    showDialog(
         context: context,
         builder: (BuildContext innerContext) {
-          return Container(
-            height: Quick.getDeviceSize(context).height * 0.45,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(20), topRight: Radius.circular(20)),
-              boxShadow: [
-                BoxShadow(
-                  blurRadius: 10,
-                  color: Colors.grey.withOpacity(1),
-                )
-              ],
-            ),
-            child: Padding(
-              padding: const EdgeInsets.only(left: 35, right: 35, top: 18.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      "Log location",
-                      style: GoogleFonts.poppins(
-                        fontSize: 40,
-                        fontWeight: FontWeight.w600,
-                        color: MyTheme.accentColor,
-                      ),
-                    ),
-                  ),
-                  Text(
-                    "Log your location into the group journal, accessible on the website.",
-                    style: GoogleFonts.poppins(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w500,
-                      color: MyTheme.accentColor.withOpacity(0.7),
-                    ),
-                  ),
-                  SizedBox(
-                    height: 30,
-                  ),
-                  Text(
-                    "Your location:",
-                    maxLines: 1,
-                    softWrap: false,
-                    overflow: TextOverflow.ellipsis,
-                    textAlign: TextAlign.left,
-                    style: GoogleFonts.poppins(
-                      fontSize: 20,
-                      color: MyTheme.accentColor,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  Container(
-                    padding: EdgeInsets.only(left: 10, right: 10),
-                    decoration: BoxDecoration(
-                      color: MyTheme.primaryColor,
-                      borderRadius: BorderRadius.all(Radius.circular(12)),
-                    ),
-                    child: Padding(
-                       padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
-                      child: TextField(
-                        controller: locationText,
-                        maxLines: 1,
-                        textAlign: TextAlign.left,
-                        decoration: InputDecoration(
-                            hintText: "Your current location",
-                            hintStyle: GoogleFonts.poppins(
-                              fontSize: 20,
-                              color: MyTheme.accentColor.withOpacity(0.7),
-                              fontWeight: FontWeight.w500,
+          return Dialog(
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+            child: Container(
+              child: Padding(
+                padding: const EdgeInsets.only(
+                    left: 35, right: 35, top: 18.0, bottom: 18),
+                child: Wrap(
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Container(
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            "Log location",
+                            style: GoogleFonts.poppins(
+                              fontSize: 35,
+                              fontWeight: FontWeight.w600,
+                              color: MyTheme.accentColor,
                             ),
-                            enabledBorder: UnderlineInputBorder(
-                                borderSide:
-                                    BorderSide(color: Colors.transparent)),
-                            focusedBorder: UnderlineInputBorder(
-                                borderSide:
-                                    BorderSide(color: Colors.transparent))),
-                        style: GoogleFonts.poppins(
-                          fontSize: 20,
-                          color: MyTheme.accentColor,
-                          fontWeight: FontWeight.w500,
+                          ),
                         ),
-                        onChanged: (text) {
-                          setState(() {});
-                        },
-
-                      ),
+                        Text(
+                          "Log your location into the group journal, accessible on the website.",
+                          style: GoogleFonts.poppins(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w500,
+                            color: MyTheme.accentColor.withOpacity(0.7),
+                          ),
+                        ),
+                        SizedBox(
+                          height: 30,
+                        ),
+                        Text(
+                          "Your location:",
+                          maxLines: 1,
+                          softWrap: false,
+                          overflow: TextOverflow.ellipsis,
+                          textAlign: TextAlign.left,
+                          style: GoogleFonts.poppins(
+                            fontSize: 20,
+                            color: MyTheme.accentColor,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        Container(
+                          padding: EdgeInsets.only(left: 10, right: 10),
+                          decoration: BoxDecoration(
+                            color: MyTheme.primaryColor,
+                            borderRadius: BorderRadius.all(Radius.circular(12)),
+                          ),
+                          child: Padding(
+                            padding: EdgeInsets.only(
+                                bottom:
+                                    MediaQuery.of(context).viewInsets.bottom),
+                            child: TextField(
+                              controller: locationText,
+                              maxLines: 1,
+                              textAlign: TextAlign.left,
+                              decoration: InputDecoration(
+                                  hintText: "Your current location",
+                                  hintStyle: GoogleFonts.poppins(
+                                    fontSize: 20,
+                                    color: MyTheme.accentColor.withOpacity(0.7),
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                  enabledBorder: UnderlineInputBorder(
+                                      borderSide: BorderSide(
+                                          color: Colors.transparent)),
+                                  focusedBorder: UnderlineInputBorder(
+                                      borderSide: BorderSide(
+                                          color: Colors.transparent))),
+                              style: GoogleFonts.poppins(
+                                fontSize: 20,
+                                color: MyTheme.accentColor,
+                                fontWeight: FontWeight.w500,
+                              ),
+                              onChanged: (text) {
+                                setState(() {});
+                              },
+                            ),
+                          ),
+                        ),
+                        SizedBox(
+                          height: 20,
+                        ),
+                        // LET'S GO BUTTON
+                        Row(
+                          children: [
+                            new Expanded(child: logButton()),
+                            SizedBox(
+                              width: 15,
+                            ),
+                            new Expanded(child: cancelLogButton()),
+                          ],
+                        )
+                      ],
                     ),
-                  ),
-                  SizedBox(
-                    height: 20,
-                  ),
-                  // LET'S GO BUTTON
-                  logButton(),
-                ],
+                  ],
+                ),
               ),
             ),
           );
@@ -224,44 +238,214 @@ class _GroupPage extends State<GroupPage> {
 // LET'S GO BUTTON
   Widget logButton() {
     return InkWell(
+      onTap: () {
+        if (logButtonEnabled) {
+          print("Locking button");
+          setState(() {
+            logButtonEnabled = false; // Prevent button spamming
+          });
+          performLogLocation(context);
+        } else {}
+      },
       child: Container(
         width: Quick.getDeviceSize(context).width,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.check_circle,
-              color: MyTheme.accentColor,
-            ),
-            SizedBox(
-              width: 10,
-            ),
-            InkWell(
-              onTap: () {
-                performLogLocation(context);
-              },
-              child: Text(
-                "Let's go >",
+        decoration: BoxDecoration(
+          color: MyTheme.accentColor,
+          borderRadius: BorderRadius.all(Radius.circular(12)),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.only(top: 4.0, bottom: 4),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.check_circle,
+                color: Colors.white,
+              ),
+              SizedBox(
+                width: 10,
+              ),
+              Text(
+                "Log",
                 textAlign: TextAlign.center,
                 style: GoogleFonts.poppins(
-                  fontSize: 25,
+                  fontSize: 20,
                   fontWeight: FontWeight.w500,
-                  color: MyTheme.accentColor,
+                  color: Colors.white,
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
   }
 
+  // CANCEL LOG BUTTON
+  Widget cancelLogButton() {
+    return InkWell(
+      onTap: () {
+        Navigator.of(context).pop();
+      },
+      child: Container(
+        width: Quick.getDeviceSize(context).width,
+        decoration: BoxDecoration(
+          color: Colors.redAccent,
+          borderRadius: BorderRadius.all(Radius.circular(12)),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.only(top: 4.0, bottom: 4),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.cancel,
+                color: Colors.white,
+              ),
+              SizedBox(
+                width: 5,
+              ),
+              Text(
+                "Cancel",
+                textAlign: TextAlign.center,
+                style: GoogleFonts.poppins(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.white,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // Log the user's location
   performLogLocation(context) {
+    int coolDownMins =
+        30; // Minutes until the next event is count as a separate one, even if same location
+
     if (locationText.text.length == 0) {
-      logError(context);
-    } else {
-      logSuccess(context);
+      logError(context, "Location cannot be empty!");
+      setState(() {
+        logButtonEnabled = true; // Prevent button spamming
+      });
+      return;
     }
+
+    // Find today's date in journal
+    var date = DateTime.now();
+    var todayJournal = FirebaseDatabase.instance
+        .reference()
+        .child("groups")
+        .child(group.id)
+        .child("journal")
+        .child(date.day.toString() +
+            "-" +
+            date.month.toString() +
+            "-" +
+            date.year.toString());
+
+    // Loop through each logged event in journal
+    todayJournal.once().then((DataSnapshot snapshot) {
+      var eventLocationExists = false; // If a location already logged today
+
+      Map<dynamic, dynamic> events = snapshot.value;
+
+      // Check if a journal day already created
+      if (events != null) {
+        // Loop through each event
+        for (var event in events.values) {
+          print(event["location"]);
+
+          if (event["type"] == "location") {
+            // Check how long since the event was made
+            var difference = DateTime.now()
+                .difference(DateTime.parse(event["logTime"]))
+                .inMinutes;
+
+            // Is this location already logged within the cooldown limit?
+            if (locationText.text == event["location"] &&
+                difference < coolDownMins) {
+              // Event exists
+              eventLocationExists = true;
+
+              //Is current user already logged inside?
+              Map<dynamic, dynamic> attendees = event["attendees"];
+              Global.getUserName().then((name) {
+                if (attendees != null && attendees[name] != null) {
+                  // User already logged this location
+                  print("User already attended");
+                  logSuccess(context, "You've already attended!");
+                  setState(() {
+                    logButtonEnabled = true; // Prevent button spamming
+                  });
+                } else {
+                  // Not yet, add this member inside
+                  print("Adding " + name + " to attendees");
+                  var thisLoggedLocation = FirebaseDatabase.instance
+                      .reference()
+                      .child("groups")
+                      .child(group.id)
+                      .child("journal")
+                      .child(date.day.toString() +
+                          "-" +
+                          date.month.toString() +
+                          "-" +
+                          date.year.toString())
+                      .child(event["id"]);
+
+                  // New attendant
+                  thisLoggedLocation
+                      .child("attendees")
+                      .set({name: name}).then((value) {
+                    setState(() {
+                      logButtonEnabled = true; // Prevent button spamming
+                    });
+                  });
+                  logSuccess(context, "Location logged successfully!");
+                }
+              });
+
+              break; // Break if event location already exist
+            }
+          }
+        }
+      }
+
+      // Not logged yet
+      if (!eventLocationExists) {
+        logSuccess(context, "Location logged successfully!");
+
+        // Create new log event and add the user inside it
+        Global.getUserName().then((name) {
+          var logEvent = FirebaseDatabase.instance
+              .reference()
+              .child("groups")
+              .child(group.id)
+              .child("journal")
+              .child(date.day.toString() +
+                  "-" +
+                  date.month.toString() +
+                  "-" +
+                  date.year.toString());
+
+          logEvent.child(logEvent.push().key).set({
+            "type": "location",
+            "location": locationText.text,
+            "logTime": DateTime.now().toString(),
+            "attendees": {
+              name: name,
+            }
+          }).then((value) {
+            setState(() {
+              logButtonEnabled = true; // Prevent button spamming
+            });
+          });
+        });
+      }
+    });
   }
 
   action(context) {
@@ -422,53 +606,167 @@ class _GroupPage extends State<GroupPage> {
   }
 
   // Show unable to log location error
-  Widget logError(context) {
+  Widget logError(context, message) {
     showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return Dialog(
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-          child: Container(
-            height: 300,
-            child: Text(
-              "Your location cannot be empty",
-              textAlign: TextAlign.left,
-              style: GoogleFonts.poppins(
-                fontSize: 18,
-                color: Colors.black,
-                fontWeight: FontWeight.w500,
+        context: context,
+        builder: (BuildContext innerContext) {
+          return Dialog(
+            shape:
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+            child: Container(
+
+              child: Padding(
+                padding: const EdgeInsets.only(
+                    left: 35, right: 35, top: 18.0, bottom: 18),
+                child: Wrap(
+                  children: [
+                    Column(
+                      children: [
+                        Text(
+                          message,
+                          maxLines: 4,
+                          softWrap: false,
+                          overflow: TextOverflow.ellipsis,
+                          textAlign: TextAlign.center,
+                          style: GoogleFonts.poppins(
+                            fontSize: 20,
+                            color: MyTheme.accentColor,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        SizedBox(
+                          height: 20,
+                        ),
+                        InkWell(
+                          onTap: () {
+                            Navigator.of(context).pop();
+                          },
+                          child: Container(
+                            alignment: Alignment.center,
+                            width: 100,
+                            decoration: BoxDecoration(
+                              color: MyTheme.accentColor,
+                              borderRadius:
+                              BorderRadius.all(Radius.circular(12)),
+                            ),
+                            child: Padding(
+                              padding:
+                              const EdgeInsets.only(top: 4.0, bottom: 4),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.cancel,
+                                    color: Colors.white,
+                                  ),
+                                  SizedBox(
+                                    width: 5,
+                                  ),
+                                  Text(
+                                    "Ok",
+                                    textAlign: TextAlign.center,
+                                    style: GoogleFonts.poppins(
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.w500,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        )
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
-        );
-      },
-    );
+          );
+        });
   }
 
   // Show log success
-  Widget logSuccess(context) {
+  Widget logSuccess(context, String message) {
+    // Close other dialog
+    Navigator.of(context).pop();
+
     showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return Dialog(
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-          child: Container(
-            height: 300,
-            child: Text(
-              "Location logged successfully",
-              textAlign: TextAlign.left,
-              style: GoogleFonts.poppins(
-                fontSize: 18,
-                color: Colors.black,
-                fontWeight: FontWeight.w500,
+        context: context,
+        builder: (BuildContext innerContext) {
+          return Dialog(
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+            child: Container(
+              child: Padding(
+                padding: const EdgeInsets.only(
+                    left: 35, right: 35, top: 18.0, bottom: 18),
+                child: Wrap(
+                  children: [
+                    Column(
+                      children: [
+                        Text(
+                          message,
+                          maxLines: 4,
+                          softWrap: false,
+                          overflow: TextOverflow.ellipsis,
+                          textAlign: TextAlign.center,
+                          style: GoogleFonts.poppins(
+                            fontSize: 20,
+                            color: MyTheme.accentColor,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        SizedBox(
+                          height: 20,
+                        ),
+                        InkWell(
+                          onTap: () {
+                            Navigator.of(context).pop();
+                          },
+                          child: Container(
+                            alignment: Alignment.center,
+                            width: 100,
+                            decoration: BoxDecoration(
+                              color: MyTheme.accentColor,
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(12)),
+                            ),
+                            child: Padding(
+                              padding:
+                                  const EdgeInsets.only(top: 4.0, bottom: 4),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.cancel,
+                                    color: Colors.white,
+                                  ),
+                                  SizedBox(
+                                    width: 5,
+                                  ),
+                                  Text(
+                                    "Ok",
+                                    textAlign: TextAlign.center,
+                                    style: GoogleFonts.poppins(
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.w500,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        )
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
-        );
-      },
-    );
+          );
+        });
   }
 
   //Dialog Box Widget
