@@ -1393,7 +1393,8 @@ class _GroupPage extends State<GroupPage> {
       Map<dynamic, dynamic> events  = snapshot.value;
 
       events.forEach((eventKey, eventValue) {
-        if(eventValue['sentTime'] == time && eventValue['sender'] == user.uid) {
+        if(eventValue['sentTime'] == time && eventValue['receiver'] == user.uid) {
+          print("Hello");
           eventDb.child(eventKey).remove();
         }
       });
