@@ -480,7 +480,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Widget groupListWidget() {
     return Container(
-      height: MediaQuery.of(context).size.height * 0.37,
+      height: MediaQuery.of(context).size.height * 0.30,
       child: FutureBuilder<List<Group>>(
           future: fetchGroupData(),
           // Get async data of groups
@@ -793,7 +793,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 )),
           ),
           SizedBox(
-            height: 10,
+            height: 0,
           ),
           new Container(
             height: 180,
@@ -802,7 +802,7 @@ class _MyHomePageState extends State<MyHomePage> {
               scrollDirection: Axis.horizontal,
               itemBuilder: (BuildContext context, int index) {
                 return Container(
-                    margin: EdgeInsets.only(top: 15, bottom: 43),
+                    margin: EdgeInsets.only(top: 15, bottom: 15),
                     width: 125,
                     decoration: BoxDecoration(
                         color: Color(0xffE5EDFF),
