@@ -131,21 +131,27 @@ class _GroupPage extends State<GroupPage> {
         Map<dynamic, dynamic> member = userSnap.value;
         int stepCountWhenJoined = userSnap.value["stepCountWhenJoined"];
         int currentStepCount = userSnap.value["stepCount"] == null ? 0 : userSnap.value["stepCount"];
+        int justRestartedStep = userSnap.value["justRestartedStep"] == null ? 0 : userSnap.value["justRestartedStep"];
 
-        if (userSnap.value["stepCountWhenJoined"] == -1) {
+        // To prevent multiple repeating step increments
+        if(justRestartedStep > 0 && justRestartedStep + Global.stepCount == userSnap.value["stepCount"]) {
+          // Don't do anything
+        } else if (userSnap.value["stepCountWhenJoined"] == -1) {
           stepCountWhenJoined = Global.stepCount;
           // Update step count
           currentStepCount = Global.stepCount -
               stepCountWhenJoined; // Because user may join at step 100, few mins later at step 300, means 200 REAL steps
         }
-        // If current step count is lower, means user restarted phone; add on to the DB one
+        // If current step count is lower, means user JUST restarted phone; add on to the DB one
         else if (userSnap.value["stepCountWhenJoined"] > Global.stepCount) {
           stepCountWhenJoined = 0;
+          justRestartedStep = currentStepCount;
           currentStepCount += Global.stepCount;
 
-        } else if (stepCountWhenJoined == 0){
-          currentStepCount += Global.stepCount -
-              stepCountWhenJoined; // Because user may join at step 100, few mins later at step 300, means 200 REAL steps
+        } else if (stepCountWhenJoined == 0 && currentStepCount > Global.stepCount){
+          // User restarted phone after he joined the group
+          // 50 steps before restart, new 30 steps. 20 = 50 - 30 = difference.
+          currentStepCount += (currentStepCount - Global.stepCount);
         } else {
           // Update step count
           currentStepCount = Global.stepCount -
@@ -159,7 +165,8 @@ class _GroupPage extends State<GroupPage> {
         // Update member
         groupMember.update({
           "stepCountWhenJoined": stepCountWhenJoined,
-          "stepCount": currentStepCount
+          "stepCount": currentStepCount,
+          "justRestartedStep" : justRestartedStep,
         });
       });
     });
