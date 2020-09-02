@@ -3,6 +3,7 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:tripwire/Util/Global.dart';
 
 import 'Model/MyTheme.dart';
 import 'Util/Quick.dart';
@@ -169,12 +170,19 @@ class _JoinPage extends State<JoinPage> {
           MyTheme.alertMsg(
               context, "Already joined", "You are already in this group");
         } else {
-           joinGroupDb.child('members').update({
+          joinGroupDb.child('members').update({
             user.uid: user.email,
           });
           MyTheme.alertMsg(
               context, "Joined", "You joined the group successfully");
         }
+
+        // Update user's groupList
+      FirebaseAuth.instance.currentUser().then((user){
+        FirebaseDatabase.instance.reference().child("member").child(user.uid).child("groups").set({
+          code : code,
+        });
+      });
       });
     } else {
       MyTheme.alertMsg(
