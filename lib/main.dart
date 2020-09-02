@@ -94,6 +94,14 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void loadData() {
 
+    FirebaseAuth.instance.currentUser().then((user){
+      FirebaseDatabase.instance.reference().child("member").child(user.uid).onChildChanged.listen((event) {
+        setState(() {
+
+        });
+      });
+    });
+
     getUserName();
     // Code possible thanks to https://www.digitalocean.com/community/tutorials/flutter-geolocator-plugin
 
@@ -491,7 +499,7 @@ class _MyHomePageState extends State<MyHomePage> {
             }
 
             // if no groups found
-            if (snapshot.data.length == 0) {
+            if (!snapshot.hasData) {
               return Padding(
                 padding: const EdgeInsets.only(left: 10.0),
                 child: Text(

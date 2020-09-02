@@ -129,20 +129,38 @@ class _GroupPage extends State<GroupPage> {
       groupMember.once().then((DataSnapshot userSnap) {
         // If -1, that means this user is the creator. Set this step = currentStep
         Map<dynamic, dynamic> member = userSnap.value;
-        int stepCount = 0;
+        int stepCountWhenJoined = userSnap.value["stepCountWhenJoined"];
+        int currentStepCount = userSnap.value["stepCount"] == null ? 0 : userSnap.value["stepCount"];
 
-        if (userSnap.value["stepCountWhenJoined"] == -1)
-          stepCount = Global.stepCount;
+        if (userSnap.value["stepCountWhenJoined"] == -1) {
+          stepCountWhenJoined = Global.stepCount;
+          // Update step count
+          currentStepCount = Global.stepCount -
+              stepCountWhenJoined; // Because user may join at step 100, few mins later at step 300, means 200 REAL steps
+        }
+        // If current step count is lower, means user restarted phone; add on to the DB one
+        else if (userSnap.value["stepCountWhenJoined"] > Global.stepCount) {
+          stepCountWhenJoined = 0;
+          currentStepCount += Global.stepCount;
 
-        // If current step count is lower, means user restarted phone; set it to 0
-        if (userSnap.value["stepCountWhenJoined"] < Global.stepCount)
-          stepCount = 0;
+        } else if (stepCountWhenJoined == 0){
+          currentStepCount += Global.stepCount -
+              stepCountWhenJoined; // Because user may join at step 100, few mins later at step 300, means 200 REAL steps
+        } else {
+          // Update step count
+          currentStepCount = Global.stepCount -
+              stepCountWhenJoined; // Because user may join at step 100, few mins later at step 300, means 200 REAL steps
+        }
 
-        // Update step count
-        stepCount = Global.stepCount - userSnap.value["stepCountWhenJoined"]; // Because user may join at step 100, few mins later at step 300, means 200 REAL steps
+
+        print(currentStepCount.toString() + " current");
+        print(stepCountWhenJoined.toString() + " stepCount");
 
         // Update member
-        groupMember.update({"stepCount" : stepCount});
+        groupMember.update({
+          "stepCountWhenJoined": stepCountWhenJoined,
+          "stepCount": currentStepCount
+        });
       });
     });
   }

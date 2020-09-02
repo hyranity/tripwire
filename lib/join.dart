@@ -169,7 +169,7 @@ class _JoinPage extends State<JoinPage> {
       Global.getUserName().then((username) {
         joinGroupDb.child("members").once().then((DataSnapshot snapshot) {
           // Ensure not joined yet
-          if (snapshot.value[user.uid] != null) {
+          if (snapshot.value != null && snapshot.value[user.uid] != null) {
             MyTheme.alertMsg(
                 context, "Already joined", "You are already in this group");
           } else {
