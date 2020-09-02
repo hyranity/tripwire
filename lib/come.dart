@@ -229,8 +229,9 @@ class _ComePage extends State<ComePage> {
   }
 
   Future<FirebaseUser> ComeEvent(String name) async {
+    var date = DateTime.now();
     var memberDb = FirebaseDatabase.instance.reference().child("member");
-    var eventDb = FirebaseDatabase.instance.reference().child("events");
+    var eventDb = FirebaseDatabase.instance.reference().child("groups").child(widget.id).child("events").child(date.day.toString() + "-" + date.month.toString() + "-" + date.year.toString());
     final FirebaseUser user = await auth.currentUser();
     bool spamDiscovered = false;
 
@@ -272,8 +273,10 @@ class _ComePage extends State<ComePage> {
               'sender': user.uid,
               'senderName' : name,
               'receiver': key,
+              'triggerPerson' : user.displayName.trim(),
               'groupId' : widget.id,
               'type': 'come',
+              'isReplied' : 'no',
               'sentTime': instance.worldtime.toString(),
             });
           }

@@ -94,7 +94,6 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void loadData() {
 
-
     getUserName();
     // Code possible thanks to https://www.digitalocean.com/community/tutorials/flutter-geolocator-plugin
 
@@ -573,7 +572,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   Container(
-                    width: MediaQuery.of(context).size.width * 0.6,
+                    width: MediaQuery.of(context).size.width * 0.5,
                     child: Text(
                       group.name,
                       maxLines: 1,
@@ -848,7 +847,7 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-  Future<String >getUserName() async {
+  Future<String>getUserName() async {
     print("getting username");
     final FirebaseUser user = await auth.currentUser();
     DB
