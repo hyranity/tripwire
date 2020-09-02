@@ -96,6 +96,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
     FirebaseAuth.instance.currentUser().then((user){
       FirebaseDatabase.instance.reference().child("member").child(user.uid).onChildChanged.listen((event) {
+        print("hey");
         setState(() {
 
         });
