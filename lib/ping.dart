@@ -10,7 +10,6 @@ import 'Model/Member.dart';
 
 class PingPage extends StatefulWidget {
   PingPage({Key key, @required this.id}) : super(key: key);
-
   final String id;
 
   @override
@@ -230,8 +229,9 @@ class _PingPage extends State<PingPage> {
   }
 
   Future<FirebaseUser> PingEvent(String name) async {
+    var date = DateTime.now();
     var memberDb = FirebaseDatabase.instance.reference().child("member");
-    var eventDb = FirebaseDatabase.instance.reference().child("events");
+    var eventDb = FirebaseDatabase.instance.reference().child("groups").child(widget.id).child("events").child(date.day.toString() + "-" + date.month.toString() + "-" + date.year.toString());
     final FirebaseUser user = await auth.currentUser();
     bool spamDiscovered = false;
 
@@ -244,7 +244,7 @@ class _PingPage extends State<PingPage> {
       Map<dynamic, dynamic> events  = snapshot.value;
       if(events != null) {
         events.forEach((eventKey, eventValue) async {
-          if (await instance.calcTimeDiff(instance.worldtime.toString(), eventValue['sentTime']) && eventValue['sender'] == user.uid || eventValue['type'] != "ping" || eventValue['senderName'] != name) {
+          if (await instance.calcTimeDiff(instance.worldtime.toString(), eventValue['sentTime']) && eventValue['sender'] == user.uid  && eventValue['pingLocation'] == "pinging" || eventValue['type'] != "ping" || eventValue['senderName'] != name) {
             //if not spamming within 5 minutes, create a ping event
             print("Not Spamming");
           }
@@ -273,10 +273,12 @@ class _PingPage extends State<PingPage> {
               'sender': user.uid,
               'senderName' : name,
               'receiver': key,
+              'triggerPerson' : user.displayName.trim(),
               'groupId' : widget.id,
               'type': 'ping',
-              'pingLocation' : 'no',
+              'pingLocation' : 'pinging',
               'location' : 'pinging',
+              'isReplied' : 'no',
               'sentTime': instance.worldtime.toString(),
             });
           }

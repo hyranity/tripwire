@@ -10,6 +10,9 @@ import 'Model/MyTheme.dart';
 import 'Model/world_time.dart';
 
 class PollPage extends StatefulWidget {
+  PollPage({Key key, @required this.id}) : super(key: key);
+  final String id;
+
   @override
   _PollPage createState() => _PollPage();
 }
@@ -150,7 +153,8 @@ class _PollPage extends State<PollPage> {
   }
 
   Future<FirebaseUser> PollEvent(String question) async {
-    var eventDb = FirebaseDatabase.instance.reference().child("events");
+    var date = DateTime.now();
+    var eventDb = FirebaseDatabase.instance.reference().child("groups").child(widget.id).child("events").child(date.day.toString() + "-" + date.month.toString() + "-" + date.year.toString());
     final FirebaseUser user = await auth.currentUser();
 
     //get time
@@ -161,9 +165,13 @@ class _PollPage extends State<PollPage> {
       'title' : 'Poll Question',
       'sender' : user.uid,
       'receiver' : 'all',
+      'triggerPerson' : user.displayName.trim(),
+      'groupId' : widget.id,
       'type' : 'poll',
       'sentTime' : wt.worldtime.toString(),
       'question' : question,
+      'yes' :0,
+      'no' :0,
     });
 
     MyTheme.alertMsg(context, "Polled ", "Your question is sent to everyone in this group.");

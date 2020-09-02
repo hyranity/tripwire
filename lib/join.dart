@@ -164,25 +164,38 @@ class _JoinPage extends State<JoinPage> {
     if (codeFound == true) {
       var joinGroupDb =
           FirebaseDatabase.instance.reference().child("groups").child(code);
-      joinGroupDb.child("members").once().then((DataSnapshot snapshot) {
-        // Ensure not joined yet
-        if (snapshot.value[user.uid] != null) {
-          MyTheme.alertMsg(
-              context, "Already joined", "You are already in this group");
-        } else {
-          joinGroupDb.child('members').update({
-            user.uid: user.email,
-          });
-          MyTheme.alertMsg(
-              context, "Joined", "You joined the group successfully");
-        }
 
-        // Update user's groupList
-      FirebaseAuth.instance.currentUser().then((user){
-        FirebaseDatabase.instance.reference().child("member").child(user.uid).child("groups").set({
-          code : code,
+      // Get user name
+      Global.getUserName().then((username) {
+        joinGroupDb.child("members").once().then((DataSnapshot snapshot) {
+          // Ensure not joined yet
+          if (snapshot.value != null && snapshot.value[user.uid] != null) {
+            MyTheme.alertMsg(
+                context, "Already joined", "You are already in this group");
+          } else {
+            joinGroupDb.child('members').update({
+              user.uid: {
+                "email": user.email,
+                "stepCountWhenJoined": Global.stepCount,
+                "name": username,
+              },
+            });
+            MyTheme.alertMsg(
+                context, "Joined", "You joined the group successfully");
+          }
+
+          // Update user's groupList
+          FirebaseAuth.instance.currentUser().then((user) {
+            FirebaseDatabase.instance
+                .reference()
+                .child("member")
+                .child(user.uid)
+                .child("groups")
+                .set({
+              code: code,
+            });
+          });
         });
-      });
       });
     } else {
       MyTheme.alertMsg(

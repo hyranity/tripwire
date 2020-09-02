@@ -1,9 +1,13 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:pedometer/pedometer.dart';
 import 'package:tripwire/Util/Global.dart';
 import 'package:tripwire/Util/Quick.dart';
+
+import 'Model/MyTheme.dart';
 
 class StepTracker extends StatefulWidget {
   StepTracker({Key key, this.title}) : super(key: key);
@@ -32,21 +36,52 @@ class _StepTracker extends State<StepTracker> {
     if (status == "walking") color = Colors.green;
 
     return Scaffold(
-      body: Center(
-        child: Container(
-          color: color,
-          width: Quick.getDeviceSize(context).width,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+      body: SafeArea(
+        child: Center(
+          child: Stack(
             children: [
               Container(
-                child: Text(
-                  steps.toString() + " steps taken",
+                alignment: Alignment.center,
+                color: Colors.white,
+                padding: EdgeInsets.only(top: 10, left: 18),
+                width: Quick.getDeviceSize(context).width,
+                child: Container(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Text(
+                        "Steps",
+
+                        style: GoogleFonts.poppins(
+                          fontSize: 30,
+                          fontWeight: FontWeight.w600,
+                          color: MyTheme.accentColor,
+
+                        ),
+                      ),
+                      Text(
+                        steps.toString(),
+                        style: GoogleFonts.poppins(
+                          fontSize: 70,
+                          fontWeight: FontWeight.w500,
+                          color: MyTheme.accentColor,
+                          height: 1,
+                        ),
+                      ),
+                      Container(
+                        child: Text(
+                          status,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-              Container(
-                child: Text(
-                  status,
+              Positioned(
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: MyTheme.backButton(context),
                 ),
               ),
             ],

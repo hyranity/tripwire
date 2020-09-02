@@ -19,6 +19,7 @@ import 'Model/Group.dart';
 import 'Model/LogEvent.dart';
 import 'Model/MyTheme.dart';
 import 'Model/action.dart';
+import 'Util/DB.dart';
 import 'come.dart';
 import 'poll.dart';
 import 'rally.dart';
@@ -42,6 +43,7 @@ class _GroupPage extends State<GroupPage> {
   Placemark location;
   TextEditingController locationText = new TextEditingController();
   String logResult = "Successful log";
+  var id = "";
   final FirebaseAuth auth = FirebaseAuth.instance;
   final replyController = new TextEditingController();
   bool logButtonEnabled = true;
@@ -54,6 +56,7 @@ class _GroupPage extends State<GroupPage> {
       print("Getting group data.... try #" + retryConnect.toString());
       loadGroupData();
       loadLocation();
+      calculateStepCount();
     }
 
     //Build main UI
@@ -109,6 +112,57 @@ class _GroupPage extends State<GroupPage> {
                     ),
                   ),
                 ))));
+  }
+
+  calculateStepCount() {
+    // Because step count persist BEFORE joining the group, make the current step zero by subtracting with stepsWhenJoining
+
+    // Access member WITHIN group tree
+    FirebaseAuth.instance.currentUser().then((user) {
+      var groupMember = FirebaseDatabase.instance
+          .reference()
+          .child("groups")
+          .child(group.id)
+          .child("members")
+          .child(user.uid);
+
+      groupMember.once().then((DataSnapshot userSnap) {
+        // If -1, that means this user is the creator. Set this step = currentStep
+        Map<dynamic, dynamic> member = userSnap.value;
+        int stepCountWhenJoined = userSnap.value["stepCountWhenJoined"];
+        int currentStepCount = userSnap.value["stepCount"] == null ? 0 : userSnap.value["stepCount"];
+
+        if (userSnap.value["stepCountWhenJoined"] == -1) {
+          stepCountWhenJoined = Global.stepCount;
+          // Update step count
+          currentStepCount = Global.stepCount -
+              stepCountWhenJoined; // Because user may join at step 100, few mins later at step 300, means 200 REAL steps
+        }
+        // If current step count is lower, means user restarted phone; add on to the DB one
+        else if (userSnap.value["stepCountWhenJoined"] > Global.stepCount) {
+          stepCountWhenJoined = 0;
+          currentStepCount += Global.stepCount;
+
+        } else if (stepCountWhenJoined == 0){
+          currentStepCount += Global.stepCount -
+              stepCountWhenJoined; // Because user may join at step 100, few mins later at step 300, means 200 REAL steps
+        } else {
+          // Update step count
+          currentStepCount = Global.stepCount -
+              stepCountWhenJoined; // Because user may join at step 100, few mins later at step 300, means 200 REAL steps
+        }
+
+
+        print(currentStepCount.toString() + " current");
+        print(stepCountWhenJoined.toString() + " stepCount");
+
+        // Update member
+        groupMember.update({
+          "stepCountWhenJoined": stepCountWhenJoined,
+          "stepCount": currentStepCount
+        });
+      });
+    });
   }
 
   // To load location
@@ -347,7 +401,6 @@ class _GroupPage extends State<GroupPage> {
             date.month.toString() +
             "-" +
             date.year.toString());
-
 
     events.once().then((DataSnapshot snapshot) {
       var eventLocationExists = false; // If a location already logged today
@@ -799,7 +852,7 @@ class _GroupPage extends State<GroupPage> {
                 Padding(
                   padding: const EdgeInsets.fromLTRB(25.0, 15.0, 0.0, 60.0),
                   child: Container(
-                    width: MediaQuery.of(context).size.width * 0.6,
+                    width: MediaQuery.of(context).size.width * 0.5,
                     child: Text(
                       desc,
                       textAlign: TextAlign.left,
@@ -845,7 +898,7 @@ class _GroupPage extends State<GroupPage> {
           if (button.type == "rally")
             confirmationDialog(context, button.dialogTitle, button.dialogDesc);
           else if (button.type == "poll")
-            Quick.navigate(context, () => PollPage());
+            Quick.navigate(context, () => PollPage(id: group.id));
           else if (button.type == "ping")
             Quick.navigate(context, () => PingPage(id: group.id));
           else if (button.type == "summon")
@@ -966,7 +1019,7 @@ class _GroupPage extends State<GroupPage> {
         .child("events");
     final FirebaseUser user = await auth.currentUser();
 
-
+    id = user.uid;
 
     return eventDb.once().then((DataSnapshot snapshot) {
       List<LogEvent> eventList = new List();
@@ -976,8 +1029,6 @@ class _GroupPage extends State<GroupPage> {
         Map<dynamic, dynamic> events = value;
 
         events.forEach((key, value) {
-
-
           // For location logs
           if (value["type"] == "location") {
             String attendStr = "";
@@ -988,7 +1039,7 @@ class _GroupPage extends State<GroupPage> {
               attendStr = value["attendees"].values.toList()[0];
 
               // Add "and others"
-              if(value["attendees"].length > 1){
+              if (value["attendees"].length > 1) {
                 attendStr = value["attendees"].length.toString() + " pax";
               }
             }
@@ -999,19 +1050,58 @@ class _GroupPage extends State<GroupPage> {
               sentTime: DateTime.parse(value['logTime']),
               isCommunication: false,
             ));
-          } else if (((value['receiver'] == user.uid ||
-                  value['receiver'] == 'all') &&
+          }
+          if (((value['receiver'] == user.uid || value['receiver'] == 'all') &&
               value['groupId'] == group.id)) {
-            eventList.add(new LogEvent(
-              title: value['title'],
-              triggerPerson: value['receiver'],
-              type: value['type'],
-              sentTime: DateTime.parse(value['sentTime']),
-              isCommunication: true,
-              sender: value['sender'],
-              receiver: value['receiver'],
-              location: "location",
-            ));
+            if (value['type'] == "ping") {
+              eventList.add(new LogEvent(
+                title: value['title'],
+                triggerPerson: value['triggerPerson'],
+                type: value['type'],
+                pingLocation: value['pingLocation'],
+                isReplied: value['isReplied'],
+                sentTime: DateTime.parse(value['sentTime']),
+                isCommunication: true,
+                sender: value['sender'],
+                receiver: value['receiver'],
+                location: value['location'],
+                answer: value['answer'],
+              ));
+            } else if (value['type'] == "poll") {
+              eventList.add(new LogEvent(
+                title: value['title'],
+                triggerPerson: value['triggerPerson'],
+                type: value['type'],
+                sentTime: DateTime.parse(value['sentTime']),
+                isCommunication: true,
+                sender: value['sender'],
+                receiver: value['receiver'],
+                yes: value['yes'],
+                no: value['no'],
+              ));
+            } else if (value['type'] == "come") {
+              eventList.add(new LogEvent(
+                title: value['title'],
+                triggerPerson: value['triggerPerson'],
+                type: value['type'],
+                isReplied: value['isReplied'],
+                sentTime: DateTime.parse(value['sentTime']),
+                isCommunication: true,
+                sender: value['sender'],
+                receiver: value['receiver'],
+                answer: value['answer'],
+              ));
+            } else {
+              eventList.add(new LogEvent(
+                title: value['title'],
+                triggerPerson: value['triggerPerson'],
+                type: value['type'],
+                sentTime: DateTime.parse(value['sentTime']),
+                isCommunication: true,
+                sender: value['sender'],
+                receiver: value['receiver'],
+              ));
+            }
           } else {
             // Don't show anything
           }
@@ -1022,14 +1112,15 @@ class _GroupPage extends State<GroupPage> {
   }
 
   Widget logEventList() {
-
-    FirebaseDatabase.instance.reference().child("groups").child(group.id).onChildChanged.listen((event) {
-      setState(() {
-
-      });
+    FirebaseDatabase.instance
+        .reference()
+        .child("groups")
+        .child(group.id)
+        .onChildChanged
+        .listen((event) {
+      setState(() {});
     });
     return Container(
-
       alignment: Alignment.topCenter,
       height: Quick.getDeviceSize(context).height * 0.5,
       child: FutureBuilder<List<LogEvent>>(
@@ -1064,12 +1155,20 @@ class _GroupPage extends State<GroupPage> {
                   } else {
                     //This is a communication event, so the following designs will be used:
                     //Rally
+
                     if (event.type == "rally") return rally(event);
-                    if (event.type == "ping") return ping(event);
-                    if (event.type == "come") return come(event);
-                    if (event.type == "poll") return poll(event);
-                    if (event.type == "ping" && event.pingLocation == "pinging")
+                    if (event.type == "ping" && event.isReplied == "no")
+                      return ping(event);
+                    if (event.type == "ping" && event.isReplied == "yes")
                       return pingBack(event);
+                    if (event.type == "come" && event.isReplied == "no")
+                      return come(event);
+                    if (event.type == "come" && event.isReplied == "yes")
+                      return comeBack(event);
+                    if (event.type == "poll" && event.sender == id)
+                      return pollBack(event);
+                    if (event.type == "poll" && event.sender != id)
+                      return poll(event);
 
                     //Default return (if no communication design is available)
                     return locationLog(event);
@@ -1114,7 +1213,7 @@ class _GroupPage extends State<GroupPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 Container(
-                  width: MediaQuery.of(context).size.width * 0.6,
+                  width: MediaQuery.of(context).size.width * 0.5,
                   child: Text(
                     event.title,
                     maxLines: 1,
@@ -1200,7 +1299,7 @@ class _GroupPage extends State<GroupPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 Container(
-                  width: MediaQuery.of(context).size.width * 0.6,
+                  width: MediaQuery.of(context).size.width * 0.5,
                   child: Text(
                     event.title,
                     maxLines: 1,
@@ -1301,7 +1400,7 @@ class _GroupPage extends State<GroupPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 Container(
-                  width: MediaQuery.of(context).size.width * 0.6,
+                  width: MediaQuery.of(context).size.width * 0.5,
                   child: Text(
                     event.title,
                     maxLines: 1,
@@ -1357,11 +1456,21 @@ class _GroupPage extends State<GroupPage> {
                 Container(
                   child: Row(
                     children: <Widget>[
-                      okOption(event, Icons.my_location, "give"),
+                      InkWell(
+                        child: okOption(event, Icons.my_location, "give"),
+                        onTap: () {
+                          PingReply(event.sentTime, 'yes');
+                        },
+                      ),
                       SizedBox(
                         width: 10,
                       ),
-                      noOption(event, Icons.cancel, "nah"),
+                      InkWell(
+                        child: noOption(event, Icons.cancel, "nah"),
+                        onTap: () {
+                          PingReply(event.sentTime, 'no');
+                        },
+                      ),
                     ],
                   ),
                 )
@@ -1378,6 +1487,10 @@ class _GroupPage extends State<GroupPage> {
       margin: EdgeInsets.only(left: 20, right: 20),
       height: 140,
       decoration: BoxDecoration(
+          border: Border.all(
+            color: Colors.green,
+            width: 1.5,
+          ),
           color: LogEvent.getColorScheme(event.type, true, 20),
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
@@ -1401,7 +1514,7 @@ class _GroupPage extends State<GroupPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 Container(
-                  width: MediaQuery.of(context).size.width * 0.6,
+                  width: MediaQuery.of(context).size.width * 0.5,
                   child: Text(
                     event.title,
                     maxLines: 1,
@@ -1457,30 +1570,36 @@ class _GroupPage extends State<GroupPage> {
                 Container(
                   child: Row(
                     children: <Widget>[
-                      Text(
-                        "Location : ",
-                        maxLines: 1,
-                        softWrap: false,
-                        overflow: TextOverflow.ellipsis,
-                        textAlign: TextAlign.left,
-                        style: GoogleFonts.poppins(
-                          fontSize: 23,
-                          color: LogEvent.getColorScheme(event.type, false, 45),
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                      Text(
-                        event.location,
-                        maxLines: 1,
-                        softWrap: false,
-                        overflow: TextOverflow.ellipsis,
-                        textAlign: TextAlign.left,
-                        style: GoogleFonts.poppins(
-                          fontSize: 23,
-                          color: LogEvent.getColorScheme(event.type, false, 45),
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
+                      if (event.answer == "yes")
+                        Text(
+                          event.location,
+                          maxLines: 1,
+                          softWrap: false,
+                          overflow: TextOverflow.ellipsis,
+                          textAlign: TextAlign.left,
+                          style: GoogleFonts.poppins(
+                            fontSize:
+                                13 + MediaQuery.of(context).size.width * 0.014,
+                            color:
+                                LogEvent.getColorScheme(event.type, false, 45),
+                            fontWeight: FontWeight.w500,
+                          ),
+                        )
+                      else
+                        Text(
+                          "Sorry, not now.",
+                          maxLines: 1,
+                          softWrap: false,
+                          overflow: TextOverflow.ellipsis,
+                          textAlign: TextAlign.left,
+                          style: GoogleFonts.poppins(
+                            fontSize:
+                                13 + MediaQuery.of(context).size.width * 0.014,
+                            color:
+                                LogEvent.getColorScheme(event.type, false, 45),
+                            fontWeight: FontWeight.w500,
+                          ),
+                        )
                     ],
                   ),
                 )
@@ -1520,7 +1639,7 @@ class _GroupPage extends State<GroupPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 Container(
-                  width: MediaQuery.of(context).size.width * 0.6,
+                  width: MediaQuery.of(context).size.width * 0.5,
                   child: Text(
                     event.title,
                     maxLines: 1,
@@ -1576,11 +1695,21 @@ class _GroupPage extends State<GroupPage> {
                 Container(
                   child: Row(
                     children: <Widget>[
-                      okOption(event, Icons.my_location, "okay"),
+                      InkWell(
+                        child: okOption(event, Icons.my_location, "okay"),
+                        onTap: () {
+                          PollReply(event.sentTime, "yes");
+                        },
+                      ),
                       SizedBox(
                         width: 10,
                       ),
-                      noOption(event, Icons.cancel, "nah"),
+                      InkWell(
+                        child: noOption(event, Icons.cancel, "nah"),
+                        onTap: () {
+                          PollReply(event.sentTime, "no");
+                        },
+                      ),
                     ],
                   ),
                 )
@@ -1591,6 +1720,124 @@ class _GroupPage extends State<GroupPage> {
       ),
     );
   }
+
+  Widget pollBack(LogEvent event) {
+    return InkWell(
+      onTap: () {},
+      child: Container(
+        margin: EdgeInsets.only(left: 20, right: 20),
+        height: 140,
+        decoration: BoxDecoration(
+            color: LogEvent.getColorScheme(event.type, true, 20),
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(
+                blurRadius: 15,
+                offset: Offset(0, 7),
+                color: Colors.grey.withOpacity(0.6),
+              )
+            ]),
+        child: Padding(
+          padding: const EdgeInsets.only(
+              left: 25.0, right: 25.0, top: 15, bottom: 15),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: <Widget>[
+              LogEvent.getIcon(event.type, 40),
+              SizedBox(
+                width: 16,
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Container(
+                    width: MediaQuery.of(context).size.width * 0.5,
+                    child: Text(
+                      event.title,
+                      maxLines: 1,
+                      softWrap: false,
+                      overflow: TextOverflow.ellipsis,
+                      textAlign: TextAlign.left,
+                      style: GoogleFonts.poppins(
+                        fontSize: 23,
+                        color: LogEvent.getColorScheme(event.type, false, 45),
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                  Row(
+                    children: <Widget>[
+                      Container(
+                        constraints: BoxConstraints(
+                          maxWidth: MediaQuery.of(context).size.width * 0.32,
+                        ),
+                        child: Text(
+                          event.triggerPerson,
+                          textAlign: TextAlign.left,
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
+                          style: GoogleFonts.poppins(
+                            fontSize:
+                                13 + MediaQuery.of(context).size.width * 0.014,
+                            color:
+                                LogEvent.getColorScheme(event.type, false, 15),
+                            fontWeight: FontWeight.w600,
+                            height: 1,
+                          ),
+                        ),
+                      ),
+                      SizedBox(
+                        width: 10,
+                      ),
+                      Text(
+                        event.timeSinceSet(),
+                        textAlign: TextAlign.left,
+                        style: GoogleFonts.poppins(
+                          fontSize:
+                              13 + MediaQuery.of(context).size.width * 0.014,
+                          color: LogEvent.getColorScheme(event.type, false, 5),
+                          fontWeight: FontWeight.w600,
+                          height: 1,
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(
+                    height: 0,
+                  ),
+                  Container(
+                    child: Row(
+                      children: <Widget>[
+                        Text(
+                          event.yes.toString() +
+                              " saying yes, \n" +
+                              event.no.toString() +
+                              " saying no",
+                          maxLines: 2,
+                          softWrap: false,
+                          overflow: TextOverflow.ellipsis,
+                          textAlign: TextAlign.left,
+                          style: GoogleFonts.poppins(
+                            fontSize:
+                                13 + MediaQuery.of(context).size.width * 0.014,
+                            color:
+                                LogEvent.getColorScheme(event.type, false, 45),
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget pollResult() {}
 
   Widget come(LogEvent event) {
     return Container(
@@ -1620,7 +1867,7 @@ class _GroupPage extends State<GroupPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 Container(
-                  width: MediaQuery.of(context).size.width * 0.6,
+                  width: MediaQuery.of(context).size.width * 0.5,
                   child: Text(
                     event.title,
                     maxLines: 1,
@@ -1676,11 +1923,146 @@ class _GroupPage extends State<GroupPage> {
                 Container(
                   child: Row(
                     children: <Widget>[
-                      okOption(event, Icons.my_location, "coming"),
+                      InkWell(
+                        child: okOption(event, Icons.my_location, "coming"),
+                        onTap: () {
+                          ComeReply(event.sentTime, "yes");
+                        },
+                      ),
                       SizedBox(
                         width: 10,
                       ),
-                      noOption(event, Icons.cancel, "nah"),
+                      InkWell(
+                        child: noOption(event, Icons.cancel, "nah"),
+                        onTap: () {
+                          ComeReply(event.sentTime, "no");
+                        },
+                      ),
+                    ],
+                  ),
+                )
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget comeBack(LogEvent event) {
+    return Container(
+      margin: EdgeInsets.only(left: 20, right: 20),
+      height: 140,
+      decoration: BoxDecoration(
+          color: LogEvent.getColorScheme(event.type, true, 20),
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              blurRadius: 15,
+              offset: Offset(0, 7),
+              color: Colors.grey.withOpacity(0.6),
+            )
+          ]),
+      child: Padding(
+        padding:
+            const EdgeInsets.only(left: 25.0, right: 25.0, top: 15, bottom: 15),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: <Widget>[
+            LogEvent.getIcon(event.type, 40),
+            SizedBox(
+              width: 16,
+            ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Container(
+                  width: MediaQuery.of(context).size.width * 0.5,
+                  child: Text(
+                    event.title,
+                    maxLines: 1,
+                    softWrap: false,
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.left,
+                    style: GoogleFonts.poppins(
+                      fontSize: 23,
+                      color: LogEvent.getColorScheme(event.type, false, 45),
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+                Row(
+                  children: <Widget>[
+                    Container(
+                      constraints: BoxConstraints(
+                        maxWidth: MediaQuery.of(context).size.width * 0.32,
+                      ),
+                      child: Text(
+                        event.triggerPerson,
+                        textAlign: TextAlign.left,
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
+                        style: GoogleFonts.poppins(
+                          fontSize:
+                              13 + MediaQuery.of(context).size.width * 0.014,
+                          color: LogEvent.getColorScheme(event.type, false, 15),
+                          fontWeight: FontWeight.w600,
+                          height: 1,
+                        ),
+                      ),
+                    ),
+                    SizedBox(
+                      width: 10,
+                    ),
+                    Text(
+                      event.timeSinceSet(),
+                      textAlign: TextAlign.left,
+                      style: GoogleFonts.poppins(
+                        fontSize:
+                            13 + MediaQuery.of(context).size.width * 0.014,
+                        color: LogEvent.getColorScheme(event.type, false, 5),
+                        fontWeight: FontWeight.w600,
+                        height: 1,
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(
+                  height: 15,
+                ),
+                Container(
+                  child: Row(
+                    children: <Widget>[
+                      if (event.answer == "yes")
+                        Text(
+                          "I'm coming",
+                          maxLines: 1,
+                          softWrap: false,
+                          overflow: TextOverflow.ellipsis,
+                          textAlign: TextAlign.left,
+                          style: GoogleFonts.poppins(
+                            fontSize:
+                                13 + MediaQuery.of(context).size.width * 0.014,
+                            color:
+                                LogEvent.getColorScheme(event.type, false, 45),
+                            fontWeight: FontWeight.w500,
+                          ),
+                        )
+                      else
+                        Text(
+                          "Sorry, I'm not coming",
+                          maxLines: 1,
+                          softWrap: false,
+                          overflow: TextOverflow.ellipsis,
+                          textAlign: TextAlign.left,
+                          style: GoogleFonts.poppins(
+                            fontSize:
+                                13 + MediaQuery.of(context).size.width * 0.014,
+                            color:
+                                LogEvent.getColorScheme(event.type, false, 45),
+                            fontWeight: FontWeight.w500,
+                          ),
+                        )
                     ],
                   ),
                 )
@@ -1904,7 +2286,7 @@ class _GroupPage extends State<GroupPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 Container(
-                  width: MediaQuery.of(context).size.width * 0.6,
+                  width: MediaQuery.of(context).size.width * 0.5,
                   child: Text(
                     group.name,
                     maxLines: 1,
@@ -1937,7 +2319,17 @@ class _GroupPage extends State<GroupPage> {
   }
 
   Future<FirebaseUser> RallyEvent() async {
-    var eventDb = FirebaseDatabase.instance.reference().child("events");
+    var date = DateTime.now();
+    var eventDb = FirebaseDatabase.instance
+        .reference()
+        .child("groups")
+        .child(group.id)
+        .child("events")
+        .child(date.day.toString() +
+            "-" +
+            date.month.toString() +
+            "-" +
+            date.year.toString());
     final FirebaseUser user = await auth.currentUser();
 
     //get time
@@ -1948,6 +2340,7 @@ class _GroupPage extends State<GroupPage> {
       'title': 'Rally Everyone',
       'sender': user.uid,
       'receiver': 'all',
+      'triggerPerson': user.displayName.trim(),
       'type': 'rally',
       'sentTime': wt.worldtime.toString(),
     });
@@ -1956,5 +2349,162 @@ class _GroupPage extends State<GroupPage> {
         context, "Rally ", "You have noticed all your group member to rally");
   }
 
-  void RemoveEvent() {}
+  Future<FirebaseUser> PingReply(DateTime sentTime, String answer) async {
+    var date = DateTime.now();
+    var eventDb = FirebaseDatabase.instance
+        .reference()
+        .child("groups")
+        .child(group.id)
+        .child("events")
+        .child(date.day.toString() +
+            "-" +
+            date.month.toString() +
+            "-" +
+            date.year.toString());
+    final FirebaseUser user = await auth.currentUser();
+
+    WorldTime instance = WorldTime(url: 'Asia/Kuala_Lumpur');
+    await instance.getTime();
+
+    Quick.getLocation().then((myLocation) {
+      String locationPing = myLocation.subLocality + ", " + myLocation.locality;
+
+      eventDb.once().then((DataSnapshot snapshot) {
+        Map<dynamic, dynamic> events = snapshot.value;
+        events.forEach((key, value) {
+          if (value['receiver'] == user.uid &&
+              value['sentTime'] == sentTime.toString() &&
+              value['type'] == 'ping') {
+            if (answer == "yes") {
+              eventDb.child(key).update({
+                'sender': user.uid,
+                'receiver': value['sender'],
+                'triggerPerson': user.displayName.trim(),
+                'location': locationPing,
+                'pingLocation': 'yes',
+                'isReplied': 'yes',
+                'answer': 'yes',
+                'sentTime': instance.worldtime.toString(),
+              });
+            } else if (answer == "no") {
+              eventDb.child(key).update({
+                'sender': user.uid,
+                'receiver': value['sender'],
+                'triggerPerson': user.displayName.trim(),
+                'pingLocation': 'yes',
+                'isReplied': 'yes',
+                'answer': 'no',
+                'sentTime': instance.worldtime.toString(),
+              });
+            }
+          }
+        });
+      });
+    });
+  }
+
+  Future<FirebaseUser> PollReply(DateTime sentTime, String reply) async {
+    var date = DateTime.now();
+    var eventDb = FirebaseDatabase.instance
+        .reference()
+        .child("groups")
+        .child(group.id)
+        .child("events")
+        .child(date.day.toString() +
+            "-" +
+            date.month.toString() +
+            "-" +
+            date.year.toString());
+    final FirebaseUser user = await auth.currentUser();
+    bool isAnswered = true;
+    int yes = 0;
+    int no = 0;
+
+    print("hello");
+
+    await eventDb.once().then((DataSnapshot snapshot) {
+      Map<dynamic, dynamic> events = snapshot.value;
+      events.forEach((key, value) {
+        if (value['receiver'] == "all" &&
+            !value['respondent'].toString().contains(user.uid) &&
+            value['sentTime'] == sentTime.toString() &&
+            value['type'] == 'poll') {
+          yes = value['yes'];
+          no = value['no'];
+
+          if (reply == "yes") {
+            yes += 1;
+          } else if (reply == "no") {
+            no += 1;
+          }
+
+          eventDb.child(key).update({
+            'isReplied': 'yes',
+            'yes': yes,
+            'no': no,
+          });
+          eventDb.child(key).child("respondent").update({
+            user.uid: user.displayName,
+          });
+          isAnswered = false;
+        }
+      });
+    });
+
+    if (isAnswered == true) {
+      MyTheme.alertMsg(context, "Polled", "You can't poll again");
+    } else {
+      MyTheme.alertMsg(context, "Polled Successfully", "You have polled !");
+    }
+  }
+
+  Future<FirebaseUser> ComeReply(DateTime sentTime, String answer) async {
+    var date = DateTime.now();
+    var eventDb = FirebaseDatabase.instance
+        .reference()
+        .child("groups")
+        .child(group.id)
+        .child("events")
+        .child(date.day.toString() +
+            "-" +
+            date.month.toString() +
+            "-" +
+            date.year.toString());
+    final FirebaseUser user = await auth.currentUser();
+
+    WorldTime instance = WorldTime(url: 'Asia/Kuala_Lumpur');
+    await instance.getTime();
+
+    eventDb.once().then((DataSnapshot snapshot) {
+      Map<dynamic, dynamic> events = snapshot.value;
+      events.forEach((key, value) {
+        if (value['receiver'] == user.uid &&
+            value['sentTime'] == sentTime.toString() &&
+            value['type'] == 'come') {
+          if (answer == "yes") {
+            eventDb.child(key).update({
+              'sender': user.uid,
+              'receiver': value['sender'],
+              'triggerPerson': user.displayName.trim(),
+              'pingLocation': 'yes',
+              'isReplied': 'yes',
+              'answer': 'yes',
+              'sentTime': instance.worldtime.toString(),
+            });
+          } else if (answer == "no") {
+            eventDb.child(key).update({
+              'sender': user.uid,
+              'receiver': value['sender'],
+              'triggerPerson': user.displayName.trim(),
+              'pingLocation': 'yes',
+              'isReplied': 'yes',
+              'answer': 'no',
+              'sentTime': instance.worldtime.toString(),
+            });
+          }
+        }
+      });
+    });
+    MyTheme.alertMsg(context, "Reply sent", "You have sent your reply");
+  }
 }

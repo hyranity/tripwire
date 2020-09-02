@@ -8,6 +8,8 @@ import 'Model/MyTheme.dart';
 import 'Model/world_time.dart';
 
 class RallyPage extends StatefulWidget {
+  RallyPage({Key key, @required this.id}) : super(key: key);
+  final String id;
   @override
   _RallyPage createState() => _RallyPage();
 }
@@ -21,7 +23,8 @@ class _RallyPage extends State<RallyPage> {
   }
 
   Future<FirebaseUser> RallyEvent() async {
-    var eventDb = FirebaseDatabase.instance.reference().child("events");
+    var date = DateTime.now();
+    var eventDb = FirebaseDatabase.instance.reference().child("groups").child(widget.id).child("events").child(date.day.toString() + "-" + date.month.toString() + "-" + date.year.toString());
     final FirebaseUser user = await auth.currentUser();
 
     //get time
@@ -32,7 +35,9 @@ class _RallyPage extends State<RallyPage> {
       'title' : 'Rally Everyone',
       'sender' : user.uid,
       'receiver' : 'all',
+      'groupId' : widget.id,
       'type' : 'rally',
+      'isReplied' : 'no',
       'sentTime' : wt.worldtime.toString(),
     });
 
