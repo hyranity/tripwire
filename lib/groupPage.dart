@@ -138,14 +138,13 @@ class _GroupPage extends State<GroupPage> {
           currentStepCount = Global.stepCount -
               stepCountWhenJoined; // Because user may join at step 100, few mins later at step 300, means 200 REAL steps
         }
-        // If current step count is lower, means user restarted phone; add on to the DB one
+        // If current step count is lower, means user JUST restarted phone; add on to the DB one
         else if (userSnap.value["stepCountWhenJoined"] > Global.stepCount) {
           stepCountWhenJoined = 0;
-          currentStepCount += Global.stepCount;
+          currentStepCount = Global.stepCount;
 
-        } else if (stepCountWhenJoined == 0){
-          currentStepCount += Global.stepCount -
-              stepCountWhenJoined; // Because user may join at step 100, few mins later at step 300, means 200 REAL steps
+          print("user just restarted phone");
+
         } else {
           // Update step count
           currentStepCount = Global.stepCount -
@@ -153,13 +152,10 @@ class _GroupPage extends State<GroupPage> {
         }
 
 
-        print(currentStepCount.toString() + " current");
-        print(stepCountWhenJoined.toString() + " stepCount");
-
         // Update member
         groupMember.update({
           "stepCountWhenJoined": stepCountWhenJoined,
-          "stepCount": currentStepCount
+          "stepCount": currentStepCount,
         });
       });
     });
