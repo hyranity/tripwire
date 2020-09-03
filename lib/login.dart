@@ -24,15 +24,17 @@ class _Login extends State<Login> {
   @override
   Widget build(BuildContext context) {
 
-// Check if  logged in
-//    FirebaseAuth.instance.currentUser().then((user) {
-//      if (user != null) {
-//        Navigator.of(context).pushReplacement(MaterialPageRoute(
-//            builder: (context) => MyHomePage()
-//        ));
-//        return;
-//      }
-//    });
+ //Check if  logged in
+    FirebaseAuth.instance.currentUser().then((user) {
+      if (user != null) {
+        print("user is logged in");
+        Navigator.of(context).pushReplacement(MaterialPageRoute(
+            builder: (context) => MyHomePage()
+        ));
+        print("guest detected");
+        return;
+      }
+    });
 
     return Scaffold(
       body: Center(
