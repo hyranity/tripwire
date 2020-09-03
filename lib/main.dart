@@ -94,14 +94,14 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void loadData() {
 
-    FirebaseAuth.instance.currentUser().then((user){
-      FirebaseDatabase.instance.reference().child("member").child(user.uid).onChildChanged.listen((event) {
-        print("hey");
-        setState(() {
-
-        });
-      });
-    });
+//    FirebaseAuth.instance.currentUser().then((user){
+//      FirebaseDatabase.instance.reference().child("member").child(user.uid).onChildChanged.listen((event) {
+//        print("hey");
+//        setState(() {
+//
+//        });
+//      });
+//    });
 
     getUserName();
     // Code possible thanks to https://www.digitalocean.com/community/tutorials/flutter-geolocator-plugin
@@ -488,6 +488,9 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Widget groupListWidget() {
+    FirebaseDatabase.instance.reference().child("groups").onChildChanged.listen((event) {setState(() {
+    }); });
+
     return Container(
       height: MediaQuery.of(context).size.height * 0.30,
       child: FutureBuilder<List<Group>>(

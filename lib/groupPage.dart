@@ -1072,6 +1072,7 @@ class _GroupPage extends State<GroupPage> {
                 isCommunication: true,
                 sender: value['sender'],
                 receiver: value['receiver'],
+                question : value['question'],
                 yes: value['yes'],
                 no: value['no'],
               ));
@@ -1608,110 +1609,115 @@ class _GroupPage extends State<GroupPage> {
   }
 
   Widget poll(LogEvent event) {
-    return Container(
-      margin: EdgeInsets.only(left: 20, right: 20),
-      height: 140,
-      decoration: BoxDecoration(
-          color: LogEvent.getColorScheme(event.type, true, 20),
-          borderRadius: BorderRadius.circular(20),
-          boxShadow: [
-            BoxShadow(
-              blurRadius: 15,
-              offset: Offset(0, 7),
-              color: Colors.grey.withOpacity(0.6),
-            )
-          ]),
-      child: Padding(
-        padding:
-            const EdgeInsets.only(left: 25.0, right: 25.0, top: 15, bottom: 15),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: <Widget>[
-            LogEvent.getIcon(event.type, 40),
-            SizedBox(
-              width: 16,
-            ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Container(
-                  width: MediaQuery.of(context).size.width * 0.5,
-                  child: Text(
-                    event.title,
-                    maxLines: 1,
-                    softWrap: false,
-                    overflow: TextOverflow.ellipsis,
-                    textAlign: TextAlign.left,
-                    style: GoogleFonts.poppins(
-                      fontSize: 23,
-                      color: LogEvent.getColorScheme(event.type, false, 45),
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ),
-                Row(
-                  children: <Widget>[
-                    Container(
-                      constraints: BoxConstraints(
-                        maxWidth: MediaQuery.of(context).size.width * 0.32,
-                      ),
-                      child: Text(
-                        event.triggerPerson,
-                        textAlign: TextAlign.left,
-                        overflow: TextOverflow.ellipsis,
-                        maxLines: 1,
-                        style: GoogleFonts.poppins(
-                          fontSize:
-                              13 + MediaQuery.of(context).size.width * 0.014,
-                          color: LogEvent.getColorScheme(event.type, false, 15),
-                          fontWeight: FontWeight.w600,
-                          height: 1,
-                        ),
-                      ),
-                    ),
-                    SizedBox(
-                      width: 10,
-                    ),
-                    Text(
-                      event.timeSinceSet(),
+    return InkWell(
+      onTap: () {
+        pollResult(event);
+      },
+      child: Container(
+        margin: EdgeInsets.only(left: 20, right: 20),
+        height: 140,
+        decoration: BoxDecoration(
+            color: LogEvent.getColorScheme(event.type, true, 20),
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(
+                blurRadius: 15,
+                offset: Offset(0, 7),
+                color: Colors.grey.withOpacity(0.6),
+              )
+            ]),
+        child: Padding(
+          padding:
+              const EdgeInsets.only(left: 25.0, right: 25.0, top: 15, bottom: 15),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: <Widget>[
+              LogEvent.getIcon(event.type, 40),
+              SizedBox(
+                width: 16,
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Container(
+                    width: MediaQuery.of(context).size.width * 0.5,
+                    child: Text(
+                      event.title,
+                      maxLines: 1,
+                      softWrap: false,
+                      overflow: TextOverflow.ellipsis,
                       textAlign: TextAlign.left,
                       style: GoogleFonts.poppins(
-                        fontSize:
-                            13 + MediaQuery.of(context).size.width * 0.014,
-                        color: LogEvent.getColorScheme(event.type, false, 5),
-                        fontWeight: FontWeight.w600,
-                        height: 1,
+                        fontSize: 23,
+                        color: LogEvent.getColorScheme(event.type, false, 45),
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
-                  ],
-                ),
-                SizedBox(
-                  height: 15,
-                ),
-                Container(
-                  child: Row(
+                  ),
+                  Row(
                     children: <Widget>[
-                      InkWell(
-                        child: okOption(event, Icons.my_location, "okay"),
-                        onTap: () {
-                          PollReply(event.sentTime, "yes");
-                        },
+                      Container(
+                        constraints: BoxConstraints(
+                          maxWidth: MediaQuery.of(context).size.width * 0.32,
+                        ),
+                        child: Text(
+                          event.triggerPerson,
+                          textAlign: TextAlign.left,
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
+                          style: GoogleFonts.poppins(
+                            fontSize:
+                                13 + MediaQuery.of(context).size.width * 0.014,
+                            color: LogEvent.getColorScheme(event.type, false, 15),
+                            fontWeight: FontWeight.w600,
+                            height: 1,
+                          ),
+                        ),
                       ),
                       SizedBox(
                         width: 10,
                       ),
-                      InkWell(
-                        child: noOption(event, Icons.cancel, "nah"),
-                        onTap: () {
-                          PollReply(event.sentTime, "no");
-                        },
+                      Text(
+                        event.timeSinceSet(),
+                        textAlign: TextAlign.left,
+                        style: GoogleFonts.poppins(
+                          fontSize:
+                              13 + MediaQuery.of(context).size.width * 0.014,
+                          color: LogEvent.getColorScheme(event.type, false, 5),
+                          fontWeight: FontWeight.w600,
+                          height: 1,
+                        ),
                       ),
                     ],
                   ),
-                )
-              ],
-            ),
-          ],
+                  SizedBox(
+                    height: 15,
+                  ),
+                  Container(
+                    child: Row(
+                      children: <Widget>[
+                        InkWell(
+                          child: okOption(event, Icons.my_location, "okay"),
+                          onTap: () {
+                            PollReply(event.sentTime, "yes");
+                          },
+                        ),
+                        SizedBox(
+                          width: 10,
+                        ),
+                        InkWell(
+                          child: noOption(event, Icons.cancel, "nah"),
+                          onTap: () {
+                            PollReply(event.sentTime, "no");
+                          },
+                        ),
+                      ],
+                    ),
+                  )
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -1719,7 +1725,9 @@ class _GroupPage extends State<GroupPage> {
 
   Widget pollBack(LogEvent event) {
     return InkWell(
-      onTap: () {},
+      onTap: () {
+        pollResult(event);
+      },
       child: Container(
         margin: EdgeInsets.only(left: 20, right: 20),
         height: 140,
@@ -1833,7 +1841,50 @@ class _GroupPage extends State<GroupPage> {
     );
   }
 
-  Widget pollResult() {}
+  Widget pollResult(LogEvent event) {
+    showModalBottomSheet(
+        barrierColor: Color.fromRGBO(0, 0, 0, 0.01),
+        context: context,
+        builder: (BuildContext builder) {
+      return Container (
+        height: Quick.getDeviceSize(context).height * 0.5,
+        decoration: BoxDecoration (
+          color: LogEvent.getColorScheme(event.type, true, 20),
+          borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(20),
+              topRight: Radius.circular(20)),
+            boxShadow: [
+              BoxShadow(
+                blurRadius: 10,
+                color: Colors.grey.withOpacity(1),
+              )
+            ]
+        ),
+
+        child: Padding(
+          padding: const EdgeInsets.only(top: 15),
+          child : Column (
+            children: <Widget> [
+              Text (
+                "Question",
+                style: GoogleFonts.poppins(
+                fontSize: 30,
+                fontWeight: FontWeight.w600,
+                color: LogEvent.getColorScheme(event.type, false, 10),
+              )),
+              Text (
+                event.question,
+                style: GoogleFonts.poppins(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w600,
+                  color: LogEvent.getColorScheme(event.type, false, 20),
+              )),
+            ],
+          ),
+        ),
+      );
+    });
+  }
 
   Widget come(LogEvent event) {
     return Container(
@@ -1950,6 +2001,10 @@ class _GroupPage extends State<GroupPage> {
       margin: EdgeInsets.only(left: 20, right: 20),
       height: 140,
       decoration: BoxDecoration(
+          border: Border.all(
+            color: Colors.green,
+            width: 1.5,
+          ),
           color: LogEvent.getColorScheme(event.type, true, 20),
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
