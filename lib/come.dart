@@ -134,22 +134,10 @@ class _ComePage extends State<ComePage> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.start,
             children: <Widget>[
-              Container(
-                height: 40,
-                width: 40,
-                decoration: BoxDecoration(
-                    boxShadow: [
-                      BoxShadow(
-                        blurRadius: 7,
-                        color: Colors.black.withOpacity(0.3),
-                      )
-                    ],
-                    shape: BoxShape.circle,
-                    image: DecorationImage(
-                      fit: BoxFit.fill,
-                      image: NetworkImage(
-                          'https://flutter.github.io/assets-for-api-docs/assets/widgets/owl.jpg'),
-                    )),
+              Icon (
+                Icons.face,
+                color: Colors.white70,
+                size: 30,
               ),
               SizedBox(
                 width: 16,
@@ -164,6 +152,7 @@ class _ComePage extends State<ComePage> {
                   textAlign: TextAlign.left,
                   style: GoogleFonts.poppins(
                     fontSize: 20,
+                    color: Colors.white70,
                   ),
                 ),
               ),

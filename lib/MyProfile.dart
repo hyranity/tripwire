@@ -1,24 +1,26 @@
 import 'dart:async';
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:pedometer/pedometer.dart';
 import 'package:tripwire/Util/Global.dart';
 import 'package:tripwire/Util/Quick.dart';
+import 'package:tripwire/login.dart';
 
 import 'Model/MyTheme.dart';
 
-class StepTracker extends StatefulWidget {
-  StepTracker({Key key, this.title}) : super(key: key);
+class MyProfile extends StatefulWidget {
+  MyProfile({Key key, this.title}) : super(key: key);
 
   final String title;
 
   @override
-  _StepTracker createState() => _StepTracker();
+  _MyProfile createState() => _MyProfile();
 }
 
-class _StepTracker extends State<StepTracker> {
+class _MyProfile extends State<MyProfile> {
   int steps = Global.stepCount; // Global.stepCount stores the last known step value
   String status = "stopped";
 
@@ -80,8 +82,36 @@ class _StepTracker extends State<StepTracker> {
               ),
               Positioned(
                 child: Padding(
-                  padding: const EdgeInsets.all(8.0),
+                  padding: const EdgeInsets.all(20.0),
                   child: MyTheme.backButton(context),
+                ),
+              ),
+              Positioned (
+                right: 5,
+                child : InkWell (
+                  child: InkWell(
+                    onTap: () {
+                      Logout();
+                    },
+                    child: Container (
+                      height:60,
+                      width:60,
+                      decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(10),
+                          boxShadow: [
+                            BoxShadow(
+                              blurRadius: 25,
+                              color: Colors.grey.withOpacity(0.3),
+                            )
+                          ]),
+                      child: Icon(
+                        Icons.exit_to_app,
+                        size: 25,
+                        color: Colors.red,
+                      ),
+                    ),
+                  ),
                 ),
               ),
             ],
@@ -113,5 +143,18 @@ class _StepTracker extends State<StepTracker> {
       });
 
     });
+  }
+
+  Future<void> Logout() async {
+    try {
+      await FirebaseAuth.instance.signOut();
+    }
+    catch(ex) {
+      print("Error : $ex");
+    }
+
+
+
+    Quick.navigate(context, () => Login());
   }
 }

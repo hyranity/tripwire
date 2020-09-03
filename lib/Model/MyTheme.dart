@@ -50,7 +50,7 @@ class MyTheme {
               borderRadius: BorderRadius.circular(15)
           ),
           child: Container(
-            height: 300,
+            height: 350,
             child: Column(
               children: <Widget> [
                 Padding(
