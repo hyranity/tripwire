@@ -7,20 +7,20 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:pedometer/pedometer.dart';
 import 'package:tripwire/Util/Global.dart';
 import 'package:tripwire/Util/Quick.dart';
+import 'package:tripwire/login.dart';
 
 import 'Model/MyTheme.dart';
-import 'login.dart';
 
-class StepTracker extends StatefulWidget {
-  StepTracker({Key key, this.title}) : super(key: key);
+class MyProfile extends StatefulWidget {
+  MyProfile({Key key, this.title}) : super(key: key);
 
   final String title;
 
   @override
-  _StepTracker createState() => _StepTracker();
+  _MyProfile createState() => _MyProfile();
 }
 
-class _StepTracker extends State<StepTracker> {
+class _MyProfile extends State<MyProfile> {
   int steps = Global.stepCount; // Global.stepCount stores the last known step value
   String status = "stopped";
 
@@ -152,6 +152,8 @@ class _StepTracker extends State<StepTracker> {
     catch(ex) {
       print("Error : $ex");
     }
+
+
 
     Quick.navigate(context, () => Login());
   }

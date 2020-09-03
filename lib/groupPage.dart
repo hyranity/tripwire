@@ -10,6 +10,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:marquee_widget/marquee_widget.dart';
 import 'package:tinycolor/tinycolor.dart';
+import 'package:tripwire/Model/CurrentLocation.dart';
 import 'package:tripwire/Model/world_time.dart';
 import 'package:tripwire/Util/Global.dart';
 import 'package:tripwire/Util/Quick.dart';
@@ -374,127 +375,133 @@ class _GroupPage extends State<GroupPage> {
 
   // Log the user's location
   performLogLocation(context) {
-    int coolDownMins =
-        30; // Minutes until the next event is count as a separate one, even if same location
 
-    if (locationText.text.length == 0) {
-      logError(context, "Location cannot be empty!");
-      setState(() {
-        logButtonEnabled = true; // Prevent button spamming
-      });
-      return;
-    }
+    Quick.getWeather(location).then((weather){
+      
+      int coolDownMins =
+      30; // Minutes until the next event is count as a separate one, even if same location
 
-    // Find today's date in journal
-    var date = DateTime.now();
-    var events = FirebaseDatabase.instance
-        .reference()
-        .child("groups")
-        .child(group.id)
-        .child("events")
-        .child(date.day.toString() +
-            "-" +
-            date.month.toString() +
-            "-" +
-            date.year.toString());
+      if (locationText.text.length == 0) {
+        logError(context, "Location cannot be empty!");
+        setState(() {
+          logButtonEnabled = true; // Prevent button spamming
+        });
+        return;
+      }
 
-    events.once().then((DataSnapshot snapshot) {
-      var eventLocationExists = false; // If a location already logged today
+      // Find today's date in journal
+      var date = DateTime.now();
+      var events = FirebaseDatabase.instance
+          .reference()
+          .child("groups")
+          .child(group.id)
+          .child("events")
+          .child(date.day.toString() +
+          "-" +
+          date.month.toString() +
+          "-" +
+          date.year.toString());
 
-      Map<dynamic, dynamic> eventList = snapshot.value;
+      events.once().then((DataSnapshot snapshot) {
+        var eventLocationExists = false; // If a location already logged today
 
-      // Check if an event day already created
-      if (eventList != null) {
-        // Loop through each event
-        for (var event in eventList.values) {
-          print(event["location"]);
+        Map<dynamic, dynamic> eventList = snapshot.value;
 
-          if (event["type"] == "location") {
-            // Check how long since the event was made
-            var difference = DateTime.now()
-                .difference(DateTime.parse(event["logTime"]))
-                .inMinutes;
+        // Check if an event day already created
+        if (eventList != null) {
+          // Loop through each event
+          for (var event in eventList.values) {
+            print(event["location"]);
 
-            // Is this location already logged within the cooldown limit?
-            if (locationText.text == event["location"] &&
-                difference < coolDownMins) {
-              // Event exists
-              eventLocationExists = true;
+            if (event["type"] == "location") {
+              // Check how long since the event was made
+              var difference = DateTime.now()
+                  .difference(DateTime.parse(event["logTime"]))
+                  .inMinutes;
 
-              //Is current user already logged inside?
-              Map<dynamic, dynamic> attendees = event["attendees"];
-              Global.getUserName().then((name) {
-                if (attendees != null && attendees[name] != null) {
-                  // User already logged this location
-                  print("User already attended");
-                  logSuccess(context, "You've already attended!");
-                  setState(() {
-                    logButtonEnabled = true; // Prevent button spamming
-                  });
-                } else {
-                  // Not yet, add this member inside
-                  print("Adding " + name + " to attendees");
-                  var thisLoggedLocation = FirebaseDatabase.instance
-                      .reference()
-                      .child("groups")
-                      .child(group.id)
-                      .child("event")
-                      .child(date.day.toString() +
-                          "-" +
-                          date.month.toString() +
-                          "-" +
-                          date.year.toString())
-                      .child(event["id"]);
+              // Is this location already logged within the cooldown limit?
+              if (locationText.text == event["location"] &&
+                  difference < coolDownMins) {
+                // Event exists
+                eventLocationExists = true;
 
-                  // New attendant
-                  thisLoggedLocation
-                      .child("attendees")
-                      .set({name: name}).then((value) {
+                //Is current user already logged inside?
+                Map<dynamic, dynamic> attendees = event["attendees"];
+                Global.getUserName().then((name) {
+                  if (attendees != null && attendees[name] != null) {
+                    // User already logged this location
+                    print("User already attended");
+                    logSuccess(context, "You've already attended!");
                     setState(() {
                       logButtonEnabled = true; // Prevent button spamming
                     });
-                  });
-                  logSuccess(context, "Location logged successfully!");
-                }
-              });
+                  } else {
+                    // Not yet, add this member inside
+                    print("Adding " + name + " to attendees");
+                    var thisLoggedLocation = FirebaseDatabase.instance
+                        .reference()
+                        .child("groups")
+                        .child(group.id)
+                        .child("event")
+                        .child(date.day.toString() +
+                        "-" +
+                        date.month.toString() +
+                        "-" +
+                        date.year.toString())
+                        .child(event["id"]);
 
-              break; // Break if event location already exist
+                    // New attendant
+                    thisLoggedLocation
+                        .child("attendees")
+                        .set({name: name}).then((value) {
+                      setState(() {
+                        logButtonEnabled = true; // Prevent button spamming
+                      });
+                    });
+                    logSuccess(context, "Location logged successfully!");
+                  }
+                });
+
+                break; // Break if event location already exist
+              }
             }
           }
         }
-      }
 
-      // Not logged yet
-      if (!eventLocationExists) {
-        logSuccess(context, "Location logged successfully!");
+        // Not logged yet
+        if (!eventLocationExists) {
+          logSuccess(context, "Location logged successfully!");
 
-        // Create new log event and add the user inside it
-        Global.getUserName().then((name) {
-          var logEvent = FirebaseDatabase.instance
-              .reference()
-              .child("groups")
-              .child(group.id)
-              .child("events")
-              .child(date.day.toString() +
-                  "-" +
-                  date.month.toString() +
-                  "-" +
-                  date.year.toString());
+          // Create new log event and add the user inside it
+          Global.getUserName().then((name) {
+            var logEvent = FirebaseDatabase.instance
+                .reference()
+                .child("groups")
+                .child(group.id)
+                .child("events")
+                .child(date.day.toString() +
+                "-" +
+                date.month.toString() +
+                "-" +
+                date.year.toString());
 
-          logEvent.child(logEvent.push().key).set({
-            "type": "location",
-            "location": locationText.text,
-            "logTime": DateTime.now().toString(),
-            "attendees": {
-              name: name,
-            }
-          }).then((value) {
-            setState(() {
-              logButtonEnabled = true; // Prevent button spamming
+            logEvent.child(logEvent.push().key).set({
+              "type": "location",
+              "location": locationText.text,
+              "temperature" : weather.temperature.celsius.toStringAsFixed(0) + "°C",
+              "weather" : weather.weatherMain,
+              "logTime": DateTime.now().toString(),
+              "attendees": {
+                name: name,
+              }
+            }).then((value) {
+              setState(() {
+                logButtonEnabled = true; // Prevent button spamming
+              });
             });
           });
-        });
-      }
+        }
+      });
     });
   }
 
