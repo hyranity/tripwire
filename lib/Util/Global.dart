@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:pedometer/pedometer.dart';
@@ -16,9 +17,12 @@ class Global {
   // Stores the latest step data but you need to repeatedly access it
   static int stepCount = 0;
 
+
   static Future<void> beginListening(context) async {
-
-
+    final FirebaseAuth auth = FirebaseAuth.instance;
+    final FirebaseUser user = await auth.currentUser();
+    TextEditingController locationText = new TextEditingController();
+    
       pedestrianStatusStream = Pedometer.pedestrianStatusStream;
       stepCountStream = Pedometer.stepCountStream;
 
@@ -27,6 +31,13 @@ class Global {
       try {
         stepCountStream.listen((event) {
           stepCount = event.steps;
+
+          if(stepCount > 100) FirebaseDatabase.instance.reference().child("member").set({
+            user.uid: {
+              'location' : locationText.text,
+              'time' : DateTime.now().toString(),
+            },
+          });
 
         }).onError((onError) {
           MyTheme.alertMsg(context, "Couldn't track steps",
