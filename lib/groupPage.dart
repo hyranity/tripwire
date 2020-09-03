@@ -131,12 +131,8 @@ class _GroupPage extends State<GroupPage> {
         Map<dynamic, dynamic> member = userSnap.value;
         int stepCountWhenJoined = userSnap.value["stepCountWhenJoined"];
         int currentStepCount = userSnap.value["stepCount"] == null ? 0 : userSnap.value["stepCount"];
-        int justRestartedStep = userSnap.value["justRestartedStep"] == null ? 0 : userSnap.value["justRestartedStep"];
 
-        // To prevent multiple repeating step increments
-        if(justRestartedStep > 0 && justRestartedStep + Global.stepCount == userSnap.value["stepCount"]) {
-          // Don't do anything
-        } else if (userSnap.value["stepCountWhenJoined"] == -1) {
+        if (userSnap.value["stepCountWhenJoined"] == -1) {
           stepCountWhenJoined = Global.stepCount;
           // Update step count
           currentStepCount = Global.stepCount -
@@ -145,13 +141,10 @@ class _GroupPage extends State<GroupPage> {
         // If current step count is lower, means user JUST restarted phone; add on to the DB one
         else if (userSnap.value["stepCountWhenJoined"] > Global.stepCount) {
           stepCountWhenJoined = 0;
-          justRestartedStep = currentStepCount;
-          currentStepCount += Global.stepCount;
+          currentStepCount = Global.stepCount;
 
-        } else if (stepCountWhenJoined == 0 && currentStepCount > Global.stepCount){
-          // User restarted phone after he joined the group
-          // 50 steps before restart, new 30 steps. 20 = 50 - 30 = difference.
-          currentStepCount += (currentStepCount - Global.stepCount);
+          print("user just restarted phone");
+
         } else {
           // Update step count
           currentStepCount = Global.stepCount -
@@ -159,14 +152,10 @@ class _GroupPage extends State<GroupPage> {
         }
 
 
-        print(currentStepCount.toString() + " current");
-        print(stepCountWhenJoined.toString() + " stepCount");
-
         // Update member
         groupMember.update({
           "stepCountWhenJoined": stepCountWhenJoined,
           "stepCount": currentStepCount,
-          "justRestartedStep" : justRestartedStep,
         });
       });
     });
