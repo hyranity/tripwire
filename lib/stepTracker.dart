@@ -9,6 +9,7 @@ import 'package:tripwire/Util/Global.dart';
 import 'package:tripwire/Util/Quick.dart';
 
 import 'Model/MyTheme.dart';
+import 'login.dart';
 
 class StepTracker extends StatefulWidget {
   StepTracker({Key key, this.title}) : super(key: key);
@@ -152,6 +153,6 @@ class _StepTracker extends State<StepTracker> {
       print("Error : $ex");
     }
 
-    Navigator.of(context).popUntil((route) => route.isFirst);
+    Quick.navigate(context, () => Login());
   }
 }
