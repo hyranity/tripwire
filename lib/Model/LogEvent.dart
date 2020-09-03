@@ -17,8 +17,9 @@ class LogEvent{
   String answer;
   int yes;
   int no;
+  String response;
 
-  LogEvent({this.title = "Event X", this.triggerPerson = "John Doe", this.type = "location", this.sentTime = null, this.isCommunication = true, this.sender="sender", this.receiver="receiver", this.pingLocation = "not pinging", this.location="location", this.isReplied = "no", this.question = "question", this.answer="answer", this.yes = 0, this.no = 0,});
+  LogEvent({this.title = "Event X", this.triggerPerson = "John Doe", this.type = "location", this.sentTime = null, this.isCommunication = true, this.sender="sender", this.receiver="receiver", this.pingLocation = "not pinging", this.location="location", this.isReplied = "no", this.question = "question", this.answer="answer", this.yes = 0, this.no = 0, this.response = ""});
 
   //Returns an icon based on its type
   static Widget getIcon(String type, double size){

@@ -1,5 +1,5 @@
 import 'package:geolocator/geolocator.dart';
-import 'package:weather/weather_library.dart';
+import 'package:weather/weather.dart';
 
 class CurrentData{
   static Future<Placemark> place = loadLocation();

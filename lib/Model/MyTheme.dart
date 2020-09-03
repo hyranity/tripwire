@@ -54,7 +54,7 @@ class MyTheme {
             child: Column(
               children: <Widget> [
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(25.0 ,15.0 ,0.0 ,15.0),
+                  padding: const EdgeInsets.fromLTRB(25.0 ,15.0 ,0.0 ,10.0),
                   child: Container(
                     width: MediaQuery.of(context).size.width * 0.6,
                     child: Text(
@@ -64,12 +64,13 @@ class MyTheme {
                         fontSize: 30,
                         color: Colors.black,
                         fontWeight: FontWeight.w500,
+
                       ),
                     ),
                   ),
                 ),
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(25.0 ,15.0 ,0.0 ,60.0),
+                  padding: const EdgeInsets.fromLTRB(25.0 ,15.0 ,0.0 ,50.0),
                   child: Container(
                     width: MediaQuery.of(context).size.width * 0.6,
                     child: Text(
