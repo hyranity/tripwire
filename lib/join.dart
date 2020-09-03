@@ -199,7 +199,7 @@ class _JoinPage extends State<JoinPage> {
       });
     } else {
       MyTheme.alertMsg(
-          context, "Wrong Group Code ", "Group is not Found, Try again.");
+          context, "Wrong Group Code ", "Group doesn't exist, Try again.");
     }
   }
 }

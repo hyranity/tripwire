@@ -4,13 +4,14 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:tripwire/Model/classes.dart';
 import 'package:tripwire/Util/Global.dart';
 import 'package:tripwire/join.dart';
 import 'package:tripwire/stepTracker.dart';
-import 'package:weather/weather_library.dart';
+import 'package:weather/weather.dart';
 
 import 'Model/CurrentLocation.dart';
 import 'Model/Group.dart';
@@ -89,11 +90,18 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     // Begin listening for steps
-    Global.beginListening();
+    {
+      try {
+        Global.beginListening(context).catchError((error){
+          print("LOL");
+        });
+      } catch (e) {
+        print("LOL");
+      }
+    }
   }
 
   void loadData() {
-
 //    FirebaseAuth.instance.currentUser().then((user){
 //      FirebaseDatabase.instance.reference().child("member").child(user.uid).onChildChanged.listen((event) {
 //        print("hey");
@@ -103,7 +111,6 @@ class _MyHomePageState extends State<MyHomePage> {
 //      });
 //    });
 
-    getUserName();
     // Code possible thanks to https://www.digitalocean.com/community/tutorials/flutter-geolocator-plugin
 
     geolocator
@@ -221,15 +228,35 @@ class _MyHomePageState extends State<MyHomePage> {
                       fontWeight: FontWeight.w600,
                     ),
                   ),
-                  Text(
-                    username,
-                    textAlign: TextAlign.left,
-                    style: GoogleFonts.poppins(
-                      color: Color(0xff8FBF88),
-                      fontSize: 20,
-                      height: 1,
-                      fontWeight: FontWeight.w600,
-                    ),
+                  FutureBuilder<String>(
+                    future: getUserName(),
+                    builder:
+                        (BuildContext context, AsyncSnapshot<String> snapshot) {
+                      if (snapshot.connectionState != ConnectionState.done ||
+                          !snapshot.hasData) {
+                        return Text(
+                          "Loading name",
+                          textAlign: TextAlign.left,
+                          style: GoogleFonts.poppins(
+                            color: Color(0xff8FBF88),
+                            fontSize: 20,
+                            height: 1,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        );
+                      }
+
+                      return Text(
+                        snapshot.data,
+                        textAlign: TextAlign.left,
+                        style: GoogleFonts.poppins(
+                          color: Color(0xff8FBF88),
+                          fontSize: 20,
+                          height: 1,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      );
+                    },
                   ),
                 ],
               ),
@@ -488,8 +515,13 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Widget groupListWidget() {
-    FirebaseDatabase.instance.reference().child("groups").onChildChanged.listen((event) {setState(() {
-    }); });
+    FirebaseDatabase.instance
+        .reference()
+        .child("groups")
+        .onChildChanged
+        .listen((event) {
+      setState(() {});
+    });
 
     return Container(
       height: MediaQuery.of(context).size.height * 0.30,
@@ -859,13 +891,12 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-  Future<String>getUserName() async {
-    print("getting username");
-    final FirebaseUser user = await auth.currentUser();
-    DB
-        .get(DB.db().reference().child("member").child(user.uid))
-        .then((var value) {
-      return value["name"];
+  Future<String> getUserName() {
+    return auth.currentUser().then((user) {
+      return FirebaseDatabase.instance.reference().child("member").child(user.uid).once().then((userSnap){
+
+        return userSnap.value["name"];
+      });
     });
   }
 }
