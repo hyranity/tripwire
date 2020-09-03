@@ -17,7 +17,6 @@ class Global {
   static int stepCount = 0;
 
   static Future<void> beginListening(context) async {
-    // Begin listening
 
 
       pedestrianStatusStream = Pedometer.pedestrianStatusStream;
@@ -25,13 +24,18 @@ class Global {
 
 
       // To store steps in stepCount variable
-      stepCountStream.listen((event) {
-        stepCount = event.steps;
+      try {
+        stepCountStream.listen((event) {
+          stepCount = event.steps;
 
-      }).onError((onError) {
-        MyTheme.alertMsg(context, "Couldn't count steps",
-            "It seems like your device does not support this step counter feature.");
-      });
+        }).onError((onError) {
+          MyTheme.alertMsg(context, "Couldn't track steps",
+              "Your device doesn't support the step counter feature.");
+        });
+      } on PlatformException catch (e) {
+        MyTheme.alertMsg(context, "Couldn't track steps",
+            "Your device doesn't support the step counter feature.");
+      }
 
   }
 

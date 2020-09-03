@@ -10,7 +10,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:tripwire/Model/classes.dart';
 import 'package:tripwire/Util/Global.dart';
 import 'package:tripwire/join.dart';
-import 'package:tripwire/stepTracker.dart';
+import 'package:tripwire/MyProfile.dart';
 import 'package:weather/weather.dart';
 
 import 'Model/CurrentLocation.dart';
@@ -91,13 +91,7 @@ class _MyHomePageState extends State<MyHomePage> {
   void initState() {
     // Begin listening for steps
     {
-      try {
-        Global.beginListening(context).catchError((error){
-          print("LOL");
-        });
-      } catch (e) {
-        print("LOL");
-      }
+      Global.beginListening(context);
     }
   }
 
@@ -112,6 +106,9 @@ class _MyHomePageState extends State<MyHomePage> {
 //    });
 
     // Code possible thanks to https://www.digitalocean.com/community/tutorials/flutter-geolocator-plugin
+
+    // Begin listening
+
 
     geolocator
         .getCurrentPosition(desiredAccuracy: LocationAccuracy.best)
@@ -158,6 +155,13 @@ class _MyHomePageState extends State<MyHomePage> {
       repeater++;
       print(repeater);
       loadData();
+      return Container(
+        color: Colors.white,
+        alignment: Alignment.center,
+        height: Quick.getDeviceSize(context).width * 0.5,
+        width: Quick.getDeviceSize(context).width * 0.5,
+        child: new CircularProgressIndicator(),
+      );
     }
 
     return Scaffold(
@@ -263,7 +267,7 @@ class _MyHomePageState extends State<MyHomePage> {
               new Spacer(),
               InkWell(
                 onTap: () {
-                  Quick.navigate(context, () => StepTracker());
+                  Quick.navigate(context, () => MyProfile());
                 },
                 child: Container(
                   height: 60,
