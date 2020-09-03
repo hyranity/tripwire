@@ -21,7 +21,6 @@ class _Register extends State<Register> {
   final emailController = new TextEditingController();
   final passwordController = new TextEditingController();
   final nameController = new TextEditingController();
-  final phoneNumController = new TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -116,38 +115,7 @@ class _Register extends State<Register> {
             ),
           ),
         ),
-        SizedBox(height: 10),
-        Container(
-          width: Quick.getDeviceSize(context).width * 0.8,
-          decoration: BoxDecoration(
-              color: Color(0xffA3D89F),
-              borderRadius: BorderRadius.circular(10),
-              boxShadow: [
-                BoxShadow(
-                  blurRadius: 10,
-                  offset: Offset(0, 5),
-                  color: Colors.grey.withOpacity(0.3),
-                )
-              ]),
-          child: TextFormField(
-            controller: phoneNumController,
-            decoration: InputDecoration(
-              contentPadding: EdgeInsets.fromLTRB(10, 0, 10, 0),
-              labelText: 'PHONE NUMBER',
-              border: InputBorder.none,
-              focusColor: Colors.red,
-              labelStyle: GoogleFonts.poppins(
-                fontWeight: FontWeight.w600,
-                color: Colors.white,
-              ),
-            ),
-            style: GoogleFonts.poppins(
-              fontWeight: FontWeight.w600,
-              color: Colors.white,
-              fontSize: 20,
-            ),
-          ),
-        ),
+
         SizedBox(height: 10),
         Container(
           width: Quick.getDeviceSize(context).width * 0.8,
@@ -196,7 +164,7 @@ class _Register extends State<Register> {
             padding: const EdgeInsets.all(8.0),
             child: InkWell(
               onTap: () {
-                signUp(emailController.text, passwordController.text, nameController.text, phoneNumController.text);
+                signUp(emailController.text, passwordController.text, nameController.text);
               },
               child: Text(
                 "LET'S GO",
@@ -233,7 +201,7 @@ class _Register extends State<Register> {
         ));
   }
 
-  Future<FirebaseUser> signUp (email, password, name, phoneNum) async {
+  Future<FirebaseUser> signUp (email, password, name) async {
     try {
       AuthResult result = await _auth.createUserWithEmailAndPassword(
           email: email.trim(), password: password);
@@ -253,10 +221,11 @@ class _Register extends State<Register> {
       memberDatabaseRef.set({
         'email': email.trim(),
         'name': name.trim(),
-        'phone': phoneNum.trim()
       });
       MyTheme.alertMsg(context, "Register Successful", "Your account has been registered");
-      return user;
+      Quick.goBack(context);
+      print("LOOOOOOOOOOOOOOOOOOOOOOOOOOOL");
+
     }
     catch(e) {
       switch(e.code) {

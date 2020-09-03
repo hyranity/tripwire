@@ -90,9 +90,7 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     // Begin listening for steps
-    {
-      Global.beginListening(context);
-    }
+    Global.beginListening(context);
   }
 
   void loadData() {
@@ -108,7 +106,6 @@ class _MyHomePageState extends State<MyHomePage> {
     // Code possible thanks to https://www.digitalocean.com/community/tutorials/flutter-geolocator-plugin
 
     // Begin listening
-
 
     geolocator
         .getCurrentPosition(desiredAccuracy: LocationAccuracy.best)
@@ -149,8 +146,8 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
-  @override
-  Widget build(BuildContext context) {
+    @override
+    Widget build(BuildContext context) {
     if (place == null || weather == null && repeater < 8) {
       repeater++;
       print(repeater);
@@ -162,6 +159,10 @@ class _MyHomePageState extends State<MyHomePage> {
         width: Quick.getDeviceSize(context).width * 0.5,
         child: new CircularProgressIndicator(),
       );
+    }
+
+    if(repeater == 8){
+      MyTheme.alertMsg(context, "Couldn't get data", "Check your Internet connection.");
     }
 
     return Scaffold(
@@ -897,8 +898,12 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Future<String> getUserName() {
     return auth.currentUser().then((user) {
-      return FirebaseDatabase.instance.reference().child("member").child(user.uid).once().then((userSnap){
-
+      return FirebaseDatabase.instance
+          .reference()
+          .child("member")
+          .child(user.uid)
+          .once()
+          .then((userSnap) {
         return userSnap.value["name"];
       });
     });
