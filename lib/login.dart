@@ -5,6 +5,8 @@ import 'package:tripwire/Util/Quick.dart';
 import 'package:tripwire/main.dart';
 import 'package:tripwire/register.dart';
 
+import 'Model/MyTheme.dart';
+
 
 
 class Login extends StatefulWidget {
@@ -195,11 +197,16 @@ class _Login extends State<Login> {
     AuthResult result = await _auth.signInWithEmailAndPassword(email: email.trim(), password: password);
     final FirebaseUser user = result.user;
 
-    assert(user != null);
-    assert(await user.getIdToken() != null);
+    try {
+      assert(user != null);
+      assert(await user.getIdToken() != null);
 
-    final FirebaseUser currentUser = await _auth.currentUser();
-    assert(user.uid == currentUser.uid);
+      final FirebaseUser currentUser = await _auth.currentUser();
+      assert(user.uid == currentUser.uid);
+    }
+    catch(ex){
+      MyTheme.alertMsg(context, "Login Failed", "Email or Password is incorrect, Please try again.");
+    }
 
     print('signInEmail succeeded: $user');
 
