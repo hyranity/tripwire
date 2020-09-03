@@ -991,35 +991,19 @@ class _GroupPage extends State<GroupPage> {
   }
 
   Future<List<LogEvent>> getEvents() async {
-//    List<LogEvent> eventList = new List();
-
-    //Dummy data
-//    eventList.add(new LogEvent(
-//        title: "KLCC",
-//        triggerPerson: "Everyone",
-//        type: "location",
-//        sentTime: DateTime(2020, 7, 21, 18, 50)));
-//
-//    eventList.add(new LogEvent(
-//        title: "Rally @ Hilton Hotel Lobby",
-//        triggerPerson: "Johann",
-//        type: "rally",
-//        isCommunication: true,
-//        sentTime: DateTime(2020, 7, 21, 12, 50)));
-//
-//    eventList.add(new LogEvent(
-//        title: "Requesting location",
-//        triggerPerson: "Kelvin",
-//        type: "ping",
-//        isCommunication: true,
-//        sentTime: DateTime(2020, 7, 20, 20, 50)));
-
-    //Getting events from firebase
+    //Getting today's events from firebase
+    var date = DateTime.now();
     var eventDb = FirebaseDatabase.instance
         .reference()
         .child("groups")
         .child(group.id)
-        .child("events");
+        .child("events")
+        .child(date.day.toString() +
+        "-" +
+        date.month.toString() +
+        "-" +
+        date.year.toString());
+
     final FirebaseUser user = await auth.currentUser();
 
     id = user.uid;
@@ -1027,96 +1011,110 @@ class _GroupPage extends State<GroupPage> {
     return eventDb.once().then((DataSnapshot snapshot) {
       List<LogEvent> eventList = new List();
 
+
+
       // Loop through each day
-      snapshot.value.forEach((key, value) {
-        Map<dynamic, dynamic> events = value;
+      try {
+        snapshot.value.forEach((key, value) {
+          print(key);
+          Map<dynamic, dynamic> events = value;
 
-        events.forEach((key, value) {
-          // For location logs
-          if (value["type"] == "location") {
-            String attendStr = "";
+            if (events["type"] == "location") {
+              String attendStr = "";
 
-            //Trigger person is taken from attendees
-            if (value["attendees"] != null) {
-              // Add initial name
-              attendStr = value["attendees"].values.toList()[0];
 
-              // Add "and others"
-              if (value["attendees"].length > 1) {
-                attendStr = value["attendees"].length.toString() + " pax";
+
+              //Trigger person is taken from attendees
+              if (events["attendees"] != null) {
+                // Add initial name
+                attendStr = events["attendees"].values.toList()[0];
+
+                // Add "and others"
+                if (events["attendees"].length > 1) {
+                  attendStr = events["attendees"].length.toString() + " pax";
+                }
               }
-            }
-            eventList.add(new LogEvent(
-              title: value["location"],
-              triggerPerson: attendStr,
-              type: value['type'],
-              sentTime: DateTime.parse(value['logTime']),
-              isCommunication: false,
-            ));
-          }
-          if (((value['receiver'] == user.uid || value['receiver'] == 'all') &&
-              value['groupId'] == group.id)) {
-            if (value['type'] == "ping") {
-              eventList.add(new LogEvent(
-                title: value['title'],
-                triggerPerson: value['triggerPerson'],
-                type: value['type'],
-                pingLocation: value['pingLocation'],
-                isReplied: value['isReplied'],
-                sentTime: DateTime.parse(value['sentTime']),
-                isCommunication: true,
-                sender: value['sender'],
-                receiver: value['receiver'],
-                location: value['location'],
-                answer: value['answer'],
-              ));
-            } else if (value['type'] == "poll") {
-              // If already responded, check whether: value["respondent"][user.uid] != null
 
               eventList.add(new LogEvent(
-                title: value['title'],
-                triggerPerson: value['triggerPerson'],
-                type: value['type'],
-                sentTime: DateTime.parse(value['sentTime']),
-                isCommunication: true,
-                sender: value['sender'],
-                receiver: value['receiver'],
-                question: value['question'],
-                yes: value['yes'],
-                no: value['no'],
-                response:
-                    value["respondent"][user.uid] != null // User has responded?
-                        ? value["respondent"][user.uid]["reply"] // Yes
-                        : null, // No
+                title: events["location"],
+                triggerPerson: attendStr,
+                type: events['type'],
+                sentTime: DateTime.parse(events['logTime']),
+                isCommunication: false,
               ));
-            } else if (value['type'] == "come") {
-              eventList.add(new LogEvent(
-                title: value['title'],
-                triggerPerson: value['triggerPerson'],
-                type: value['type'],
-                isReplied: value['isReplied'],
-                sentTime: DateTime.parse(value['sentTime']),
-                isCommunication: true,
-                sender: value['sender'],
-                receiver: value['receiver'],
-                answer: value['answer'],
-              ));
-            } else {
-              eventList.add(new LogEvent(
-                title: value['title'],
-                triggerPerson: value['triggerPerson'],
-                type: value['type'],
-                sentTime: DateTime.parse(value['sentTime']),
-                isCommunication: true,
-                sender: value['sender'],
-                receiver: value['receiver'],
-              ));
+
             }
-          } else {
-            // Don't show anything
-          }
+
+            if (((events['receiver'] == user.uid || events['receiver'] == 'all') &&
+                events['groupId'] == group.id)) {
+              if (events['type'] == "ping") {
+
+                eventList.add(new LogEvent(
+                  title: events['title'],
+                  triggerPerson: events['triggerPerson'],
+                  type: events['type'],
+                  pingLocation: events['pingLocation'],
+                  isReplied: events['isReplied'],
+                  sentTime: DateTime.parse(events['sentTime']),
+                  isCommunication: true,
+                  sender: events['sender'],
+                  receiver: events['receiver'],
+                  location: events['location'],
+                  answer: events['answer'],
+                ));
+              } else if (events['type'] == "poll") {
+                // If already responded, check whether: events["respondent"][user.uid] != null
+
+                eventList.add(new LogEvent(
+                  title: events['title'],
+                  triggerPerson: events['triggerPerson'],
+                  type: events['type'],
+                  sentTime: DateTime.parse(events['sentTime']),
+                  isCommunication: true,
+                  sender: events['sender'],
+                  receiver: events['receiver'],
+                  question: events['question'],
+                  yes: events['yes'],
+                  no: events['no'],
+                  response:
+                      events["respondent"] != null ?
+                  events["respondent"][user.uid] != null // User has responded?
+                      ? events["respondent"][user.uid]["reply"] // Yes
+                      : null : null, // No
+                ));
+              } else if (events['type'] == "come") {
+                eventList.add(new LogEvent(
+                  title: events['title'],
+                  triggerPerson: events['triggerPerson'],
+                  type: events['type'],
+                  isReplied: events['isReplied'],
+                  sentTime: DateTime.parse(events['sentTime']),
+                  isCommunication: true,
+                  sender: events['sender'],
+                  receiver: events['receiver'],
+                  answer: events['answer'],
+                ));
+              } else {
+                eventList.add(new LogEvent(
+                  title: events['title'],
+                  triggerPerson: events['triggerPerson'],
+                  type: events['type'],
+                  sentTime: DateTime.parse(events['sentTime']),
+                  isCommunication: true,
+                  location: events['location'],
+                  sender: events['sender'],
+                  receiver: events['receiver'],
+                ));
+              }
+            } else {
+              // Don't show anything
+            }
+
         });
-      });
+      }on NoSuchMethodError catch (e) {
+        print(e.stackTrace);
+      }
+
       return new List.from(eventList.reversed);
     });
   }
@@ -1366,11 +1364,20 @@ class _GroupPage extends State<GroupPage> {
                   constraints: BoxConstraints(maxHeight: 100),
                   child: Row(
                     children: <Widget>[
-                      okOption(event, Icons.directions_run, "otw"),
-                      SizedBox(
-                        width: 10,
-                      ),
-                      noOption(event, Icons.cancel, "nah"),
+                      Text(
+                        event.location,
+                        maxLines: 1,
+                        softWrap: false,
+                        overflow: TextOverflow.ellipsis,
+                        textAlign: TextAlign.left,
+                        style: GoogleFonts.poppins(
+                          fontSize:
+                          13 + MediaQuery.of(context).size.width * 0.014,
+                          color:
+                          LogEvent.getColorScheme(event.type, false, 45),
+                          fontWeight: FontWeight.w500,
+                        ),
+                      )
                     ],
                   ),
                 )
@@ -1385,7 +1392,7 @@ class _GroupPage extends State<GroupPage> {
   Widget ping(LogEvent event) {
     return Container(
       margin: EdgeInsets.only(left: 20, right: 20),
-      height: 140,
+      height: 150,
       decoration: BoxDecoration(
           color: LogEvent.getColorScheme(event.type, true, 20),
           borderRadius: BorderRadius.circular(20),
@@ -2416,13 +2423,20 @@ class _GroupPage extends State<GroupPage> {
     WorldTime wt = WorldTime(url: 'Asia/Kuala_Lumpur');
     await wt.getTime();
 
-    await eventDb.push().set({
-      'title': 'Rally Everyone',
-      'sender': user.uid,
-      'receiver': 'all',
-      'triggerPerson': user.displayName.trim(),
-      'type': 'rally',
-      'sentTime': wt.worldtime.toString(),
+    Quick.getLocation().then((myLocation) {
+      String locationRally = myLocation.subLocality + ", " + myLocation.locality;
+
+      eventDb.push().set({
+        'title': 'Rally Everyone',
+        'sender': user.uid,
+        'receiver': 'all',
+        'triggerPerson': user.displayName.trim(),
+        'groupId': widget.id,
+        'type': 'rally',
+        'isReplied': 'no',
+        'location' : locationRally,
+        'sentTime': wt.worldtime.toString(),
+      });
     });
 
     MyTheme.alertMsg(
