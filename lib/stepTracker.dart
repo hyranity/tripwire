@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -80,8 +81,36 @@ class _StepTracker extends State<StepTracker> {
               ),
               Positioned(
                 child: Padding(
-                  padding: const EdgeInsets.all(8.0),
+                  padding: const EdgeInsets.all(20.0),
                   child: MyTheme.backButton(context),
+                ),
+              ),
+              Positioned (
+                right: 5,
+                child : InkWell (
+                  child: InkWell(
+                    onTap: () {
+                      Logout();
+                    },
+                    child: Container (
+                      height:60,
+                      width:60,
+                      decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(10),
+                          boxShadow: [
+                            BoxShadow(
+                              blurRadius: 25,
+                              color: Colors.grey.withOpacity(0.3),
+                            )
+                          ]),
+                      child: Icon(
+                        Icons.exit_to_app,
+                        size: 25,
+                        color: Colors.red,
+                      ),
+                    ),
+                  ),
                 ),
               ),
             ],
@@ -113,5 +142,16 @@ class _StepTracker extends State<StepTracker> {
       });
 
     });
+  }
+
+  Future<void> Logout() async {
+    try {
+      await FirebaseAuth.instance.signOut();
+    }
+    catch(ex) {
+      print("Error : $ex");
+    }
+
+    Navigator.of(context).popUntil((route) => route.isFirst);
   }
 }

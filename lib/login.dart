@@ -157,7 +157,7 @@ class _Login extends State<Login> {
                 signInUser(emailController.text, passwordController.text)
                     .then((FirebaseUser user) {
                   Quick.navigate(context, () => MyHomePage());
-                }).catchError((e) => print(e));
+                }).catchError((e) => MyTheme.alertMsg(context, "Login Failed", "Email or Password is incorrect, Please try again."),);
               },
               child: Text(
                 "LET'S GO",
@@ -199,23 +199,16 @@ class _Login extends State<Login> {
     AuthResult result = await _auth.signInWithEmailAndPassword(email: email.trim(), password: password);
     final FirebaseUser user = result.user;
 
-    try {
       assert(user != null);
       assert(await user.getIdToken() != null);
 
       final FirebaseUser currentUser = await _auth.currentUser();
       assert(user.uid == currentUser.uid);
-    }
-    catch(ex){
-      MyTheme.alertMsg(context, "Login Failed", "Email or Password is incorrect, Please try again.");
-    }
 
-    print('signInEmail succeeded: $user');
+      print('signInEmail succeeded: $user');
 
-    return user;
+      return user;
+
   }
-
-
-
 }
 

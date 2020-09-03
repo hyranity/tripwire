@@ -5,6 +5,8 @@ import 'package:tripwire/Util/Quick.dart';
 import 'package:tripwire/login.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
+import 'Model/MyTheme.dart';
+
 class Register extends StatefulWidget {
   Register({Key key, this.title}) : super(key: key);
 
@@ -232,24 +234,60 @@ class _Register extends State<Register> {
   }
 
   Future<FirebaseUser> signUp (email, password, name, phoneNum) async {
-    AuthResult result = await _auth.createUserWithEmailAndPassword(email: email.trim(), password: password);
-    final FirebaseUser user = result.user;
+    try {
+      AuthResult result = await _auth.createUserWithEmailAndPassword(
+          email: email.trim(), password: password);
+      final FirebaseUser user = result.user;
 
-    //update displayName
-    UserUpdateInfo updateUser = UserUpdateInfo();
-    updateUser.displayName = name;
-    user.updateProfile(updateUser);
+      //update displayName
+      UserUpdateInfo updateUser = UserUpdateInfo();
+      updateUser.displayName = name;
+      user.updateProfile(updateUser);
 
-    assert (user != null);
-    assert (await user.getIdToken() != null);
+      assert (user != null);
+      assert (await user.getIdToken() != null);
 
-    final memberDatabaseRef = FirebaseDatabase().reference().child("member").child(user.uid);
-    memberDatabaseRef.set({
-      'email' : email.trim(),
-      'name' : name.trim(),
-      'phone' : phoneNum.trim()
-    });
-
-    return user;
+      final memberDatabaseRef = FirebaseDatabase().reference()
+          .child("member")
+          .child(user.uid);
+      memberDatabaseRef.set({
+        'email': email.trim(),
+        'name': name.trim(),
+        'phone': phoneNum.trim()
+      });
+      MyTheme.alertMsg(context, "Register Successful", "Your account has been registered");
+      return user;
+    }
+    catch(e) {
+      switch(e.code) {
+        case "ERROR_INVALID_EMAIL" :
+          MyTheme.alertMsg(context, "Register Failed", "Invalid Email Format");
+          break;
+        case "ERROR_WRONG_PASSWORD":
+          MyTheme.alertMsg(context, "Register Failed", "Wrong Password");
+          break;
+        case "ERROR_USER_NOT_FOUND":
+          MyTheme.alertMsg(context, "Register Failed", "User is not Found");
+          break;
+        case "ERROR_USER_DISABLED":
+          MyTheme.alertMsg(context, "Register Failed", "User is disabled");
+          break;
+        case "ERROR_TOO_MANY_REQUESTS":
+          MyTheme.alertMsg(context, "Register Failed", "Too many request attempt, please try again later");
+          break;
+        case "ERROR_OPERATION_NOT_ALLOWED":
+          MyTheme.alertMsg(context, "Register Failed", "Operation is not allowed");
+          break;
+        case "ERROR_EMAIL_ALREADY_IN_USE":
+          MyTheme.alertMsg(context, "Register Failed", "Email in use, Please try another email.");
+          break;
+        case "ERROR_WEAK_PASSWORD":
+          MyTheme.alertMsg(context, "Register Failed", "Weak password, password must contain atleast 6 characters");
+          break;
+        default:
+          MyTheme.alertMsg(context, "Register Failed", e.code);
+          break;
+      }
+    }
   }
 }
