@@ -1,13 +1,12 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:tripwire/Util/Global.dart';
 import 'package:tripwire/Util/Quick.dart';
 import 'package:tripwire/main.dart';
 import 'package:tripwire/register.dart';
 
 import 'Model/MyTheme.dart';
-
-
 
 class Login extends StatefulWidget {
   Login({Key key, this.title}) : super(key: key);
@@ -25,17 +24,21 @@ class _Login extends State<Login> {
 
   @override
   Widget build(BuildContext context) {
-
- //Check if  logged in
+    //Check if  logged in
     FirebaseAuth.instance.currentUser().then((user) {
       if (user != null) {
-        print("user is logged in");
-        Navigator.of(context).pushReplacement(MaterialPageRoute(
-            builder: (context) => MyHomePage()
-        ));
-        print("guest detected");
-        return;
+        Global.getDBUser().then((dbUser) {
+          if (dbUser != null) {
+            print("user is logged in");
+            Navigator.of(context).pushReplacement(
+                MaterialPageRoute(builder: (context) => MyHomePage()));
+          }
+        });
+        ;
       }
+
+      print("guest detected");
+      return;
     });
 
     return Scaffold(
@@ -65,27 +68,24 @@ class _Login extends State<Login> {
             fontWeight: FontWeight.w600,
           ),
         ),
-        SizedBox(
-          height: 20
-        ),
+        SizedBox(height: 20),
         Container(
           width: Quick.getDeviceSize(context).width * 0.8,
           decoration: BoxDecoration(
-            color: Color(0xffA3D89F),
-            borderRadius: BorderRadius.circular(10),
+              color: Color(0xffA3D89F),
+              borderRadius: BorderRadius.circular(10),
               boxShadow: [
                 BoxShadow(
                   blurRadius: 10,
                   offset: Offset(0, 5),
                   color: Colors.grey.withOpacity(0.3),
                 )
-              ]
-          ),
+              ]),
           child: TextFormField(
             controller: emailController,
             decoration: InputDecoration(
-              contentPadding:EdgeInsets.fromLTRB(10,0,10,0),
-                labelText: 'EMAIL',
+              contentPadding: EdgeInsets.fromLTRB(10, 0, 10, 0),
+              labelText: 'EMAIL',
               border: InputBorder.none,
               focusColor: Colors.red,
               labelStyle: GoogleFonts.poppins(
@@ -100,28 +100,24 @@ class _Login extends State<Login> {
             ),
           ),
         ),
-        SizedBox(
-            height: 10
-        ),
+        SizedBox(height: 10),
         Container(
           width: Quick.getDeviceSize(context).width * 0.8,
           decoration: BoxDecoration(
-            color: Color(0xffA3D89F),
-            borderRadius: BorderRadius.circular(10),
-            boxShadow: [
-              BoxShadow(
-                blurRadius: 10,
-                offset: Offset(0, 5),
-                color: Colors.grey.withOpacity(0.3),
-              )
-            ]
-          ),
-
+              color: Color(0xffA3D89F),
+              borderRadius: BorderRadius.circular(10),
+              boxShadow: [
+                BoxShadow(
+                  blurRadius: 10,
+                  offset: Offset(0, 5),
+                  color: Colors.grey.withOpacity(0.3),
+                )
+              ]),
           child: TextFormField(
             controller: passwordController,
             obscureText: true,
             decoration: InputDecoration(
-              contentPadding:EdgeInsets.fromLTRB(10,0,10,0),
+              contentPadding: EdgeInsets.fromLTRB(10, 0, 10, 0),
               labelText: 'PASSWORD',
               border: InputBorder.none,
               focusColor: Colors.red,
@@ -137,9 +133,7 @@ class _Login extends State<Login> {
             ),
           ),
         ),
-        SizedBox(
-            height: 24
-        ),
+        SizedBox(height: 24),
         Container(
           decoration: BoxDecoration(
               color: Color(0xffD5F5D1),
@@ -157,7 +151,10 @@ class _Login extends State<Login> {
                 signInUser(emailController.text, passwordController.text)
                     .then((FirebaseUser user) {
                   Quick.navigate(context, () => MyHomePage());
-                }).catchError((e) => MyTheme.alertMsg(context, "Login Failed", "Email or Password is incorrect, Please try again."),);
+                }).catchError(
+                  (e) => MyTheme.alertMsg(context, "Login Failed",
+                      "Email or Password is incorrect, Please try again."),
+                );
               },
               child: Text(
                 "LET'S GO",
@@ -179,7 +176,7 @@ class _Login extends State<Login> {
     return Positioned(
       bottom: 35,
       child: InkWell(
-        onTap: (){
+        onTap: () {
           Quick.navigate(context, () => Register());
         },
         child: Text(
@@ -196,19 +193,18 @@ class _Login extends State<Login> {
   }
 
   Future<FirebaseUser> signInUser(String email, String password) async {
-    AuthResult result = await _auth.signInWithEmailAndPassword(email: email.trim(), password: password);
+    AuthResult result = await _auth.signInWithEmailAndPassword(
+        email: email.trim(), password: password);
     final FirebaseUser user = result.user;
 
-      assert(user != null);
-      assert(await user.getIdToken() != null);
+    assert(user != null);
+    assert(await user.getIdToken() != null);
 
-      final FirebaseUser currentUser = await _auth.currentUser();
-      assert(user.uid == currentUser.uid);
+    final FirebaseUser currentUser = await _auth.currentUser();
+    assert(user.uid == currentUser.uid);
 
-      print('signInEmail succeeded: $user');
+    print('signInEmail succeeded: $user');
 
-      return user;
-
+    return user;
   }
 }
-
