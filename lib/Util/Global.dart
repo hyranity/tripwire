@@ -48,4 +48,14 @@ class Global {
       return value["name"];
     });
   }
+
+  static Future<dynamic> getDBUser() async{
+    FirebaseAuth auth = FirebaseAuth.instance;
+    final FirebaseUser user = await auth.currentUser();
+    return DB
+        .get(DB.db().reference().child("member").child(user.uid))
+        .then((var value) {
+      return value;
+    });
+  }
 }

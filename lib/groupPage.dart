@@ -377,7 +377,7 @@ class _GroupPage extends State<GroupPage> {
   performLogLocation(context) {
 
     Quick.getWeather(location).then((weather){
-      
+
       int coolDownMins =
       30; // Minutes until the next event is count as a separate one, even if same location
 
