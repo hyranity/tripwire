@@ -991,35 +991,19 @@ class _GroupPage extends State<GroupPage> {
   }
 
   Future<List<LogEvent>> getEvents() async {
-//    List<LogEvent> eventList = new List();
-
-    //Dummy data
-//    eventList.add(new LogEvent(
-//        title: "KLCC",
-//        triggerPerson: "Everyone",
-//        type: "location",
-//        sentTime: DateTime(2020, 7, 21, 18, 50)));
-//
-//    eventList.add(new LogEvent(
-//        title: "Rally @ Hilton Hotel Lobby",
-//        triggerPerson: "Johann",
-//        type: "rally",
-//        isCommunication: true,
-//        sentTime: DateTime(2020, 7, 21, 12, 50)));
-//
-//    eventList.add(new LogEvent(
-//        title: "Requesting location",
-//        triggerPerson: "Kelvin",
-//        type: "ping",
-//        isCommunication: true,
-//        sentTime: DateTime(2020, 7, 20, 20, 50)));
-
     //Getting events from firebase
+    var date = DateTime.now();
     var eventDb = FirebaseDatabase.instance
         .reference()
         .child("groups")
         .child(group.id)
-        .child("events");
+        .child("events")
+        .child(date.day.toString() +
+        "-" +
+        date.month.toString() +
+        "-" +
+        date.year.toString());
+
     final FirebaseUser user = await auth.currentUser();
 
     id = user.uid;
@@ -1033,6 +1017,7 @@ class _GroupPage extends State<GroupPage> {
 
         events.forEach((key, value) {
           // For location logs
+
           if (value["type"] == "location") {
             String attendStr = "";
 
@@ -1046,6 +1031,7 @@ class _GroupPage extends State<GroupPage> {
                 attendStr = value["attendees"].length.toString() + " pax";
               }
             }
+
             eventList.add(new LogEvent(
               title: value["location"],
               triggerPerson: attendStr,
@@ -1053,10 +1039,13 @@ class _GroupPage extends State<GroupPage> {
               sentTime: DateTime.parse(value['logTime']),
               isCommunication: false,
             ));
+
           }
+
           if (((value['receiver'] == user.uid || value['receiver'] == 'all') &&
               value['groupId'] == group.id)) {
             if (value['type'] == "ping") {
+
               eventList.add(new LogEvent(
                 title: value['title'],
                 triggerPerson: value['triggerPerson'],
@@ -1108,6 +1097,7 @@ class _GroupPage extends State<GroupPage> {
                 type: value['type'],
                 sentTime: DateTime.parse(value['sentTime']),
                 isCommunication: true,
+                location: value['location'],
                 sender: value['sender'],
                 receiver: value['receiver'],
               ));
@@ -1117,6 +1107,7 @@ class _GroupPage extends State<GroupPage> {
           }
         });
       });
+
       return new List.from(eventList.reversed);
     });
   }
@@ -1366,11 +1357,20 @@ class _GroupPage extends State<GroupPage> {
                   constraints: BoxConstraints(maxHeight: 100),
                   child: Row(
                     children: <Widget>[
-                      okOption(event, Icons.directions_run, "otw"),
-                      SizedBox(
-                        width: 10,
-                      ),
-                      noOption(event, Icons.cancel, "nah"),
+                      Text(
+                        event.location,
+                        maxLines: 1,
+                        softWrap: false,
+                        overflow: TextOverflow.ellipsis,
+                        textAlign: TextAlign.left,
+                        style: GoogleFonts.poppins(
+                          fontSize:
+                          13 + MediaQuery.of(context).size.width * 0.014,
+                          color:
+                          LogEvent.getColorScheme(event.type, false, 45),
+                          fontWeight: FontWeight.w500,
+                        ),
+                      )
                     ],
                   ),
                 )
@@ -2416,13 +2416,20 @@ class _GroupPage extends State<GroupPage> {
     WorldTime wt = WorldTime(url: 'Asia/Kuala_Lumpur');
     await wt.getTime();
 
-    await eventDb.push().set({
-      'title': 'Rally Everyone',
-      'sender': user.uid,
-      'receiver': 'all',
-      'triggerPerson': user.displayName.trim(),
-      'type': 'rally',
-      'sentTime': wt.worldtime.toString(),
+    Quick.getLocation().then((myLocation) {
+      String locationRally = myLocation.subLocality + ", " + myLocation.locality;
+
+      eventDb.push().set({
+        'title': 'Rally Everyone',
+        'sender': user.uid,
+        'receiver': 'all',
+        'triggerPerson': user.displayName.trim(),
+        'groupId': widget.id,
+        'type': 'rally',
+        'isReplied': 'no',
+        'location' : locationRally,
+        'sentTime': wt.worldtime.toString(),
+      });
     });
 
     MyTheme.alertMsg(

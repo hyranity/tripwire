@@ -32,92 +32,182 @@ class _MyProfile extends State<MyProfile> {
 
   @override
   Widget build(BuildContext context) {
-
-    // To show Green color when walking
-    var color = Colors.white;
-    if (status == "walking") color = Colors.green;
-
-    return Scaffold(
-      body: SafeArea(
-        child: Center(
-          child: Stack(
-            children: [
-              Container(
-                alignment: Alignment.center,
-                color: Colors.white,
-                padding: EdgeInsets.only(top: 10, left: 18),
-                width: Quick.getDeviceSize(context).width,
-                child: Container(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Text(
-                        "Steps",
-
-                        style: GoogleFonts.poppins(
-                          fontSize: 30,
-                          fontWeight: FontWeight.w600,
-                          color: MyTheme.accentColor,
-
-                        ),
-                      ),
-                      Text(
-                        steps.toString(),
-                        style: GoogleFonts.poppins(
-                          fontSize: 70,
-                          fontWeight: FontWeight.w500,
-                          color: MyTheme.accentColor,
-                          height: 1,
-                        ),
-                      ),
-                      Container(
-                        child: Text(
-                          status,
-                        ),
-                      ),
-                    ],
-                  ),
+    return Stack(
+      children: <Widget>[
+        Column(
+          children: <Widget>[
+            Container(
+              height: MediaQuery.of(context).size.height * .45,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [Colors.blue, Colors.indigo],
                 ),
               ),
-              Positioned(
-                child: Padding(
-                  padding: const EdgeInsets.all(20.0),
-                  child: MyTheme.backButton(context),
-                ),
-              ),
-              Positioned (
-                right: 5,
-                child : InkWell (
-                  child: InkWell(
-                    onTap: () {
-                      Logout();
-                    },
-                    child: Container (
-                      height:60,
-                      width:60,
-                      decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(10),
-                          boxShadow: [
-                            BoxShadow(
-                              blurRadius: 25,
-                              color: Colors.grey.withOpacity(0.3),
-                            )
-                          ]),
-                      child: Icon(
-                        Icons.exit_to_app,
-                        size: 25,
-                        color: Colors.red,
+              child: Center(
+                child: Column (
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    CircleAvatar(
+                      backgroundImage: NetworkImage("https://cache.desktopnexus.com/thumbseg/1847/1847388-bigthumbnail.jpg"),
+                      radius: 50.0,
+                    ),
+                    SizedBox(
+                      height: 10.0,
+                    ),
+                    Text(
+                      "Sinon",
+                      style: GoogleFonts.poppins(
+                        fontSize: 25.0,
+                        color:Colors.white,
+                        decoration: TextDecoration.none,
                       ),
                     ),
-                  ),
+                  ],
                 ),
               ),
-            ],
-          ),
+            ),
+            Container(
+              height: MediaQuery.of(context).size.height * .55,
+              width: MediaQuery.of(context).size.width,
+              color: Colors.white,
+              child: Padding (
+                padding: const EdgeInsets.symmetric(vertical: 30.0,horizontal: 16.0),
+                child: Column (
+
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: <Widget>[
+                    Text(
+                      "Name",
+                      style: GoogleFonts.poppins(
+                        fontSize: 18.0,
+                        fontWeight: FontWeight.bold,
+                        decoration: TextDecoration.none,
+                        color:Colors.indigo,
+                      ),
+                    ),Text(
+                      "Sinon",
+                      style: GoogleFonts.poppins(
+                        fontSize: 20.0,
+                        decoration: TextDecoration.none,
+                        color:Colors.blue,
+                      ),
+                    ),
+                    SizedBox(
+                      height: 20.0,
+                    ),
+                    Text(
+                      "Email",
+                      style: GoogleFonts.poppins(
+                        fontSize: 18.0,
+                        fontWeight: FontWeight.bold,
+                        decoration: TextDecoration.none,
+                        color:Colors.indigo,
+                      ),
+                    ),
+                    Text(
+                      "sinon@sao.com",
+                      style: GoogleFonts.poppins(
+                        fontSize: 20.0,
+                        decoration: TextDecoration.none,
+                        color:Colors.blue,
+                      ),
+                    ),
+                    SizedBox(
+                      height: 10.0,
+                    ),
+                    Container (
+                      width: 300,
+
+                      child: RaisedButton(
+                        shape: RoundedRectangleBorder (
+                            borderRadius: BorderRadius.circular(80.0),
+                        ),
+
+                        child: Ink(
+
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              )
+            )
+          ],
         ),
-      ),
+        Container(
+          alignment: Alignment.topCenter,
+          padding: EdgeInsets.only(
+              top: MediaQuery.of(context).size.height * .35,
+              right: 20.0,
+              left: 20.0),
+          child: Container(
+            height: 120.0,
+            width: MediaQuery.of(context).size.width,
+            child: Card(
+              color: Colors.white,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8.0,vertical: 22.0),
+                child: Row(
+                  children: <Widget>[
+                    Expanded(
+                      child: Column (
+                        children: <Widget>[
+                          Text(
+                            "Group Joined",
+                            style: GoogleFonts.poppins(
+                              fontSize: 18.0,
+                              fontWeight: FontWeight.bold,
+                              color:Colors.blue,
+                            ),
+                          ),
+                          SizedBox(
+                            height: 5.0,
+                          ),
+                          Text(
+                            "1",
+                            style: GoogleFonts.poppins(
+                              fontSize: 15.0,
+                              color:Colors.blue,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Expanded(
+                      child: Column (
+                        children: <Widget>[
+                          Text(
+                            "Steps Taken",
+                            style: GoogleFonts.poppins(
+                              fontSize: 18.0,
+                              fontWeight: FontWeight.bold,
+                              color:Colors.blue,
+                            ),
+                          ),
+                          SizedBox(
+                            height: 5.0,
+                          ),
+                          Text(
+                            "123",
+                            style: GoogleFonts.poppins(
+                              fontSize: 15.0,
+                              color:Colors.blue,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ) //Card
+      ],
     );
   }
 

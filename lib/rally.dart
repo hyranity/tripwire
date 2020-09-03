@@ -6,6 +6,7 @@ import 'package:flutter/cupertino.dart';
 
 import 'Model/MyTheme.dart';
 import 'Model/world_time.dart';
+import 'Util/Quick.dart';
 
 class RallyPage extends StatefulWidget {
   RallyPage({Key key, @required this.id}) : super(key: key);
@@ -31,14 +32,19 @@ class _RallyPage extends State<RallyPage> {
     WorldTime wt = WorldTime(url: 'Asia/Kuala_Lumpur');
     await wt.getTime();
 
-    await eventDb.push().set({
-      'title' : 'Rally Everyone',
-      'sender' : user.uid,
-      'receiver' : 'all',
-      'groupId' : widget.id,
-      'type' : 'rally',
-      'isReplied' : 'no',
-      'sentTime' : wt.worldtime.toString(),
+    Quick.getLocation().then((myLocation) {
+      String locationRally = myLocation.subLocality + ", " + myLocation.locality;
+
+      eventDb.push().set({
+        'title': 'Rally Everyone',
+        'sender': user.uid,
+        'receiver': 'all',
+        'groupId': widget.id,
+        'type': 'rally',
+        'isReplied': 'no',
+        'location' : locationRally,
+        'sentTime': wt.worldtime.toString(),
+      });
     });
 
     MyTheme.alertMsg(context, "Rally ", "You have noticed all your group member to rally");

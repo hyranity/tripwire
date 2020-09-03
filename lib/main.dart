@@ -152,13 +152,13 @@ class _MyHomePageState extends State<MyHomePage> {
       repeater++;
       print(repeater);
       loadData();
-      return Container(
-        color: Colors.white,
-        alignment: Alignment.center,
-        height: Quick.getDeviceSize(context).width * 0.5,
-        width: Quick.getDeviceSize(context).width * 0.5,
-        child: new CircularProgressIndicator(),
-      );
+//      return Container(
+//        color: Colors.white,
+//        alignment: Alignment.center,
+//        height: Quick.getDeviceSize(context).width * 0.5,
+//        width: Quick.getDeviceSize(context).width * 0.5,
+//        child: new CircularProgressIndicator(),
+//      );
     }
 
     if(repeater == 8){
