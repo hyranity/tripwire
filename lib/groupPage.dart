@@ -1039,7 +1039,6 @@ class _GroupPage extends State<GroupPage> {
               sentTime: DateTime.parse(value['logTime']),
               isCommunication: false,
             ));
-
           }
 
           if (((value['receiver'] == user.uid || value['receiver'] == 'all') &&
