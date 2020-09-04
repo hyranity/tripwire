@@ -99,9 +99,7 @@ class _GroupProfile extends State<GroupProfile> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
                     CircleAvatar(
-                      backgroundImage: NetworkImage(
-                          "https://cache.desktopnexus.com/thumbseg/1847/1847388-bigthumbnail.jpg"
-                              ),
+                      backgroundImage: NetworkImage(group.photoURL),
                       radius: 50.0,
                     ),
                     SizedBox(
@@ -206,6 +204,20 @@ class _GroupProfile extends State<GroupProfile> {
                           ),
                         ),
                       ),
+                      SizedBox(
+                        height: Quick
+                            .getDeviceSize(context)
+                            .height * 0.02,
+                      ),
+                      Text(
+                        "Edit the group on the Tripwire website!",
+                        style: GoogleFonts.poppins(
+                          fontSize: 15.0,
+                          fontWeight: FontWeight.w500,
+                          decoration: TextDecoration.none,
+                          color: Color(0xff669260),
+                        ),
+                      ),
                     ],
                   ),
                 ))
@@ -229,8 +241,8 @@ class _GroupProfile extends State<GroupProfile> {
             child: Card(
               color: Colors.white,
               child: Padding(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 8.0, vertical: 22.0),
+                padding: const EdgeInsets.only(
+                    left: 8.0, right: 8, top: 22.0),
                 child: Row(
                   children: <Widget>[
                     Expanded(
@@ -246,13 +258,13 @@ class _GroupProfile extends State<GroupProfile> {
                                 color: Color(0xff669260),
                               ),
                             ),
-                            SizedBox(
-                              height: 5.0,
-                            ),
                             Text(
                               group.memberCount.toString(),
+                              overflow: TextOverflow.ellipsis,
+
                               style: GoogleFonts.poppins(
-                                fontSize: 15.0,
+                                fontSize: 25.0,
+                                fontWeight: FontWeight.w600,
                                 color:  Color(0xff8FBF88),
                               ),
                             ),
@@ -271,13 +283,12 @@ class _GroupProfile extends State<GroupProfile> {
                               color: Color(0xff669260),
                             ),
                           ),
-                          SizedBox(
-                            height: 5.0,
-                          ),
                           Text(
                             group.id,
+                            overflow: TextOverflow.ellipsis,
                             style: GoogleFonts.poppins(
-                              fontSize: 15.0,
+                              fontSize: 25.0,
+                              fontWeight: FontWeight.w600,
                               color:  Color(0xff8FBF88),
                             ),
                           ),

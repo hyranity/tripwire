@@ -31,8 +31,7 @@ class _Login extends State<Login> {
           if (dbUser != null) {
             print("user is logged in");
             if (context != null) {
-              Navigator.of(context).pushReplacement(
-                  MaterialPageRoute(builder: (context) => MyHomePage()));
+              Quick.forceNavigate(context, () => MyHomePage());
             }
           }
         });
@@ -43,6 +42,7 @@ class _Login extends State<Login> {
     });
 
     return Scaffold(
+      resizeToAvoidBottomInset: true,
       body: Center(
         child: Stack(
           alignment: Alignment.center,
@@ -151,7 +151,8 @@ class _Login extends State<Login> {
               onTap: () {
                 signInUser(emailController.text, passwordController.text)
                     .then((FirebaseUser user) {
-                  Quick.navigate(context, () => MyHomePage());
+                  Navigator.of(context).pushReplacement(
+                      MaterialPageRoute(builder: (context) => MyHomePage()));
                 }).catchError(
                   (e) => MyTheme.alertMsg(context, "Login Failed",
                       "Email or Password is incorrect, Please try again."),

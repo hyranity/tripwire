@@ -210,6 +210,8 @@ class _Register extends State<Register> {
       //update displayName
       UserUpdateInfo updateUser = UserUpdateInfo();
       updateUser.displayName = name;
+      updateUser.photoUrl =
+          "https://icon-library.com/images/default-profile-icon/default-profile-icon-16.jpg";
       user.updateProfile(updateUser);
 
       assert (user != null);
@@ -221,10 +223,10 @@ class _Register extends State<Register> {
       memberDatabaseRef.set({
         'email': email.trim(),
         'name': name.trim(),
+        'photoURL': "https://icon-library.com/images/default-profile-icon/default-profile-icon-16.jpg",
       });
-      MyTheme.alertMsg(context, "Register Successful", "Your account has been registered");
-      Quick.goBack(context);
-      print("LOOOOOOOOOOOOOOOOOOOOOOOOOOOL");
+      successfulMsg(
+          context, "Register Successful", "Your account has been registered");
 
     }
     catch(e) {
@@ -259,4 +261,110 @@ class _Register extends State<Register> {
       }
     }
   }
+
+  static Widget successfulMsg(BuildContext context, String title, String desc) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Dialog(
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(15)
+          ),
+          child: Container(
+            height: 350,
+            child: Column(
+              children: <Widget>[
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(25.0, 15.0, 0.0, 10.0),
+                  child: Container(
+                    width: MediaQuery
+                        .of(context)
+                        .size
+                        .width * 0.6,
+                    child: Text(
+                      title,
+                      textAlign: TextAlign.left,
+                      style: GoogleFonts.poppins(
+                        fontSize: 30,
+                        color: Colors.black,
+                        fontWeight: FontWeight.w500,
+
+                      ),
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(25.0, 15.0, 0.0, 50.0),
+                  child: Container(
+                    width: MediaQuery
+                        .of(context)
+                        .size
+                        .width * 0.6,
+                    child: Text(
+                      desc,
+                      textAlign: TextAlign.left,
+                      style: GoogleFonts.poppins(
+                        fontSize: 18,
+                        color: Colors.black,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ),
+                InkWell(
+                  onTap: () {
+                    Navigator.of(context).popUntil((route) => route.isFirst);
+                  },
+                  child: Container(
+                    constraints: BoxConstraints(maxHeight: 100),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        Container(
+                          decoration: BoxDecoration(
+                              color: Color(0xffB5E8AF),
+                              borderRadius: BorderRadius.circular(10),
+                              boxShadow: [
+                                BoxShadow(
+                                  blurRadius: 10,
+                                  color: Colors.grey.withOpacity(0.1),
+                                )
+                              ]),
+                          child: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Row(
+                              children: <Widget>[
+                                Icon(
+                                  Icons.check,
+                                  color: Color(0xff537050),
+                                ),
+                                SizedBox(width: 5),
+                                Text(
+                                  "Okay",
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 13 + MediaQuery
+                                        .of(context)
+                                        .size
+                                        .width * 0.014,
+                                    color: Color(0xff537050),
+                                    fontWeight: FontWeight.w600,
+                                    height: 1,
+                                  ),
+                                )
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
 }

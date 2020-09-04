@@ -61,9 +61,9 @@ class _MyProfile extends State<MyProfile> {
                 print("setting state #" + buildTimes.toString());
                 this.user = user;
                 groupJoined = groupList == null ? 0 : groupList.length;
-                this.userImg = dbUser["profilePic"] == null
-                    ? "https://cache.desktopnexus.com/thumbseg/1847/1847388-bigthumbnail.jpg"
-                    : dbUser["profilePic"].toString();
+                this.userImg = dbUser["photoURL"] == null
+                    ? MyTheme.defaultIcon
+                    : dbUser["photoURL"];
               });
             });
           }
@@ -79,10 +79,7 @@ class _MyProfile extends State<MyProfile> {
         Column(
           children: <Widget>[
             Container(
-              height: MediaQuery
-                  .of(context)
-                  .size
-                  .height * .45,
+              height: MediaQuery.of(context).size.height * .45,
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
@@ -97,9 +94,7 @@ class _MyProfile extends State<MyProfile> {
                   children: <Widget>[
                     CircleAvatar(
                       backgroundImage: NetworkImage(
-                          userImg == null
-                              ? "https://cache.desktopnexus.com/thumbseg/1847/1847388-bigthumbnail.jpg"
-                              : userImg),
+                          userImg == null ? MyTheme.defaultIcon : userImg),
                       radius: 50.0,
                     ),
                     SizedBox(
@@ -148,7 +143,7 @@ class _MyProfile extends State<MyProfile> {
                         style: GoogleFonts.poppins(
                           fontSize: 20.0,
                           decoration: TextDecoration.none,
-                          color:  Color(0xff8FBF88),
+                          color: Color(0xff8FBF88),
                         ),
                       ),
                       SizedBox(
@@ -168,19 +163,22 @@ class _MyProfile extends State<MyProfile> {
                         style: GoogleFonts.poppins(
                           fontSize: 20.0,
                           decoration: TextDecoration.none,
-                          color:  Color(0xff8FBF88),
+                          color: Color(0xff8FBF88),
                         ),
                       ),
                       SizedBox(
                         height: Quick.getDeviceSize(context).height * 0.05,
                       ),
-                      Container (
+                      Container(
                         alignment: Alignment.bottomCenter,
+                        width: Quick
+                            .getDeviceSize(context)
+                            .width * 0.6,
                         child: RaisedButton(
                           onPressed: () {
                             Logout();
                           },
-                          shape: RoundedRectangleBorder (
+                          shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(80.0),
                           ),
                           elevation: 0,
@@ -190,18 +188,39 @@ class _MyProfile extends State<MyProfile> {
                               gradient: LinearGradient(
                                   begin: Alignment.centerRight,
                                   end: Alignment.centerLeft,
-                                  colors: [Colors.red,Colors.redAccent]
-                              ),
+                                  colors: [Colors.red, Colors.redAccent]),
                               borderRadius: BorderRadius.circular(30.0),
                             ),
                             child: Container(
-                              constraints: BoxConstraints(maxWidth: Quick.getDeviceSize(context).width, minHeight: 50.0),
+                              constraints: BoxConstraints(
+                                  maxWidth: Quick
+                                      .getDeviceSize(context)
+                                      .width,
+                                  minHeight: 50.0),
                               alignment: Alignment.center,
-                              child: Text("Log out",
-                                style: GoogleFonts.poppins(color: Colors.white, fontSize: 26.0, fontWeight:FontWeight.w300),
+                              child: Text(
+                                "Log out",
+                                style: GoogleFonts.poppins(
+                                    color: Colors.white,
+                                    fontSize: 23.0,
+                                    fontWeight: FontWeight.w300),
                               ),
                             ),
                           ),
+                        ),
+                      ),
+                      SizedBox(
+                        height: Quick
+                            .getDeviceSize(context)
+                            .height * 0.02,
+                      ),
+                      Text(
+                        "Edit your profile on the Tripwire website!",
+                        style: GoogleFonts.poppins(
+                          fontSize: 15.0,
+                          fontWeight: FontWeight.w500,
+                          decoration: TextDecoration.none,
+                          color: Color(0xff669260),
                         ),
                       ),
                     ],
@@ -227,8 +246,8 @@ class _MyProfile extends State<MyProfile> {
             child: Card(
               color: Colors.white,
               child: Padding(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 8.0, vertical: 22.0),
+                padding: const EdgeInsets.only(
+                    left: 8.0, right: 8, top: 22.0),
                 child: Row(
                   children: <Widget>[
                     Expanded(
@@ -242,13 +261,12 @@ class _MyProfile extends State<MyProfile> {
                               color: Color(0xff669260),
                             ),
                           ),
-                          SizedBox(
-                            height: 5.0,
-                          ),
                           Text(
                             groupJoined.toString(),
+                            overflow: TextOverflow.ellipsis,
                             style: GoogleFonts.poppins(
-                              fontSize: 15.0,
+                              fontSize: 25.0,
+                              fontWeight: FontWeight.w600,
                               color:  Color(0xff8FBF88),
                             ),
                           ),
@@ -261,18 +279,16 @@ class _MyProfile extends State<MyProfile> {
                           Text(
                             "Steps Taken",
                             style: GoogleFonts.poppins(
-                              fontSize: 18.0,
-                              fontWeight: FontWeight.bold,
-                              color: Color(0xff669260)
-                            ),
-                          ),
-                          SizedBox(
-                            height: 5.0,
+                                fontSize: 18.0,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xff669260)),
                           ),
                           Text(
                             steps.toString(),
+                            overflow: TextOverflow.ellipsis,
                             style: GoogleFonts.poppins(
-                              fontSize: 15.0,
+                              fontSize: 25.0,
+                              fontWeight: FontWeight.w600,
                               color:  Color(0xff8FBF88),
                             ),
                           ),
@@ -306,7 +322,6 @@ class _MyProfile extends State<MyProfile> {
     );
   }
 
-
   // Listen to steps
   void listenToChanges() {
     // Upon a change in steps
@@ -333,6 +348,6 @@ class _MyProfile extends State<MyProfile> {
       print("Error : $ex");
     }
 
-    Quick.navigate(context, () => Login());
+    Quick.forceNavigate(context, () => Login());
   }
 }

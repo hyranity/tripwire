@@ -19,6 +19,13 @@ class Quick {
     }));
   }
 
+  static void forceNavigate(context, Widget Function() navigatePage) {
+    Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (BuildContext context) => navigatePage()),
+        ModalRoute.withName('/'));
+  }
+
   static void goBack(BuildContext context) {
     Navigator.pop(context);
   }

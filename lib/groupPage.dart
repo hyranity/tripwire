@@ -191,7 +191,10 @@ class _GroupPage extends State<GroupPage> {
     Quick.getLocation().then((location) {
       setState(() {
         this.location = location;
-        locationText.text = location.subLocality + ", " + location.locality;
+        locationText.text =
+            (location.subLocality == "" ? "N/A" : location.subLocality) +
+                ", " +
+                location.locality;
         print(locationText.text);
       });
     });
@@ -605,7 +608,8 @@ class _GroupPage extends State<GroupPage> {
                           ),
                           Text(
                             location != null
-                                ? location.subLocality + "," + location.locality
+                                ? (location.subLocality == "" ? "N/A" : location
+                                .subLocality) + "," + location.locality
                                 : "No location found", // Load current location
                             maxLines: 1,
                             softWrap: false,
@@ -2566,7 +2570,7 @@ class _GroupPage extends State<GroupPage> {
                   image: DecorationImage(
                     fit: BoxFit.fill,
                     image: NetworkImage(
-                        'https://flutter.github.io/assets-for-api-docs/assets/widgets/owl.jpg'),
+                        group.photoURL),
                   )),
             ),
             SizedBox(
@@ -2628,7 +2632,8 @@ class _GroupPage extends State<GroupPage> {
 
     Quick.getLocation().then((myLocation) {
       String locationRally =
-          myLocation.subLocality + ", " + myLocation.locality;
+          (myLocation.subLocality == "" ? "N/A" : myLocation.subLocality) +
+              ", " + myLocation.locality;
 
       eventDb.push().set({
         'title': 'Rally Everyone',
@@ -2665,7 +2670,8 @@ class _GroupPage extends State<GroupPage> {
     await instance.getTime();
 
     Quick.getLocation().then((myLocation) {
-      String locationPing = myLocation.subLocality + ", " + myLocation.locality;
+      String locationPing = (myLocation.subLocality == "" ? "N/A" : myLocation
+          .subLocality) + ", " + myLocation.locality;
 
       eventDb.once().then((DataSnapshot snapshot) {
         Map<dynamic, dynamic> events = snapshot.value;

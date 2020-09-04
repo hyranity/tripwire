@@ -5,6 +5,8 @@ import 'package:tripwire/Util/Quick.dart';
 class MyTheme {
   static Color primaryColor = Color(0xffD5F5D1);
   static Color accentColor = Color(0xff669260);
+  static String defaultIcon =
+      "https://icon-library.com/images/default-profile-icon/default-profile-icon-16.jpg";
 
   static TextStyle sectionHeader(BuildContext context) {
     return GoogleFonts.poppins(

@@ -146,8 +146,8 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
-    @override
-    Widget build(BuildContext context) {
+  @override
+  Widget build(BuildContext context) {
     try {
       if (place == null || weather == null && repeater < 8) {
         repeater++;
@@ -275,23 +275,22 @@ class _MyHomePageState extends State<MyHomePage> {
                 onTap: () {
                   Quick.navigate(context, () => MyProfile());
                 },
-                child: Container(
-                  height: 60,
-                  width: 60,
-                  decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(10),
-                      boxShadow: [
-                        BoxShadow(
-                          blurRadius: 25,
-                          color: Colors.grey.withOpacity(0.3),
-                        )
-                      ]),
-                  child: Icon(
-                    Icons.menu,
-                    size: 25,
-                    color: Color(0xff669260),
-                  ),
+                child: FutureBuilder(
+                  future: Global.getDBUser(),
+                  builder: (BuildContext context, AsyncSnapshot snapshot) {
+                    if (snapshot.connectionState != ConnectionState.done ||
+                        !snapshot.hasData) {
+                      return CircleAvatar(
+                        backgroundImage: NetworkImage(MyTheme.defaultIcon),
+                        radius: 35.0,
+                      );
+                    }
+
+                    return CircleAvatar(
+                      backgroundImage: NetworkImage(snapshot.data["photoURL"]),
+                      radius: 35.0,
+                    );
+                  },
                 ),
               )
             ],
@@ -513,12 +512,12 @@ class _MyHomePageState extends State<MyHomePage> {
 
         if (member.toString().contains(user.uid)) {
           groupList.add(new Group(
-            name: value['name'],
-            id: value['id'],
-            desc: value['desc'],
-            isActive: false,
-            memberCount: 0,
-          ));
+              name: value['name'],
+              id: value['id'],
+              desc: value['desc'],
+              isActive: false,
+              memberCount: 0,
+              photoURL: value['photoURL']));
         }
       });
       return groupList;
@@ -616,8 +615,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     shape: BoxShape.circle,
                     image: DecorationImage(
                       fit: BoxFit.fill,
-                      image: NetworkImage(
-                          'https://flutter.github.io/assets-for-api-docs/assets/widgets/owl.jpg'),
+                      image: NetworkImage(group.photoURL),
                     )),
               ),
               SizedBox(
@@ -818,7 +816,7 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget detailedWeatherInfo() {
     List<WeatherBubble> weatherInfo = new List();
     weatherInfo.add(new WeatherBubble(
-        title: "Humidity", value: (weather.humidity).toStringAsFixed(0) + "%"));
+        title: "Humidity %", value: (weather.humidity).toStringAsFixed(0)));
     weatherInfo.add(new WeatherBubble(
         title: "Sunrise",
         amOrPm: "AM",
@@ -851,7 +849,7 @@ class _MyHomePageState extends State<MyHomePage> {
             height: 0,
           ),
           new Container(
-            height: 180,
+            height: 150,
             child: ListView.separated(
               padding: EdgeInsets.only(left: 23, right: 23),
               scrollDirection: Axis.horizontal,
@@ -882,9 +880,11 @@ class _MyHomePageState extends State<MyHomePage> {
                                 fontWeight: FontWeight.w600,
                               )),
                           Text(weatherInfo[index].value,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                               style: GoogleFonts.poppins(
                                 color: Color(0xff64749A),
-                                fontSize: 41,
+                                fontSize: 40,
                                 fontWeight: FontWeight.w600,
                               )),
                         ],
