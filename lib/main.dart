@@ -545,7 +545,7 @@ class _MyHomePageState extends State<MyHomePage> {
             }
 
             // if no groups found
-            if (!snapshot.hasData) {
+            if (!snapshot.hasData || snapshot.data.length == 0) {
               return Padding(
                 padding: const EdgeInsets.only(left: 10.0),
                 child: Text(
