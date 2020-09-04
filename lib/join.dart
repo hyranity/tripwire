@@ -192,7 +192,7 @@ class _JoinPage extends State<JoinPage> {
                 .child("member")
                 .child(user.uid)
                 .child("groups")
-                .set({
+                .update({
               code: code,
             });
           });

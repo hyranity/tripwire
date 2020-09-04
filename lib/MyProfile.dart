@@ -284,7 +284,24 @@ class _MyProfile extends State<MyProfile> {
               ),
             ),
           ),
-        ) //Card
+        ), //Card
+        RaisedButton(
+          onPressed: () {
+            Quick.goBack(context);
+          },
+          color: Colors.transparent,
+          elevation: 0,
+          splashColor: Colors.transparent,
+          highlightColor: Colors.transparent,
+          child: Text(
+            "< BACK",
+            style: GoogleFonts.poppins(
+              fontWeight: FontWeight.w600,
+              fontSize: 20 + MediaQuery.of(context).size.width * 0.014,
+              color: Color(0xff669260),
+            ),
+          ),
+        ),
       ],
     );
   }

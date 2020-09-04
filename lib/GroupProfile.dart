@@ -289,7 +289,24 @@ class _GroupProfile extends State<GroupProfile> {
               ),
             ),
           ),
-        ) //Card
+        ),//Card,
+        RaisedButton(
+          onPressed: () {
+            Quick.goBack(context);
+          },
+          color: Colors.transparent,
+          elevation: 0,
+          splashColor: Colors.transparent,
+          highlightColor: Colors.transparent,
+          child: Text(
+            "< BACK",
+            style: GoogleFonts.poppins(
+              fontWeight: FontWeight.w600,
+              fontSize: 20 + MediaQuery.of(context).size.width * 0.014,
+              color: Color(0xff669260),
+            ),
+          ),
+        ),
       ],
     );
   }
@@ -365,7 +382,7 @@ class _GroupProfile extends State<GroupProfile> {
                 style: GoogleFonts.poppins(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
-                  color: Colors.indigo,
+                  color: Color(0xff669260),
                 ),
             ),
           ),
@@ -379,7 +396,7 @@ class _GroupProfile extends State<GroupProfile> {
     return Container(
       height:70,
       decoration: BoxDecoration(
-          color: Color(0xff6098F6),
+          color: MyTheme.primaryColor,
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
@@ -395,7 +412,7 @@ class _GroupProfile extends State<GroupProfile> {
           children: <Widget>[
             Icon (
               Icons.face,
-              color: Colors.white70,
+              color: Color(0xff669260),
               size: 30,
             ),
 
@@ -412,7 +429,7 @@ class _GroupProfile extends State<GroupProfile> {
                 textAlign: TextAlign.left,
                 style: GoogleFonts.poppins(
                   fontSize: 20,
-                  color: Colors.white70,
+                  color: Color(0xff669260),
                 ),
               ),
             ),
