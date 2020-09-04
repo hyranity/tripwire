@@ -168,7 +168,7 @@ class _PollPage extends State<PollPage> {
       'triggerPerson' : user.displayName.trim(),
       'groupId' : widget.id,
       'type' : 'poll',
-      'sentTime' : wt.worldtime.toString(),
+      'sentTime': DateTime.now().toString(),
       'question' : question,
       'yes' :0,
       'no' :0,
