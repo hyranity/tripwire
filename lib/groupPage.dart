@@ -2473,7 +2473,6 @@ class _GroupPage extends State<GroupPage> {
               eventDb.child(key).update({
                 'sender': user.uid,
                 'receiver': value['sender'],
-                'triggerPerson': user.displayName.trim(),
                 'location': locationPing,
                 'pingLocation': 'yes',
                 'isReplied': 'yes',
@@ -2484,7 +2483,6 @@ class _GroupPage extends State<GroupPage> {
               eventDb.child(key).update({
                 'sender': user.uid,
                 'receiver': value['sender'],
-                'triggerPerson': user.displayName.trim(),
                 'pingLocation': 'yes',
                 'isReplied': 'yes',
                 'answer': 'no',
@@ -2574,7 +2572,6 @@ class _GroupPage extends State<GroupPage> {
             eventDb.child(key).update({
               'sender': user.uid,
               'receiver': value['sender'],
-              'triggerPerson': user.displayName.trim(),
               'pingLocation': 'yes',
               'isReplied': 'yes',
               'answer': 'yes',
@@ -2584,7 +2581,6 @@ class _GroupPage extends State<GroupPage> {
             eventDb.child(key).update({
               'sender': user.uid,
               'receiver': value['sender'],
-              'triggerPerson': user.displayName.trim(),
               'pingLocation': 'yes',
               'isReplied': 'yes',
               'answer': 'no',
