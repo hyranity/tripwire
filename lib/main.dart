@@ -515,6 +515,7 @@ class _MyHomePageState extends State<MyHomePage> {
           groupList.add(new Group(
             name: value['name'],
             id: value['id'],
+            desc: value['desc'],
             isActive: false,
             memberCount: 0,
           ));

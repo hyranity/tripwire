@@ -87,7 +87,7 @@ class _MyProfile extends State<MyProfile> {
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
-                  colors: [Colors.blue, Colors.indigo],
+                  colors: [MyTheme.primaryColor, Colors.green],
                 ),
               ),
               child: Center(
@@ -140,7 +140,7 @@ class _MyProfile extends State<MyProfile> {
                           fontSize: 18.0,
                           fontWeight: FontWeight.bold,
                           decoration: TextDecoration.none,
-                          color: Colors.indigo,
+                          color: Color(0xff669260),
                         ),
                       ),
                       Text(
@@ -148,7 +148,7 @@ class _MyProfile extends State<MyProfile> {
                         style: GoogleFonts.poppins(
                           fontSize: 20.0,
                           decoration: TextDecoration.none,
-                          color: Colors.blue,
+                          color:  Color(0xff8FBF88),
                         ),
                       ),
                       SizedBox(
@@ -160,7 +160,7 @@ class _MyProfile extends State<MyProfile> {
                           fontSize: 18.0,
                           fontWeight: FontWeight.bold,
                           decoration: TextDecoration.none,
-                          color: Colors.indigo,
+                          color: Color(0xff669260),
                         ),
                       ),
                       Text(
@@ -168,7 +168,7 @@ class _MyProfile extends State<MyProfile> {
                         style: GoogleFonts.poppins(
                           fontSize: 20.0,
                           decoration: TextDecoration.none,
-                          color: Colors.blue,
+                          color:  Color(0xff8FBF88),
                         ),
                       ),
                       SizedBox(
@@ -239,7 +239,7 @@ class _MyProfile extends State<MyProfile> {
                             style: GoogleFonts.poppins(
                               fontSize: 18.0,
                               fontWeight: FontWeight.bold,
-                              color: Colors.blue,
+                              color: Color(0xff669260),
                             ),
                           ),
                           SizedBox(
@@ -249,7 +249,7 @@ class _MyProfile extends State<MyProfile> {
                             groupJoined.toString(),
                             style: GoogleFonts.poppins(
                               fontSize: 15.0,
-                              color: Colors.blue,
+                              color:  Color(0xff8FBF88),
                             ),
                           ),
                         ],
@@ -263,7 +263,7 @@ class _MyProfile extends State<MyProfile> {
                             style: GoogleFonts.poppins(
                               fontSize: 18.0,
                               fontWeight: FontWeight.bold,
-                              color: Colors.blue,
+                              color: Color(0xff669260)
                             ),
                           ),
                           SizedBox(
@@ -273,7 +273,7 @@ class _MyProfile extends State<MyProfile> {
                             steps.toString(),
                             style: GoogleFonts.poppins(
                               fontSize: 15.0,
-                              color: Colors.blue,
+                              color:  Color(0xff8FBF88),
                             ),
                           ),
                         ],
@@ -288,7 +288,6 @@ class _MyProfile extends State<MyProfile> {
       ],
     );
   }
-
 
 
   // Listen to steps

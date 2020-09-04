@@ -10,6 +10,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:marquee_widget/marquee_widget.dart';
 import 'package:tinycolor/tinycolor.dart';
+import 'package:tripwire/GroupProfile.dart';
 import 'package:tripwire/Model/CurrentLocation.dart';
 import 'package:tripwire/Model/world_time.dart';
 import 'package:tripwire/Util/Global.dart';
@@ -80,9 +81,12 @@ class _GroupPage extends State<GroupPage> {
                           //Provide responsive design
                           height: MediaQuery.of(context).size.height * 0.02,
                         ),
-                        Container(
-                            padding: EdgeInsets.only(left: 20, right: 20),
-                            child: groupInfo()),
+                        InkWell(
+                          onTap: () {Quick.navigate(context, () => GroupProfile(group : group));},
+                          child: Container(
+                              padding: EdgeInsets.only(left: 20, right: 20),
+                              child: groupInfo()),
+                        ),
                         SizedBox(
                           //Provide responsive design
                           height: MediaQuery.of(context).size.height * 0.04,
