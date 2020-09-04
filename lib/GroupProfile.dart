@@ -90,7 +90,7 @@ class _GroupProfile extends State<GroupProfile> {
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
-                  colors: [MyTheme.primaryColor, Colors.green],
+                  colors: [MyTheme.primaryColor, Color(0xff90C78A)],
                 ),
               ),
               child: Center(
