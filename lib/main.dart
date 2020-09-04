@@ -148,21 +148,26 @@ class _MyHomePageState extends State<MyHomePage> {
 
     @override
     Widget build(BuildContext context) {
-    if (place == null || weather == null && repeater < 8) {
-      repeater++;
-      print(repeater);
-      loadData();
-//      return Container(
-//        color: Colors.white,
-//        alignment: Alignment.center,
-//        height: Quick.getDeviceSize(context).width * 0.5,
-//        width: Quick.getDeviceSize(context).width * 0.5,
-//        child: new CircularProgressIndicator(),
-//      );
-    }
+    try {
+      if (place == null || weather == null && repeater < 8) {
+        repeater++;
+        print(repeater);
+        loadData();
+        //      return Container(
+        //        color: Colors.white,
+        //        alignment: Alignment.center,
+        //        height: Quick.getDeviceSize(context).width * 0.5,
+        //        width: Quick.getDeviceSize(context).width * 0.5,
+        //        child: new CircularProgressIndicator(),
+        //      );
+      }
 
-    if(repeater == 8){
-      MyTheme.alertMsg(context, "Couldn't get data", "Check your Internet connection.");
+      if (repeater == 8) {
+        MyTheme.alertMsg(
+            context, "Couldn't get data", "Check your Internet connection.");
+      }
+    } on Exception catch (e) {
+      print(e);
     }
 
     return Scaffold(

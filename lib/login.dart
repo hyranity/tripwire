@@ -30,11 +30,12 @@ class _Login extends State<Login> {
         Global.getDBUser().then((dbUser) {
           if (dbUser != null) {
             print("user is logged in");
-            Navigator.of(context).pushReplacement(
-                MaterialPageRoute(builder: (context) => MyHomePage()));
+            if (context != null) {
+              Navigator.of(context).pushReplacement(
+                  MaterialPageRoute(builder: (context) => MyHomePage()));
+            }
           }
         });
-        ;
       }
 
       print("guest detected");
