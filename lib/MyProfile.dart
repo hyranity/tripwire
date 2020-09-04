@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -21,13 +22,54 @@ class MyProfile extends StatefulWidget {
 }
 
 class _MyProfile extends State<MyProfile> {
-  int steps = Global.stepCount; // Global.stepCount stores the last known step value
+  int steps =
+      Global.stepCount; // Global.stepCount stores the last known step value
   String status = "stopped";
+  FirebaseUser user;
+  int groupJoined = 0;
+  int buildTimes = 0;
+  String userImg;
 
   @override
   void initState() {
     super.initState();
     listenToChanges();
+    loadData();
+  }
+
+  void loadData() {
+    Map<dynamic, dynamic> groupList;
+    if (user == null && buildTimes < 3) {
+      buildTimes++;
+      // Get user auth data
+      FirebaseAuth.instance.currentUser().then((user) {
+        // Get user DB data
+        Global.getDBUser().then((dbUser) {
+          if (dbUser != null) {
+            // Get group count
+            FirebaseDatabase.instance
+                .reference()
+                .child("member")
+                .child(user.uid)
+                .child("groups")
+                .once()
+                .then((groups) {
+              if (groups.value != null) {
+                groupList = groups.value;
+              }
+              setState(() {
+                print("setting state #" + buildTimes.toString());
+                this.user = user;
+                groupJoined = groupList.length;
+                this.userImg = dbUser["profilePic"] == null
+                    ? "https://cache.desktopnexus.com/thumbseg/1847/1847388-bigthumbnail.jpg"
+                    : dbUser["profilePic"].toString();
+              });
+            });
+          }
+        });
+      });
+    }
   }
 
   @override
@@ -37,7 +79,10 @@ class _MyProfile extends State<MyProfile> {
         Column(
           children: <Widget>[
             Container(
-              height: MediaQuery.of(context).size.height * .45,
+              height: MediaQuery
+                  .of(context)
+                  .size
+                  .height * .45,
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
@@ -46,22 +91,25 @@ class _MyProfile extends State<MyProfile> {
                 ),
               ),
               child: Center(
-                child: Column (
+                child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
                     CircleAvatar(
-                      backgroundImage: NetworkImage("https://cache.desktopnexus.com/thumbseg/1847/1847388-bigthumbnail.jpg"),
+                      backgroundImage: NetworkImage(
+                          userImg == null
+                              ? "https://cache.desktopnexus.com/thumbseg/1847/1847388-bigthumbnail.jpg"
+                              : userImg),
                       radius: 50.0,
                     ),
                     SizedBox(
                       height: 10.0,
                     ),
                     Text(
-                      "Sinon",
+                      user == null ? "" : user.displayName,
                       style: GoogleFonts.poppins(
                         fontSize: 25.0,
-                        color:Colors.white,
+                        color: Colors.white,
                         decoration: TextDecoration.none,
                       ),
                     ),
@@ -70,132 +118,141 @@ class _MyProfile extends State<MyProfile> {
               ),
             ),
             Container(
-              height: MediaQuery.of(context).size.height * .55,
-              width: MediaQuery.of(context).size.width,
-              color: Colors.white,
-              child: Padding (
-                padding: const EdgeInsets.symmetric(vertical: 30.0,horizontal: 16.0),
-                child: Column (
-
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: <Widget>[
-                    Text(
-                      "Name",
-                      style: GoogleFonts.poppins(
-                        fontSize: 18.0,
-                        fontWeight: FontWeight.bold,
-                        decoration: TextDecoration.none,
-                        color:Colors.indigo,
+                height: MediaQuery
+                    .of(context)
+                    .size
+                    .height * .55,
+                width: MediaQuery
+                    .of(context)
+                    .size
+                    .width,
+                color: Colors.white,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                      vertical: 30.0, horizontal: 16.0),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: <Widget>[
+                      Text(
+                        "Name",
+                        style: GoogleFonts.poppins(
+                          fontSize: 18.0,
+                          fontWeight: FontWeight.bold,
+                          decoration: TextDecoration.none,
+                          color: Colors.indigo,
+                        ),
                       ),
-                    ),Text(
-                      "Sinon",
-                      style: GoogleFonts.poppins(
-                        fontSize: 20.0,
-                        decoration: TextDecoration.none,
-                        color:Colors.blue,
+                      Text(
+                        user == null ? "" : user.displayName,
+                        style: GoogleFonts.poppins(
+                          fontSize: 20.0,
+                          decoration: TextDecoration.none,
+                          color: Colors.blue,
+                        ),
                       ),
-                    ),
-                    SizedBox(
-                      height: 20.0,
-                    ),
-                    Text(
-                      "Email",
-                      style: GoogleFonts.poppins(
-                        fontSize: 18.0,
-                        fontWeight: FontWeight.bold,
-                        decoration: TextDecoration.none,
-                        color:Colors.indigo,
+                      SizedBox(
+                        height: 20.0,
                       ),
-                    ),
-                    Text(
-                      "sinon@sao.com",
-                      style: GoogleFonts.poppins(
-                        fontSize: 20.0,
-                        decoration: TextDecoration.none,
-                        color:Colors.blue,
+                      Text(
+                        "Email",
+                        style: GoogleFonts.poppins(
+                          fontSize: 18.0,
+                          fontWeight: FontWeight.bold,
+                          decoration: TextDecoration.none,
+                          color: Colors.indigo,
+                        ),
                       ),
-                    ),
-                    SizedBox(
-                      height: 10.0,
-                    ),
-                    Container (
-                      width: 300,
-
-                      child: RaisedButton(
-                        shape: RoundedRectangleBorder (
+                      Text(
+                        user == null ? "" : user.email,
+                        style: GoogleFonts.poppins(
+                          fontSize: 20.0,
+                          decoration: TextDecoration.none,
+                          color: Colors.blue,
+                        ),
+                      ),
+                      SizedBox(
+                        height: 10.0,
+                      ),
+                      Container(
+                        width: 300,
+                        child: RaisedButton(
+                          shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(80.0),
-                        ),
-
-                        child: Ink(
-
+                          ),
+                          child: Ink(),
                         ),
                       ),
-                    ),
-                  ],
-                ),
-              )
-            )
+                    ],
+                  ),
+                ))
           ],
         ),
         Container(
           alignment: Alignment.topCenter,
           padding: EdgeInsets.only(
-              top: MediaQuery.of(context).size.height * .35,
+              top: MediaQuery
+                  .of(context)
+                  .size
+                  .height * .35,
               right: 20.0,
               left: 20.0),
           child: Container(
             height: 120.0,
-            width: MediaQuery.of(context).size.width,
+            width: MediaQuery
+                .of(context)
+                .size
+                .width,
             child: Card(
               color: Colors.white,
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8.0,vertical: 22.0),
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 8.0, vertical: 22.0),
                 child: Row(
                   children: <Widget>[
                     Expanded(
-                      child: Column (
+                      child: Column(
                         children: <Widget>[
                           Text(
                             "Group Joined",
                             style: GoogleFonts.poppins(
                               fontSize: 18.0,
                               fontWeight: FontWeight.bold,
-                              color:Colors.blue,
+                              color: Colors.blue,
                             ),
                           ),
                           SizedBox(
                             height: 5.0,
                           ),
                           Text(
-                            "1",
+                            groupJoined.toString(),
                             style: GoogleFonts.poppins(
                               fontSize: 15.0,
-                              color:Colors.blue,
+                              color: Colors.blue,
                             ),
                           ),
                         ],
                       ),
                     ),
                     Expanded(
-                      child: Column (
+                      child: Column(
                         children: <Widget>[
                           Text(
                             "Steps Taken",
                             style: GoogleFonts.poppins(
                               fontSize: 18.0,
                               fontWeight: FontWeight.bold,
-                              color:Colors.blue,
+                              color: Colors.blue,
                             ),
                           ),
                           SizedBox(
                             height: 5.0,
                           ),
                           Text(
-                            "123",
+                            steps.toString(),
                             style: GoogleFonts.poppins(
                               fontSize: 15.0,
-                              color:Colors.blue,
+                              color: Colors.blue,
                             ),
                           ),
                         ],
@@ -211,39 +268,33 @@ class _MyProfile extends State<MyProfile> {
     );
   }
 
+
+
   // Listen to steps
   void listenToChanges() {
-
     // Upon a change in steps
     Global.stepCountStream.listen((event) {
-
       // Rebuild the entire screen
       setState(() {
         steps = event.steps;
       });
-
     });
 
     // Upon a change in walking status
     Global.pedestrianStatusStream.listen((event) {
-
       // Rebuild the entire screen
       setState(() {
         status = event.status;
       });
-
     });
   }
 
   Future<void> Logout() async {
     try {
       await FirebaseAuth.instance.signOut();
-    }
-    catch(ex) {
+    } catch (ex) {
       print("Error : $ex");
     }
-
-
 
     Quick.navigate(context, () => Login());
   }

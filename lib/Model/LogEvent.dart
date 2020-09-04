@@ -18,8 +18,25 @@ class LogEvent{
   int yes;
   int no;
   String response;
+  var attendees;
 
-  LogEvent({this.title = "Event X", this.triggerPerson = "John Doe", this.type = "location", this.sentTime = null, this.isCommunication = true, this.sender="sender", this.receiver="receiver", this.pingLocation = "not pinging", this.location="location", this.isReplied = "no", this.question = "question", this.answer="answer", this.yes = 0, this.no = 0, this.response = ""});
+  LogEvent(
+      {this.title = "Event X",
+      this.triggerPerson = "John Doe",
+      this.type = "location",
+      this.sentTime = null,
+      this.isCommunication = true,
+      this.sender = "sender",
+      this.receiver = "receiver",
+      this.pingLocation = "not pinging",
+      this.location = "location",
+      this.isReplied = "no",
+      this.question = "question",
+      this.answer = "answer",
+      this.yes = 0,
+      this.no = 0,
+      this.response = "",
+      this.attendees = null});
 
   //Returns an icon based on its type
   static Widget getIcon(String type, double size){
@@ -110,8 +127,9 @@ class LogEvent{
       double years = months / 12;
       return years.floor().toString() + (years<2? " yr " : " yrs ") + " ago";
     }else{
+      if (difference < 0)
+        return (difference.floor() * -1).toString() + " mins left";
 
-      //If less than 10 minutes ago
       if(difference < 10)
         return "Just now";
       else
