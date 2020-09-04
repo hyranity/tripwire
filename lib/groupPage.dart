@@ -511,6 +511,10 @@ class _GroupPage extends State<GroupPage> {
                 "-" +
                 date.year.toString());
 
+            var id = logEvent
+                .push()
+                .key;
+
             logEvent.child(logEvent.push().key).set({
               "type": "location",
               "location": locationText.text,
@@ -518,6 +522,7 @@ class _GroupPage extends State<GroupPage> {
               weather.temperature.celsius.toStringAsFixed(0) + "°C",
               "weather": weather.weatherMain,
               "logTime": DateTime.now().toString(),
+              "id": id,
               "attendees": {
                 user.uid: user.displayName,
               }
