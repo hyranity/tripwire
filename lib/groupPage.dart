@@ -451,7 +451,7 @@ class _GroupPage extends State<GroupPage> {
 
                 //Is current user already logged inside?
                 Map<dynamic, dynamic> attendees = event["attendees"];
-
+                print(attendees);
                 FirebaseAuth.instance.currentUser().then((user) {
                   if (attendees != null && attendees[user.uid] != null) {
                     // User already logged this location
@@ -466,7 +466,7 @@ class _GroupPage extends State<GroupPage> {
                         .reference()
                         .child("groups")
                         .child(group.id)
-                        .child("event")
+                        .child("events")
                         .child(date.day.toString() +
                         "-" +
                         date.month.toString() +
@@ -475,15 +475,15 @@ class _GroupPage extends State<GroupPage> {
                         .child(event["id"]);
 
                     // New attendant
-
+                    print(thisLoggedLocation.path);
                     thisLoggedLocation
                         .child("attendees")
-                        .set({user.uid: user.displayName}).then((value) {
+                        .update({user.uid: user.displayName}).then((value) {
                       setState(() {
                         logButtonEnabled = true; // Prevent button spamming
                       });
 
-                      logSuccess(context, "Location logged successfully!");
+                      logSuccess(context, "You participated in this logging!");
                     });
                   }
                 });
