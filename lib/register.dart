@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:tripwire/Util/Quick.dart';
 import 'package:tripwire/login.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:tripwire/main.dart';
 
 import 'Model/MyTheme.dart';
 
@@ -313,7 +314,7 @@ class _Register extends State<Register> {
                 ),
                 InkWell(
                   onTap: () {
-                    Navigator.of(context).popUntil((route) => route.isFirst);
+                    Quick.forceNavigate(context, () => MyHomePage());
                   },
                   child: Container(
                     constraints: BoxConstraints(maxHeight: 100),
