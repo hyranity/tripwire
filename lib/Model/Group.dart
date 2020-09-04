@@ -8,6 +8,7 @@ class Group{
   int memberCount;
   String desc;
   String photoURL;
+  Map<dynamic, dynamic> members;
 
   Group(
       {this.name,
@@ -16,5 +17,6 @@ class Group{
       this.isActive = false,
       this.memberCount = 0,
       this.desc,
-      this.photoURL = "MyTheme.defaultIcon"});
+      this.photoURL = "MyTheme.defaultIcon",
+      this.members = null});
 }

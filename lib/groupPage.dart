@@ -1014,6 +1014,7 @@ class _GroupPage extends State<GroupPage> {
       groups.forEach((key, value) async {
         countUser += 1;
       });
+      group.members = groups["members"];
       group.memberCount = countUser;
     });
   }
