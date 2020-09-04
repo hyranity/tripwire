@@ -178,6 +178,7 @@ class _JoinPage extends State<JoinPage> {
                 "email": user.email,
                 "stepCountWhenJoined": Global.stepCount,
                 "name": username,
+                "role" : "member",
               },
             });
             MyTheme.alertMsg(

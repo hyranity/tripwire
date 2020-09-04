@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:pedometer/pedometer.dart';
 import 'package:tripwire/Model/MyTheme.dart';
 import 'package:tripwire/Util/Quick.dart';
@@ -30,20 +31,31 @@ class Global {
       stepCountStream.listen((event) {
         stepCount = event.steps;
         print(stepCount);
-        if (stepCount % 10 == 0) {
-          Quick.getLocation().then((place) {
-            // For every 100 steps
-            FirebaseDatabase.instance
-                .reference()
-                .child("member")
-                .child(user.uid)
-                .update({
-              'lastLocation': place.subLocality +
-                  ", " +
-                  place.administrativeArea +
-                  ", " +
-                  place.country,
-              'lastLoggedTime': DateTime.now().toString(),
+        Geolocator geolocator = Geolocator()..forceAndroidLocationManager;
+        if (stepCount % 100 == 0 || stepCount == 0) {
+          geolocator
+              .getCurrentPosition(desiredAccuracy: LocationAccuracy.best)
+              .then((Position currentPos) {
+            geolocator.placemarkFromCoordinates(
+                currentPos.latitude, currentPos.longitude).then((placeList) {
+
+                Placemark place = placeList[0];
+
+              // For every 100 steps
+              FirebaseDatabase.instance
+                  .reference()
+                  .child("member")
+                  .child(user.uid)
+                  .update({
+                'lastLocation': place.subLocality == null? "N/A" : place.subLocality +
+                    ", " +
+                    place.administrativeArea +
+                    ", " +
+                    place.country,
+                'lastLoggedTime': DateTime.now().toString(),
+                'longitude' : currentPos.longitude,
+                'latitude' : currentPos.latitude,
+            });
             });
           });
         }
