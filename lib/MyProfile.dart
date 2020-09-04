@@ -60,7 +60,7 @@ class _MyProfile extends State<MyProfile> {
               setState(() {
                 print("setting state #" + buildTimes.toString());
                 this.user = user;
-                groupJoined = groupList.length;
+                groupJoined = groupList == null ? 0 : groupList.length;
                 this.userImg = dbUser["profilePic"] == null
                     ? "https://cache.desktopnexus.com/thumbseg/1847/1847388-bigthumbnail.jpg"
                     : dbUser["profilePic"].toString();
