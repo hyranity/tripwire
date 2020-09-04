@@ -314,7 +314,8 @@ class _Register extends State<Register> {
                 ),
                 InkWell(
                   onTap: () {
-                    Quick.forceNavigate(context, () => MyHomePage());
+                    Navigator.of(context).pushReplacement(
+                        MaterialPageRoute(builder: (context) => MyHomePage()));
                   },
                   child: Container(
                     constraints: BoxConstraints(maxHeight: 100),

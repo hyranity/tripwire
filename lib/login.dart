@@ -31,7 +31,8 @@ class _Login extends State<Login> {
           if (dbUser != null) {
             print("user is logged in");
             if (context != null) {
-              Quick.forceNavigate(context, () => MyHomePage());
+              Navigator.of(context).pushReplacement(
+                  MaterialPageRoute(builder: (context) => MyHomePage()));
             }
           }
         });
