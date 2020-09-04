@@ -82,7 +82,10 @@ class _GroupPage extends State<GroupPage> {
                           height: MediaQuery.of(context).size.height * 0.02,
                         ),
                         InkWell(
-                          onTap: () {Quick.navigate(context, () => GroupProfile(group : group));},
+                          onTap: () {
+                            Quick.navigate(
+                                context, () => GroupProfile(group: group));
+                          },
                           child: Container(
                               padding: EdgeInsets.only(left: 20, right: 20),
                               child: groupInfo()),
@@ -122,45 +125,62 @@ class _GroupPage extends State<GroupPage> {
   calculateStepCount() {
     // Because step count persist BEFORE joining the group, make the current step zero by subtracting with stepsWhenJoining
 
-    // Access member WITHIN group tree
-    FirebaseAuth.instance.currentUser().then((user) {
-      var groupMember = FirebaseDatabase.instance
-          .reference()
-          .child("groups")
-          .child(group.id)
-          .child("members")
-          .child(user.uid);
+    // Is this group active?
+    FirebaseDatabase.instance
+        .reference()
+        .child("groups")
+        .child(group.id)
+        .once()
+        .then((DataSnapshot groupSnap) {
+      Map<dynamic, dynamic> groupObj = groupSnap.value;
+      var groupStatus =
+          groupObj["status"] == null ? "inactive" : groupObj["status"];
+      
+      if (groupStatus == "inactive") {
+        // End here since it's not active
+        return;
+      }
 
-      groupMember.once().then((DataSnapshot userSnap) {
-        // If -1, that means this user is the creator. Set this step = currentStep
-        Map<dynamic, dynamic> member = userSnap.value;
-        int stepCountWhenJoined = userSnap.value["stepCountWhenJoined"];
-        int currentStepCount = userSnap.value["stepCount"] == null
-            ? 0
-            : userSnap.value["stepCount"];
+      // Access member WITHIN group tree
+      FirebaseAuth.instance.currentUser().then((user) {
+        var groupMember = FirebaseDatabase.instance
+            .reference()
+            .child("groups")
+            .child(group.id)
+            .child("members")
+            .child(user.uid);
 
-        if (userSnap.value["stepCountWhenJoined"] == -1) {
-          stepCountWhenJoined = Global.stepCount;
-          // Update step count
-          currentStepCount = Global.stepCount -
-              stepCountWhenJoined; // Because user may join at step 100, few mins later at step 300, means 200 REAL steps
-        }
-        // If current step count is lower, means user JUST restarted phone; add on to the DB one
-        else if (userSnap.value["stepCountWhenJoined"] > Global.stepCount) {
-          stepCountWhenJoined = 0;
-          currentStepCount = Global.stepCount;
+        groupMember.once().then((DataSnapshot userSnap) {
+          Map<dynamic, dynamic> member = userSnap.value;
+          int stepCountWhenJoined = userSnap.value["stepCountWhenJoined"];
+          int currentStepCount = userSnap.value["stepCount"] == null
+              ? 0
+              : userSnap.value["stepCount"];
 
-          print("user just restarted phone");
-        } else {
-          // Update step count
-          currentStepCount = Global.stepCount -
-              stepCountWhenJoined; // Because user may join at step 100, few mins later at step 300, means 200 REAL steps
-        }
+          // If -1, that means this user is the creator. Set this step = currentStep
+          if (userSnap.value["stepCountWhenJoined"] == -1) {
+            stepCountWhenJoined = Global.stepCount;
+            // Update step count
+            currentStepCount = Global.stepCount -
+                stepCountWhenJoined; // Because user may join at step 100, few mins later at step 300, means 200 REAL steps
+          }
+          // If current step count is lower, means user JUST restarted phone; add on to the DB one
+          else if (userSnap.value["stepCountWhenJoined"] > Global.stepCount) {
+            stepCountWhenJoined = 0;
+            currentStepCount = Global.stepCount;
 
-        // Update member
-        groupMember.update({
-          "stepCountWhenJoined": stepCountWhenJoined,
-          "stepCount": currentStepCount,
+            print("user just restarted phone");
+          } else {
+            // Update step count
+            currentStepCount = Global.stepCount -
+                stepCountWhenJoined; // Because user may join at step 100, few mins later at step 300, means 200 REAL steps
+          }
+
+          // Update member
+          groupMember.update({
+            "stepCountWhenJoined": stepCountWhenJoined,
+            "stepCount": currentStepCount,
+          });
         });
       });
     });

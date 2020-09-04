@@ -47,8 +47,9 @@ class Global {
                   .child("member")
                   .child(user.uid)
                   .update({
-                'lastLocation': place.subLocality == "" ? "N/A" : place.subLocality +
-                    ", " +
+                'lastLocation':
+                    (place.subLocality == "" ? "N/A" : place.subLocality) +
+                        ", " +
                     place.administrativeArea +
                     ", " +
                     place.country,
