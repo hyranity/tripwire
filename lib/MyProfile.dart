@@ -152,7 +152,7 @@ class _MyProfile extends State<MyProfile> {
                         ),
                       ),
                       SizedBox(
-                        height: 20.0,
+                        height: 20,
                       ),
                       Text(
                         "Email",
@@ -172,15 +172,36 @@ class _MyProfile extends State<MyProfile> {
                         ),
                       ),
                       SizedBox(
-                        height: 10.0,
+                        height: Quick.getDeviceSize(context).height * 0.05,
                       ),
-                      Container(
-                        width: 300,
+                      Container (
+                        alignment: Alignment.bottomCenter,
                         child: RaisedButton(
-                          shape: RoundedRectangleBorder(
+                          onPressed: () {
+                            Logout();
+                          },
+                          shape: RoundedRectangleBorder (
                             borderRadius: BorderRadius.circular(80.0),
                           ),
-                          child: Ink(),
+                          elevation: 0,
+                          padding: EdgeInsets.all(0.0),
+                          child: Ink(
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                  begin: Alignment.centerRight,
+                                  end: Alignment.centerLeft,
+                                  colors: [Colors.red,Colors.redAccent]
+                              ),
+                              borderRadius: BorderRadius.circular(30.0),
+                            ),
+                            child: Container(
+                              constraints: BoxConstraints(maxWidth: Quick.getDeviceSize(context).width, minHeight: 50.0),
+                              alignment: Alignment.center,
+                              child: Text("Log out",
+                                style: GoogleFonts.poppins(color: Colors.white, fontSize: 26.0, fontWeight:FontWeight.w300),
+                              ),
+                            ),
+                          ),
                         ),
                       ),
                     ],
