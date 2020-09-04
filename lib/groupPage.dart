@@ -515,7 +515,7 @@ class _GroupPage extends State<GroupPage> {
                 .push()
                 .key;
 
-            logEvent.child(logEvent.push().key).set({
+            logEvent.child(id).set({
               "type": "location",
               "location": locationText.text,
               "temperature":
