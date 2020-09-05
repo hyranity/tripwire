@@ -231,6 +231,8 @@ class _GroupPage extends State<GroupPage> {
                         ),
                         Text(
                           "Log your location into the group journal, accessible on the website.",
+                          maxLines: 3,
+                          overflow: TextOverflow.ellipsis,
                           style: GoogleFonts.poppins(
                             fontSize: 18,
                             fontWeight: FontWeight.w500,
@@ -347,7 +349,7 @@ class _GroupPage extends State<GroupPage> {
                 "Log",
                 textAlign: TextAlign.center,
                 style: GoogleFonts.poppins(
-                  fontSize: 20,
+                  fontSize: 18,
                   fontWeight: FontWeight.w500,
                   color: Colors.white,
                 ),
@@ -386,8 +388,9 @@ class _GroupPage extends State<GroupPage> {
               Text(
                 "Cancel",
                 textAlign: TextAlign.center,
+                overflow: TextOverflow.ellipsis,
                 style: GoogleFonts.poppins(
-                  fontSize: 20,
+                  fontSize: 18,
                   fontWeight: FontWeight.w500,
                   color: Colors.white,
                 ),
