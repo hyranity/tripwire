@@ -219,6 +219,7 @@ class _GroupPage extends State<GroupPage> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Container(
+                          margin: MediaQuery.of(context).viewInsets,
                           alignment: Alignment.centerLeft,
                           child: Text(
                             "Log location",
@@ -328,6 +329,7 @@ class _GroupPage extends State<GroupPage> {
         } else {}
       },
       child: Container(
+
         width: Quick.getDeviceSize(context).width,
         decoration: BoxDecoration(
           color: MyTheme.accentColor,
@@ -441,7 +443,7 @@ class _GroupPage extends State<GroupPage> {
             if (event["type"] == "location") {
               // Check how long since the event was made
               var difference = DateTime.now()
-                  .difference(DateTime.parse(event["logTime"]))
+                  .difference(DateTime.parse(event["sentTime"]))
                   .inMinutes;
 
               // Is this location already logged within the cooldown limit?
@@ -523,7 +525,7 @@ class _GroupPage extends State<GroupPage> {
               "temperature":
               weather.temperature.celsius.toStringAsFixed(0) + "°C",
               "weather": weather.weatherMain,
-              "logTime": DateTime.now().toString(),
+              "sentTime": DateTime.now().toString(),
               "id": id,
               "attendees": {
                 user.uid: user.displayName,
@@ -582,7 +584,7 @@ class _GroupPage extends State<GroupPage> {
                   },
                   child: Container(
                     alignment: Alignment.center,
-                    height: 120,
+
                     width: 300,
                     decoration: BoxDecoration(
                       color: MyTheme.primaryColor,
@@ -618,7 +620,7 @@ class _GroupPage extends State<GroupPage> {
                                 ? (location.subLocality == ""
                                 ? "N/A"
                                 : location.subLocality) +
-                                "," +
+                                ", " +
                                 location.locality
                                 : "No location found", // Load current location
                             maxLines: 1,
@@ -626,6 +628,7 @@ class _GroupPage extends State<GroupPage> {
                             overflow: TextOverflow.ellipsis,
                             textAlign: TextAlign.center,
                             style: GoogleFonts.poppins(
+                              height: 1,
                               fontSize: 23,
                               color: MyTheme.accentColor,
                               fontWeight: FontWeight.w500,
@@ -636,6 +639,7 @@ class _GroupPage extends State<GroupPage> {
                     ),
                   ),
                 ),
+
               ],
             ),
           );
@@ -918,7 +922,9 @@ class _GroupPage extends State<GroupPage> {
                       SizedBox(
                         width: 10,
                       ),
-                      cancelOption(Icons.cancel, "nah"),
+                      InkWell(onTap: () {
+                        Navigator.pop(context);
+                      }, child: cancelOption(Icons.cancel, "nah")),
                     ],
                   ),
                 )
@@ -1041,7 +1047,7 @@ class _GroupPage extends State<GroupPage> {
         "-" +
         date.month.toString() +
         "-" +
-        date.year.toString());
+        date.year.toString()).orderByChild("sentTime");
 
     final FirebaseUser user = await auth.currentUser();
 
@@ -1074,7 +1080,7 @@ class _GroupPage extends State<GroupPage> {
               title: events["location"],
               triggerPerson: attendStr,
               type: events['type'],
-              sentTime: DateTime.parse(events['logTime']),
+              sentTime: DateTime.parse(events['sentTime']),
               isCommunication: false,
               attendees: events['attendees'],
             ));
