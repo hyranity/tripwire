@@ -536,6 +536,21 @@ class _MyHomePageState extends State<MyHomePage> {
       setState(() {});
     });
 
+    FirebaseAuth.instance.currentUser().then((user) {
+      FirebaseDatabase.instance
+          .reference()
+          .child("member")
+          .child(user.uid)
+          .onChildChanged
+          .listen((event) {
+        setState(() {
+
+        });
+      });
+    });
+
+
+
     return Container(
       height: MediaQuery.of(context).size.height * 0.30,
       child: FutureBuilder<List<Group>>(

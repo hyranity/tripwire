@@ -202,7 +202,13 @@ class _Register extends State<Register> {
         ));
   }
 
-  Future<FirebaseUser> signUp (email, password, name) async {
+  signUp(email, password, name) async {
+    if (name.toString().isEmpty) {
+      MyTheme.alertMsg(
+          context, "Register Failed", "Ensure your fields are all filled in");
+      return;
+    }
+
     try {
       AuthResult result = await _auth.createUserWithEmailAndPassword(
           email: email.trim(), password: password);
@@ -255,6 +261,10 @@ class _Register extends State<Register> {
           break;
         case "ERROR_WEAK_PASSWORD":
           MyTheme.alertMsg(context, "Register Failed", "Weak password, password must contain atleast 6 characters");
+          break;
+        case "error":
+          MyTheme.alertMsg(context, "Register Failed",
+              "Ensure your fields are all filled in");
           break;
         default:
           MyTheme.alertMsg(context, "Register Failed", e.code);

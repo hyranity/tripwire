@@ -135,7 +135,7 @@ class _GroupPage extends State<GroupPage> {
       Map<dynamic, dynamic> groupObj = groupSnap.value;
       var groupStatus =
           groupObj["status"] == null ? "inactive" : groupObj["status"];
-      
+
       if (groupStatus == "inactive") {
         // End here since it's not active
         return;
@@ -421,10 +421,10 @@ class _GroupPage extends State<GroupPage> {
           .child(group.id)
           .child("events")
           .child(date.day.toString() +
-          "-" +
-          date.month.toString() +
-          "-" +
-          date.year.toString());
+              "-" +
+              date.month.toString() +
+              "-" +
+              date.year.toString());
 
       events.once().then((DataSnapshot snapshot) {
         var eventLocationExists = false; // If a location already logged today
@@ -612,8 +612,11 @@ class _GroupPage extends State<GroupPage> {
                           ),
                           Text(
                             location != null
-                                ? (location.subLocality == "" ? "N/A" : location
-                                .subLocality) + "," + location.locality
+                                ? (location.subLocality == ""
+                                ? "N/A"
+                                : location.subLocality) +
+                                "," +
+                                location.locality
                                 : "No location found", // Load current location
                             maxLines: 1,
                             softWrap: false,
@@ -1155,7 +1158,9 @@ class _GroupPage extends State<GroupPage> {
         .child(group.id)
         .onChildChanged
         .listen((event) {
-      setState(() {});
+      setState(() {
+
+      });
     });
     return Container(
       alignment: Alignment.topCenter,
@@ -2574,8 +2579,7 @@ class _GroupPage extends State<GroupPage> {
                   shape: BoxShape.circle,
                   image: DecorationImage(
                     fit: BoxFit.fill,
-                    image: NetworkImage(
-                        group.photoURL),
+                    image: NetworkImage(group.photoURL),
                   )),
             ),
             SizedBox(
@@ -2638,7 +2642,8 @@ class _GroupPage extends State<GroupPage> {
     Quick.getLocation().then((myLocation) {
       String locationRally =
           (myLocation.subLocality == "" ? "N/A" : myLocation.subLocality) +
-              ", " + myLocation.locality;
+              ", " +
+              myLocation.locality;
 
       eventDb.push().set({
         'title': 'Rally Everyone',
@@ -2675,8 +2680,10 @@ class _GroupPage extends State<GroupPage> {
     await instance.getTime();
 
     Quick.getLocation().then((myLocation) {
-      String locationPing = (myLocation.subLocality == "" ? "N/A" : myLocation
-          .subLocality) + ", " + myLocation.locality;
+      String locationPing =
+          (myLocation.subLocality == "" ? "N/A" : myLocation.subLocality) +
+              ", " +
+              myLocation.locality;
 
       eventDb.once().then((DataSnapshot snapshot) {
         Map<dynamic, dynamic> events = snapshot.value;
