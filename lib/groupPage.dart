@@ -161,8 +161,7 @@ class _GroupPage extends State<GroupPage> {
           if (userSnap.value["stepCountWhenJoined"] == -1) {
             stepCountWhenJoined = Global.stepCount;
             // Update step count
-            currentStepCount = Global.stepCount -
-                stepCountWhenJoined; // Because user may join at step 100, few mins later at step 300, means 200 REAL steps
+            currentStepCount = 0;
           }
           // If current step count is lower, means user JUST restarted phone; add on to the DB one
           else if (userSnap.value["stepCountWhenJoined"] > Global.stepCount) {
