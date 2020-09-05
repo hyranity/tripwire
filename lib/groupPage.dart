@@ -2732,7 +2732,7 @@ class _GroupPage extends State<GroupPage> {
                 'pingLocation': 'yes',
                 'isReplied': 'yes',
                 'answer': 'yes',
-                'sentTime': instance.worldtime.toString(),
+                'sentTime': DateTime.now().toString(),
               });
             } else if (answer == "no") {
               eventDb.child(key).update({
@@ -2741,7 +2741,7 @@ class _GroupPage extends State<GroupPage> {
                 'pingLocation': 'yes',
                 'isReplied': 'yes',
                 'answer': 'no',
-                'sentTime': instance.worldtime.toString(),
+                'sentTime': DateTime.now().toString(),
               });
             }
           }
@@ -2830,7 +2830,7 @@ class _GroupPage extends State<GroupPage> {
               'pingLocation': 'yes',
               'isReplied': 'yes',
               'answer': 'yes',
-              'sentTime': instance.worldtime.toString(),
+              'sentTime': DateTime.now().toString(),
             });
           } else if (answer == "no") {
             eventDb.child(key).update({
@@ -2839,7 +2839,7 @@ class _GroupPage extends State<GroupPage> {
               'pingLocation': 'yes',
               'isReplied': 'yes',
               'answer': 'no',
-              'sentTime': instance.worldtime.toString(),
+              'sentTime': DateTime.now().toString(),
             });
           }
         }
