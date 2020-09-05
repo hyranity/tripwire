@@ -243,7 +243,6 @@ class _PingPage extends State<PingPage> {
       }
     });
 
-    print('Spam : $spamDiscovered');
 
     //if spam within 5 minutes
     if (spamDiscovered == true) {
@@ -266,7 +265,7 @@ class _PingPage extends State<PingPage> {
               'pingLocation' : 'pinging',
               'location' : 'pinging',
               'isReplied' : 'no',
-              'sentTime': instance.worldtime.toString(),
+              'sentTime': DateTime.now().toString(),
             });
           }
         });

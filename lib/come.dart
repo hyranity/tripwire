@@ -263,7 +263,7 @@ class _ComePage extends State<ComePage> {
               'groupId' : widget.id,
               'type': 'come',
               'isReplied' : 'no',
-              'sentTime': instance.worldtime.toString(),
+              'sentTime': DateTime.now().toString(),
             });
           }
         });

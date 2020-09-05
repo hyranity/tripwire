@@ -28,9 +28,6 @@ class _RallyPage extends State<RallyPage> {
     var eventDb = FirebaseDatabase.instance.reference().child("groups").child(widget.id).child("events").child(date.day.toString() + "-" + date.month.toString() + "-" + date.year.toString());
     final FirebaseUser user = await auth.currentUser();
 
-    //get time
-    WorldTime wt = WorldTime(url: 'Asia/Kuala_Lumpur');
-    await wt.getTime();
 
     Quick.getLocation().then((myLocation) {
       String locationRally = myLocation.subLocality + ", " + myLocation.locality;
@@ -43,7 +40,7 @@ class _RallyPage extends State<RallyPage> {
         'type': 'rally',
         'isReplied': 'no',
         'location' : locationRally,
-        'sentTime': wt.worldtime.toString(),
+        'sentTime': DateTime.now().toString(),
       });
     });
 

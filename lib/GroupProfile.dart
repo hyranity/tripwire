@@ -80,8 +80,6 @@ class _GroupProfile extends State<GroupProfile> {
       loadMemberList();
     }
 
-    print(groupMembers.toString() + "LOL");
-
     return Stack(
       children: <Widget>[
         Column(
