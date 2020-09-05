@@ -135,7 +135,7 @@ class _GroupPage extends State<GroupPage> {
       Map<dynamic, dynamic> groupObj = groupSnap.value;
       var groupStatus =
           groupObj["status"] == null ? "inactive" : groupObj["status"];
-      
+
       if (groupStatus == "inactive") {
         // End here since it's not active
         return;
@@ -161,8 +161,7 @@ class _GroupPage extends State<GroupPage> {
           if (userSnap.value["stepCountWhenJoined"] == -1) {
             stepCountWhenJoined = Global.stepCount;
             // Update step count
-            currentStepCount = Global.stepCount -
-                stepCountWhenJoined; // Because user may join at step 100, few mins later at step 300, means 200 REAL steps
+            currentStepCount = 0;
           }
           // If current step count is lower, means user JUST restarted phone; add on to the DB one
           else if (userSnap.value["stepCountWhenJoined"] > Global.stepCount) {
@@ -220,6 +219,7 @@ class _GroupPage extends State<GroupPage> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Container(
+                          margin: MediaQuery.of(context).viewInsets,
                           alignment: Alignment.centerLeft,
                           child: Text(
                             "Log location",
@@ -232,6 +232,8 @@ class _GroupPage extends State<GroupPage> {
                         ),
                         Text(
                           "Log your location into the group journal, accessible on the website.",
+                          maxLines: 3,
+                          overflow: TextOverflow.ellipsis,
                           style: GoogleFonts.poppins(
                             fontSize: 18,
                             fontWeight: FontWeight.w500,
@@ -327,6 +329,7 @@ class _GroupPage extends State<GroupPage> {
         } else {}
       },
       child: Container(
+
         width: Quick.getDeviceSize(context).width,
         decoration: BoxDecoration(
           color: MyTheme.accentColor,
@@ -348,7 +351,7 @@ class _GroupPage extends State<GroupPage> {
                 "Log",
                 textAlign: TextAlign.center,
                 style: GoogleFonts.poppins(
-                  fontSize: 20,
+                  fontSize: 18,
                   fontWeight: FontWeight.w500,
                   color: Colors.white,
                 ),
@@ -387,8 +390,9 @@ class _GroupPage extends State<GroupPage> {
               Text(
                 "Cancel",
                 textAlign: TextAlign.center,
+                overflow: TextOverflow.ellipsis,
                 style: GoogleFonts.poppins(
-                  fontSize: 20,
+                  fontSize: 18,
                   fontWeight: FontWeight.w500,
                   color: Colors.white,
                 ),
@@ -422,10 +426,10 @@ class _GroupPage extends State<GroupPage> {
           .child(group.id)
           .child("events")
           .child(date.day.toString() +
-          "-" +
-          date.month.toString() +
-          "-" +
-          date.year.toString());
+              "-" +
+              date.month.toString() +
+              "-" +
+              date.year.toString());
 
       events.once().then((DataSnapshot snapshot) {
         var eventLocationExists = false; // If a location already logged today
@@ -439,7 +443,7 @@ class _GroupPage extends State<GroupPage> {
             if (event["type"] == "location") {
               // Check how long since the event was made
               var difference = DateTime.now()
-                  .difference(DateTime.parse(event["logTime"]))
+                  .difference(DateTime.parse(event["sentTime"]))
                   .inMinutes;
 
               // Is this location already logged within the cooldown limit?
@@ -451,7 +455,7 @@ class _GroupPage extends State<GroupPage> {
 
                 //Is current user already logged inside?
                 Map<dynamic, dynamic> attendees = event["attendees"];
-
+                print(attendees);
                 FirebaseAuth.instance.currentUser().then((user) {
                   if (attendees != null && attendees[user.uid] != null) {
                     // User already logged this location
@@ -466,24 +470,24 @@ class _GroupPage extends State<GroupPage> {
                         .reference()
                         .child("groups")
                         .child(group.id)
-                        .child("event")
+                        .child("events")
                         .child(date.day.toString() +
-                        "-" +
-                        date.month.toString() +
-                        "-" +
-                        date.year.toString())
+                            "-" +
+                            date.month.toString() +
+                            "-" +
+                            date.year.toString())
                         .child(event["id"]);
 
                     // New attendant
-
+                    print(thisLoggedLocation.path);
                     thisLoggedLocation
                         .child("attendees")
-                        .set({user.uid: user.displayName}).then((value) {
+                        .update({user.uid: user.displayName}).then((value) {
                       setState(() {
                         logButtonEnabled = true; // Prevent button spamming
                       });
 
-                      logSuccess(context, "Location logged successfully!");
+                      logSuccess(context, "You participated in this logging!");
                     });
                   }
                 });
@@ -511,13 +515,18 @@ class _GroupPage extends State<GroupPage> {
                 "-" +
                 date.year.toString());
 
-            logEvent.child(logEvent.push().key).set({
+            var id = logEvent
+                .push()
+                .key;
+
+            logEvent.child(id).set({
               "type": "location",
               "location": locationText.text,
               "temperature":
               weather.temperature.celsius.toStringAsFixed(0) + "°C",
               "weather": weather.weatherMain,
-              "logTime": DateTime.now().toString(),
+              "sentTime": DateTime.now().toString(),
+              "id": id,
               "attendees": {
                 user.uid: user.displayName,
               }
@@ -575,7 +584,7 @@ class _GroupPage extends State<GroupPage> {
                   },
                   child: Container(
                     alignment: Alignment.center,
-                    height: 120,
+
                     width: 300,
                     decoration: BoxDecoration(
                       color: MyTheme.primaryColor,
@@ -608,14 +617,18 @@ class _GroupPage extends State<GroupPage> {
                           ),
                           Text(
                             location != null
-                                ? (location.subLocality == "" ? "N/A" : location
-                                .subLocality) + "," + location.locality
+                                ? (location.subLocality == ""
+                                ? "N/A"
+                                : location.subLocality) +
+                                ", " +
+                                location.locality
                                 : "No location found", // Load current location
                             maxLines: 1,
                             softWrap: false,
                             overflow: TextOverflow.ellipsis,
                             textAlign: TextAlign.center,
                             style: GoogleFonts.poppins(
+                              height: 1,
                               fontSize: 23,
                               color: MyTheme.accentColor,
                               fontWeight: FontWeight.w500,
@@ -626,6 +639,7 @@ class _GroupPage extends State<GroupPage> {
                     ),
                   ),
                 ),
+
               ],
             ),
           );
@@ -908,7 +922,9 @@ class _GroupPage extends State<GroupPage> {
                       SizedBox(
                         width: 10,
                       ),
-                      cancelOption(Icons.cancel, "nah"),
+                      InkWell(onTap: () {
+                        Navigator.pop(context);
+                      }, child: cancelOption(Icons.cancel, "nah")),
                     ],
                   ),
                 )
@@ -1014,6 +1030,7 @@ class _GroupPage extends State<GroupPage> {
       groups.forEach((key, value) async {
         countUser += 1;
       });
+      group.members = groups["members"];
       group.memberCount = countUser;
     });
   }
@@ -1030,7 +1047,7 @@ class _GroupPage extends State<GroupPage> {
         "-" +
         date.month.toString() +
         "-" +
-        date.year.toString());
+        date.year.toString()).orderByChild("sentTime");
 
     final FirebaseUser user = await auth.currentUser();
 
@@ -1059,15 +1076,17 @@ class _GroupPage extends State<GroupPage> {
               }
             }
 
+
             eventList.add(new LogEvent(
               title: events["location"],
               triggerPerson: attendStr,
               type: events['type'],
-              sentTime: DateTime.parse(events['logTime']),
+              sentTime: DateTime.parse(events['sentTime']),
               isCommunication: false,
               attendees: events['attendees'],
             ));
           }
+
 
           if (((events['receiver'] == user.uid ||
               events['receiver'] == 'all') &&
@@ -1118,6 +1137,17 @@ class _GroupPage extends State<GroupPage> {
                 sender: events['sender'],
                 receiver: events['receiver'],
                 answer: events['answer'],
+              ));
+            } else if (events["type"] == "rally") {
+              eventList.add(new LogEvent(
+                title: events['title'],
+                triggerPerson: events['triggerPerson'],
+                type: events['type'],
+                sentTime: DateTime.parse(events['sentTime']),
+                isCommunication: true,
+                location: events['location'],
+                sender: events['sender'],
+                receiver: events['receiver'],
               ));
             } else {
               eventList.add(new LogEvent(
@@ -1244,6 +1274,7 @@ class _GroupPage extends State<GroupPage> {
                             ),
                           ),
                           Container(
+                            alignment: Alignment.topLeft,
                             padding: EdgeInsets.all(10),
                             decoration: BoxDecoration(
                                 color: MyTheme.primaryColor,
@@ -1306,22 +1337,34 @@ class _GroupPage extends State<GroupPage> {
                                         .of(context)
                                         .size
                                         .width * 0.6,
-                                    child: Text(
-                                      event.attendees[event.attendees.keys
-                                          .elementAt(index)],
-                                      textAlign: TextAlign.left,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: GoogleFonts.poppins(
-                                        fontSize: 18,
-                                        color: Colors.black,
-                                        fontWeight: FontWeight.w500,
-                                      ),
+                                    child: Row(
+                                      children: [
+                                        Quick.getUserPic(event
+                                            .attendees.keys
+                                            .elementAt(index), 20),
+                                        SizedBox(
+                                            width: 10
+                                        ),
+                                        Text(
+                                          event.attendees[event.attendees.keys
+                                              .elementAt(index)],
+                                          textAlign: TextAlign.left,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: GoogleFonts.poppins(
+                                            fontSize: 18,
+                                            color: MyTheme.accentColor,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   );
                                 },
                                 separatorBuilder:
                                     (BuildContext context, index) {
-                                  return new Container();
+                                  return new Container(
+                                    height: 10,
+                                  );
                                 },
                                 itemCount: event.attendees.length),
                           ),
@@ -2569,8 +2612,7 @@ class _GroupPage extends State<GroupPage> {
                   shape: BoxShape.circle,
                   image: DecorationImage(
                     fit: BoxFit.fill,
-                    image: NetworkImage(
-                        group.photoURL),
+                    image: NetworkImage(group.photoURL),
                   )),
             ),
             SizedBox(
@@ -2633,18 +2675,19 @@ class _GroupPage extends State<GroupPage> {
     Quick.getLocation().then((myLocation) {
       String locationRally =
           (myLocation.subLocality == "" ? "N/A" : myLocation.subLocality) +
-              ", " + myLocation.locality;
+              ", " +
+              myLocation.locality;
 
       eventDb.push().set({
         'title': 'Rally Everyone',
         'sender': user.uid,
         'receiver': 'all',
         'triggerPerson': user.displayName.trim(),
-        'groupId': widget.id,
+        'groupId': group.id,
         'type': 'rally',
         'isReplied': 'no',
         'location': locationRally,
-        'sentTime': wt.worldtime.toString(),
+        'sentTime': DateTime.now().toString(),
       });
     });
 
@@ -2670,8 +2713,10 @@ class _GroupPage extends State<GroupPage> {
     await instance.getTime();
 
     Quick.getLocation().then((myLocation) {
-      String locationPing = (myLocation.subLocality == "" ? "N/A" : myLocation
-          .subLocality) + ", " + myLocation.locality;
+      String locationPing =
+          (myLocation.subLocality == "" ? "N/A" : myLocation.subLocality) +
+              ", " +
+              myLocation.locality;
 
       eventDb.once().then((DataSnapshot snapshot) {
         Map<dynamic, dynamic> events = snapshot.value;
@@ -2687,7 +2732,7 @@ class _GroupPage extends State<GroupPage> {
                 'pingLocation': 'yes',
                 'isReplied': 'yes',
                 'answer': 'yes',
-                'sentTime': instance.worldtime.toString(),
+                'sentTime': DateTime.now().toString(),
               });
             } else if (answer == "no") {
               eventDb.child(key).update({
@@ -2696,7 +2741,7 @@ class _GroupPage extends State<GroupPage> {
                 'pingLocation': 'yes',
                 'isReplied': 'yes',
                 'answer': 'no',
-                'sentTime': instance.worldtime.toString(),
+                'sentTime': DateTime.now().toString(),
               });
             }
           }
@@ -2785,7 +2830,7 @@ class _GroupPage extends State<GroupPage> {
               'pingLocation': 'yes',
               'isReplied': 'yes',
               'answer': 'yes',
-              'sentTime': instance.worldtime.toString(),
+              'sentTime': DateTime.now().toString(),
             });
           } else if (answer == "no") {
             eventDb.child(key).update({
@@ -2794,7 +2839,7 @@ class _GroupPage extends State<GroupPage> {
               'pingLocation': 'yes',
               'isReplied': 'yes',
               'answer': 'no',
-              'sentTime': instance.worldtime.toString(),
+              'sentTime': DateTime.now().toString(),
             });
           }
         }

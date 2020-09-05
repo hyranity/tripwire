@@ -1,4 +1,3 @@
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/cupertino.dart';
@@ -13,18 +12,17 @@ import 'Util/Quick.dart';
 
 class GroupProfile extends StatefulWidget {
   GroupProfile({Key key, @required this.group}) : super(key: key);
-   Group group;
+  Group group;
 
   @override
   _GroupProfile createState() => _GroupProfile();
-  
 }
 
 class _GroupProfile extends State<GroupProfile> {
   final FirebaseAuth auth = FirebaseAuth.instance;
   FirebaseUser user;
   Group group;
-
+  Map<dynamic, dynamic> groupMembers;
   int retryConnect = 0;
   int totalMembers = 0;
   int buildTimes = 0;
@@ -40,9 +38,14 @@ class _GroupProfile extends State<GroupProfile> {
 
   void loadMemberList() {
     setState(() {
-      var groupDb = FirebaseDatabase.instance.reference().child("groups").child(group.id).child("members");
+      var groupDb = FirebaseDatabase.instance
+          .reference()
+          .child("groups")
+          .child(group.id)
+          .child("members");
       groupDb.once().then((DataSnapshot snapshot) {
         Map<dynamic, dynamic> groups = snapshot.value;
+        groupMembers = groups;
         groups.forEach((key, value) {
           list.add(key);
         });
@@ -82,10 +85,7 @@ class _GroupProfile extends State<GroupProfile> {
         Column(
           children: <Widget>[
             Container(
-              height: MediaQuery
-                  .of(context)
-                  .size
-                  .height * .45,
+              height: MediaQuery.of(context).size.height * .45,
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
@@ -148,7 +148,7 @@ class _GroupProfile extends State<GroupProfile> {
                         style: GoogleFonts.poppins(
                           fontSize: 20.0,
                           decoration: TextDecoration.none,
-                          color:  Color(0xff8FBF88),
+                          color: Color(0xff8FBF88),
                         ),
                       ),
                       SizedBox(
@@ -168,41 +168,24 @@ class _GroupProfile extends State<GroupProfile> {
                         style: GoogleFonts.poppins(
                           fontSize: 20.0,
                           decoration: TextDecoration.none,
-                          color:  Color(0xff8FBF88),
+                          color: Color(0xff8FBF88),
                         ),
                       ),
                       SizedBox(
                         height: Quick.getDeviceSize(context).height * 0.05,
                       ),
-                      Container (
-                        alignment: Alignment.bottomCenter,
-                        child: RaisedButton(
-                          onPressed: () {
-                            QuitGroup();
-                          },
-                          shape: RoundedRectangleBorder (
-                            borderRadius: BorderRadius.circular(80.0),
-                          ),
-                          elevation: 0,
-                          padding: EdgeInsets.all(0.0),
-                          child: Ink(
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                  begin: Alignment.centerRight,
-                                  end: Alignment.centerLeft,
-                                  colors: [Colors.red,Colors.redAccent]
-                              ),
-                              borderRadius: BorderRadius.circular(30.0),
-                            ),
-                            child: Container(
-                              constraints: BoxConstraints(maxWidth: Quick.getDeviceSize(context).width, minHeight: 50.0),
-                              alignment: Alignment.center,
-                              child: Text("Quit Group",
-                                style: GoogleFonts.poppins(color: Colors.white, fontSize: 26.0, fontWeight:FontWeight.w300),
-                              ),
-                            ),
-                          ),
-                        ),
+                      FutureBuilder<Widget>(
+                        future: quitGroup(),
+                        builder: (BuildContext context,
+                            AsyncSnapshot<Widget> snapshot) {
+                          if (snapshot.connectionState !=
+                              ConnectionState.done ||
+                              !snapshot.hasData) {
+                            return new CircularProgressIndicator();
+                          }
+
+                          return snapshot.data;
+                        },
                       ),
                       SizedBox(
                         height: Quick
@@ -241,13 +224,14 @@ class _GroupProfile extends State<GroupProfile> {
             child: Card(
               color: Colors.white,
               child: Padding(
-                padding: const EdgeInsets.only(
-                    left: 8.0, right: 8, top: 22.0),
+                padding: const EdgeInsets.only(left: 8.0, right: 8, top: 22.0),
                 child: Row(
                   children: <Widget>[
                     Expanded(
                       child: InkWell(
-                        onTap: () {memberListPopUp();},
+                        onTap: () {
+                          memberListPopUp();
+                        },
                         child: Column(
                           children: <Widget>[
                             Text(
@@ -261,11 +245,10 @@ class _GroupProfile extends State<GroupProfile> {
                             Text(
                               group.memberCount.toString(),
                               overflow: TextOverflow.ellipsis,
-
                               style: GoogleFonts.poppins(
                                 fontSize: 25.0,
                                 fontWeight: FontWeight.w600,
-                                color:  Color(0xff8FBF88),
+                                color: Color(0xff8FBF88),
                               ),
                             ),
                           ],
@@ -289,7 +272,7 @@ class _GroupProfile extends State<GroupProfile> {
                             style: GoogleFonts.poppins(
                               fontSize: 25.0,
                               fontWeight: FontWeight.w600,
-                              color:  Color(0xff8FBF88),
+                              color: Color(0xff8FBF88),
                             ),
                           ),
                         ],
@@ -300,7 +283,7 @@ class _GroupProfile extends State<GroupProfile> {
               ),
             ),
           ),
-        ),//Card,
+        ), //Card,
         RaisedButton(
           onPressed: () {
             Quick.goBack(context);
@@ -322,6 +305,89 @@ class _GroupProfile extends State<GroupProfile> {
     );
   }
 
+  Future<Widget> quitGroup() async {
+    return FirebaseAuth.instance.currentUser().then((user) {
+      return FirebaseDatabase.instance
+          .reference()
+          .child("groups")
+          .child(group.id)
+          .child("members")
+          .child(user.uid)
+          .once()
+          .then((groupMem) {
+        if (groupMem.value["role"] == "member") {
+          return Container(
+            alignment: Alignment.bottomCenter,
+            child: RaisedButton(
+              onPressed: () {
+                QuitGroup();
+              },
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(80.0),
+              ),
+              elevation: 0,
+              padding: EdgeInsets.all(0.0),
+              child: Ink(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                      begin: Alignment.centerRight,
+                      end: Alignment.centerLeft,
+                      colors: [Colors.red, Colors.redAccent]),
+                  borderRadius: BorderRadius.circular(30.0),
+                ),
+                child: Container(
+                  constraints: BoxConstraints(
+                      maxWidth: Quick
+                          .getDeviceSize(context)
+                          .width,
+                      minHeight: 50.0),
+                  alignment: Alignment.center,
+                  child: Text(
+                    "Quit Group",
+                    style: GoogleFonts.poppins(
+                        color: Colors.white,
+                        fontSize: 26.0,
+                        fontWeight: FontWeight.w300),
+                  ),
+                ),
+              ),
+            ),
+          );
+        } else {
+          return Container(
+            alignment: Alignment.bottomCenter,
+            child: RaisedButton(
+              onPressed: () {},
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(80.0),
+              ),
+              elevation: 0,
+              padding: EdgeInsets.all(0.0),
+              child: Ink(
+
+                child: Container(
+                  constraints: BoxConstraints(
+                      maxWidth: Quick
+                          .getDeviceSize(context)
+                          .width,
+                      minHeight: 50.0),
+                  alignment: Alignment.center,
+                  child: Text(
+                    "Cannot quit group",
+                    style: GoogleFonts.poppins(
+                        color: Colors.white,
+                        fontSize: 20.0,
+                        fontWeight: FontWeight.w600),
+                  ),
+                ),
+              ),
+            ),
+          );
+        }
+      });
+    });
+  }
+
   Widget memberListPopUp() {
     showModalBottomSheet(
         barrierColor: Color.fromRGBO(0, 0, 0, 0.01),
@@ -330,11 +396,11 @@ class _GroupProfile extends State<GroupProfile> {
           return Container(
             height: Quick.getDeviceSize(context).height * 0.5,
             decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [Colors.white, Colors.white60],
-              ),
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [Colors.white, Colors.white60],
+                ),
                 color: Colors.blueAccent,
                 borderRadius: BorderRadius.only(
                     topLeft: Radius.circular(20),
@@ -358,25 +424,24 @@ class _GroupProfile extends State<GroupProfile> {
   }
 
   Future<List<Member>> getMemberArray() async {
+    var db = FirebaseDatabase.instance.reference().child("member");
 
-    var db =  FirebaseDatabase.instance.reference().child("member");
-
-    return db.once().then((DataSnapshot snapshot){
+    return db.once().then((DataSnapshot snapshot) {
       List<Member> memberList = new List();
 
       Map<dynamic, dynamic> members = snapshot.value;
 
       members.forEach((key, value) {
-        for (int i=0 ; i<list.length ; i++) {
-          if(list[i] == key) {
-            memberList.add( new Member(name: value["name"], email: value["email"]));
+        for (int i = 0; i < list.length; i++) {
+          if (list[i] == key) {
+            memberList.add(new Member(
+                name: value["name"], email: value["email"], id: key));
           }
         }
       });
 
       return memberList;
     });
-
   }
 
   Widget MemberList() {
@@ -388,13 +453,13 @@ class _GroupProfile extends State<GroupProfile> {
           Padding(
             padding: const EdgeInsets.only(left: 20.0),
             child: Text(
-                "Members",
-                textAlign: TextAlign.left,
-                style: GoogleFonts.poppins(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xff669260),
-                ),
+              "Members",
+              textAlign: TextAlign.left,
+              style: GoogleFonts.poppins(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Color(0xff669260),
+              ),
             ),
           ),
           MemberListWidget(),
@@ -405,7 +470,7 @@ class _GroupProfile extends State<GroupProfile> {
 
   Widget MemberItem(Member member) {
     return Container(
-      height:70,
+      height: 70,
       decoration: BoxDecoration(
           color: MyTheme.primaryColor,
           borderRadius: BorderRadius.circular(20),
@@ -421,12 +486,7 @@ class _GroupProfile extends State<GroupProfile> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.start,
           children: <Widget>[
-            Icon (
-              Icons.face,
-              color: Color(0xff669260),
-              size: 30,
-            ),
-
+            Quick.getUserPic(member.id, 20),
             SizedBox(
               width: 16,
             ),
@@ -457,15 +517,13 @@ class _GroupProfile extends State<GroupProfile> {
         height: MediaQuery.of(context).size.height * 0.37,
         child: FutureBuilder<List<Member>>(
             future: getMemberArray(),
-
-            builder: (BuildContext context, AsyncSnapshot snapshot){
-
+            builder: (BuildContext context, AsyncSnapshot snapshot) {
               // While data is loading
               if (snapshot.connectionState != ConnectionState.done) {
                 return new Container(
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget> [
+                    children: <Widget>[
                       CircularProgressIndicator(),
                     ],
                   ),
@@ -473,11 +531,9 @@ class _GroupProfile extends State<GroupProfile> {
               }
 
               // If no members
-              if(!snapshot.hasData){
+              if (!snapshot.hasData) {
                 return new Container(
-                  child: Text(
-                      "No members found."
-                  ),
+                  child: Text("No members found."),
                 );
               }
 
@@ -489,15 +545,14 @@ class _GroupProfile extends State<GroupProfile> {
                     scrollDirection: Axis.vertical,
                     shrinkWrap: true,
                     itemCount: snapshot.data.length,
-                    separatorBuilder: (BuildContext context, int index){
+                    separatorBuilder: (BuildContext context, int index) {
                       return SizedBox(
                         height: 15,
                       );
                     },
-                    itemBuilder: (BuildContext context, int index){
+                    itemBuilder: (BuildContext context, int index) {
                       return MemberItem(snapshot.data[index]);
-                    }
-                ),
+                    }),
               );
             }),
       ),
@@ -506,8 +561,16 @@ class _GroupProfile extends State<GroupProfile> {
 
   QuitGroup() async {
     final FirebaseUser user = await auth.currentUser();
-    var delGroupDb = FirebaseDatabase.instance.reference().child("groups").child(group.id).child("members");
-    var updateGroupJoinedDb = FirebaseDatabase.instance.reference().child("member").child(user.uid).child("groups");
+    var delGroupDb = FirebaseDatabase.instance
+        .reference()
+        .child("groups")
+        .child(group.id)
+        .child("members");
+    var updateGroupJoinedDb = FirebaseDatabase.instance
+        .reference()
+        .child("member")
+        .child(user.uid)
+        .child("groups");
 
     await delGroupDb.child(user.uid).remove();
     await updateGroupJoinedDb.child(group.id).remove();
@@ -515,5 +578,4 @@ class _GroupProfile extends State<GroupProfile> {
     Quick.navigate(context, () => MyHomePage());
     MyTheme.alertMsg(context, "Success", "You have quit the group. Sad");
   }
-  
 }

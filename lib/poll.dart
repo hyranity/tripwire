@@ -157,9 +157,6 @@ class _PollPage extends State<PollPage> {
     var eventDb = FirebaseDatabase.instance.reference().child("groups").child(widget.id).child("events").child(date.day.toString() + "-" + date.month.toString() + "-" + date.year.toString());
     final FirebaseUser user = await auth.currentUser();
 
-    //get time
-    WorldTime wt = WorldTime(url: 'Asia/Kuala_Lumpur');
-    await wt.getTime();
 
     await eventDb.push().set({
       'title' : 'Poll Question',
@@ -168,7 +165,7 @@ class _PollPage extends State<PollPage> {
       'triggerPerson' : user.displayName.trim(),
       'groupId' : widget.id,
       'type' : 'poll',
-      'sentTime' : wt.worldtime.toString(),
+      'sentTime': DateTime.now().toString(),
       'question' : question,
       'yes' :0,
       'no' :0,

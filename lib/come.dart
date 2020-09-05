@@ -9,6 +9,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'Model/Member.dart';
 import 'Model/MyTheme.dart';
 import 'Model/world_time.dart';
+import 'Util/Quick.dart';
 
 class ComePage extends StatefulWidget {
   ComePage({Key key, @required this.id}) : super(key: key);
@@ -101,8 +102,8 @@ class _ComePage extends State<ComePage> {
           if(list[i] == key) {
             // For each member
             if (value['name'] != user.displayName.trim())
-              memberList.add(
-                  new Member(name: value["name"], email: value["email"]));
+              memberList.add(new Member(
+                  name: value["name"], email: value["email"], id: key));
           }
         }
       });
@@ -134,11 +135,7 @@ class _ComePage extends State<ComePage> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.start,
             children: <Widget>[
-              Icon (
-                Icons.face,
-                color: Colors.white70,
-                size: 30,
-              ),
+              Quick.getUserPic(member.id, 20),
               SizedBox(
                 width: 16,
               ),
@@ -233,7 +230,11 @@ class _ComePage extends State<ComePage> {
       Map<dynamic, dynamic> events  = snapshot.value;
       if(events != null) {
         events.forEach((eventKey, eventValue) async {
-          if (await instance.calcTimeDiff(instance.worldtime.toString(), eventValue['sentTime']) && eventValue['sender'] == user.uid || eventValue['type'] != "come" || eventValue['senderName'] != name ) {
+          if (await instance.calcTimeDiff(
+                      DateTime.now().toString(), eventValue['sentTime']) &&
+                  eventValue['sender'] == user.uid ||
+              eventValue['type'] != "come" ||
+              eventValue['senderName'] != name) {
             //if not spamming within 5 minutes, create a ping event
             print("Not Spamming");
           }
@@ -266,7 +267,7 @@ class _ComePage extends State<ComePage> {
               'groupId' : widget.id,
               'type': 'come',
               'isReplied' : 'no',
-              'sentTime': instance.worldtime.toString(),
+              'sentTime': DateTime.now().toString(),
             });
           }
         });

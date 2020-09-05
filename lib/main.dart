@@ -511,13 +511,16 @@ class _MyHomePageState extends State<MyHomePage> {
         var member = value['members'];
 
         if (member.toString().contains(user.uid)) {
+          Map<dynamic, dynamic> members = value['members'];
+
           groupList.add(new Group(
               name: value['name'],
               id: value['id'],
               desc: value['desc'],
-              isActive: false,
+              isActive: value["status"] == "active" ? true : false,
               memberCount: 0,
-              photoURL: value['photoURL']));
+              photoURL: value['photoURL'],
+              members: members));
         }
       });
       return groupList;
@@ -532,6 +535,21 @@ class _MyHomePageState extends State<MyHomePage> {
         .listen((event) {
       setState(() {});
     });
+
+    FirebaseAuth.instance.currentUser().then((user) {
+      FirebaseDatabase.instance
+          .reference()
+          .child("member")
+          .child(user.uid)
+          .onChildChanged
+          .listen((event) {
+        setState(() {
+
+        });
+      });
+    });
+
+
 
     return Container(
       height: MediaQuery.of(context).size.height * 0.30,
@@ -581,6 +599,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Widget groupItem(Group group) {
+    print(group.isActive);
     return InkWell(
       onTap: () {
         Quick.navigate(context, () => GroupPage(group: group));
@@ -635,13 +654,13 @@ class _MyHomePageState extends State<MyHomePage> {
                       style: GoogleFonts.poppins(
                         fontSize: 23,
                         color:
-                            group.isActive ? Colors.white : Color(0xff8AB587),
+                        group.isActive ? Colors.white : Color(0xff8AB587),
                         fontWeight: FontWeight.w600,
                       ),
                     ),
                   ),
                   Text(
-                    group.hoursSince.toString() + " hrs ago",
+                    group.isActive ? "Active" : "Inactive",
                     textAlign: TextAlign.left,
                     style: GoogleFonts.poppins(
                       fontSize: 17,

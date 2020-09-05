@@ -6,7 +6,7 @@ import 'package:tinycolor/tinycolor.dart';
 import 'package:tripwire/Model/MyTheme.dart';
 import 'package:tripwire/Model/world_time.dart';
 import 'Model/Member.dart';
-
+import 'Util/Quick.dart';
 
 class PingPage extends StatefulWidget {
   PingPage({Key key, @required this.id}) : super(key: key);
@@ -97,7 +97,8 @@ class _PingPage extends State<PingPage> {
           for (int i=0 ; i<list.length ; i++) {
             if(list[i] == key) {
               if (value['name'] != user.displayName.trim())
-                memberList.add( new Member(name: value["name"], email: value["email"]));
+                memberList.add(new Member(
+                    name: value["name"], email: value["email"], id: key));
             }
           }
         });
@@ -130,11 +131,7 @@ class _PingPage extends State<PingPage> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.start,
             children: <Widget>[
-              Icon (
-                Icons.face,
-                color: Colors.white70,
-                size: 30,
-              ),
+              Quick.getUserPic(member.id, 20),
 
               SizedBox(
                 width: 16,
@@ -234,7 +231,12 @@ class _PingPage extends State<PingPage> {
       Map<dynamic, dynamic> events  = snapshot.value;
       if(events != null) {
         events.forEach((eventKey, eventValue) async {
-          if (await instance.calcTimeDiff(instance.worldtime.toString(), eventValue['sentTime']) && eventValue['sender'] == user.uid  && eventValue['pingLocation'] == "pinging" || eventValue['type'] != "ping" || eventValue['senderName'] != name) {
+          if (await instance.calcTimeDiff(
+                      DateTime.now().toString(), eventValue['sentTime']) &&
+                  eventValue['sender'] == user.uid &&
+                  eventValue['pingLocation'] == "pinging" ||
+              eventValue['type'] != "ping" ||
+              eventValue['senderName'] != name) {
             //if not spamming within 5 minutes, create a ping event
             print("Not Spamming");
           }
@@ -246,7 +248,6 @@ class _PingPage extends State<PingPage> {
       }
     });
 
-    print('Spam : $spamDiscovered');
 
     //if spam within 5 minutes
     if (spamDiscovered == true) {
@@ -269,7 +270,7 @@ class _PingPage extends State<PingPage> {
               'pingLocation' : 'pinging',
               'location' : 'pinging',
               'isReplied' : 'no',
-              'sentTime': instance.worldtime.toString(),
+              'sentTime': DateTime.now().toString(),
             });
           }
         });
