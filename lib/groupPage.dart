@@ -1076,6 +1076,7 @@ class _GroupPage extends State<GroupPage> {
               }
             }
 
+
             eventList.add(new LogEvent(
               title: events["location"],
               triggerPerson: attendStr,
@@ -1085,6 +1086,7 @@ class _GroupPage extends State<GroupPage> {
               attendees: events['attendees'],
             ));
           }
+
 
           if (((events['receiver'] == user.uid ||
               events['receiver'] == 'all') &&
@@ -1135,6 +1137,17 @@ class _GroupPage extends State<GroupPage> {
                 sender: events['sender'],
                 receiver: events['receiver'],
                 answer: events['answer'],
+              ));
+            } else if (events["type"] == "rally") {
+              eventList.add(new LogEvent(
+                title: events['title'],
+                triggerPerson: events['triggerPerson'],
+                type: events['type'],
+                sentTime: DateTime.parse(events['sentTime']),
+                isCommunication: true,
+                location: events['location'],
+                sender: events['sender'],
+                receiver: events['receiver'],
               ));
             } else {
               eventList.add(new LogEvent(
@@ -2670,7 +2683,7 @@ class _GroupPage extends State<GroupPage> {
         'sender': user.uid,
         'receiver': 'all',
         'triggerPerson': user.displayName.trim(),
-        'groupId': widget.id,
+        'groupId': group.id,
         'type': 'rally',
         'isReplied': 'no',
         'location': locationRally,
