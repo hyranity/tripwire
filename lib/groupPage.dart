@@ -2687,7 +2687,7 @@ class _GroupPage extends State<GroupPage> {
         'type': 'rally',
         'isReplied': 'no',
         'location': locationRally,
-        'sentTime': wt.worldtime.toString(),
+        'sentTime': DateTime.now().toString(),
       });
     });
 
