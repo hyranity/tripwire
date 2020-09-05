@@ -36,10 +36,11 @@ class Global {
           geolocator
               .getCurrentPosition(desiredAccuracy: LocationAccuracy.best)
               .then((Position currentPos) {
-            geolocator.placemarkFromCoordinates(
-                currentPos.latitude, currentPos.longitude).then((placeList) {
-
-                Placemark place = placeList[0];
+            geolocator
+                .placemarkFromCoordinates(
+                    currentPos.latitude, currentPos.longitude)
+                .then((placeList) {
+              Placemark place = placeList[0];
 
               // For every 100 steps
               FirebaseDatabase.instance
@@ -50,13 +51,13 @@ class Global {
                 'lastLocation':
                     (place.subLocality == "" ? "N/A" : place.subLocality) +
                         ", " +
-                    place.administrativeArea +
-                    ", " +
-                    place.country,
+                        place.administrativeArea +
+                        ", " +
+                        place.country,
                 'lastLoggedTime': DateTime.now().toString(),
-                'longitude' : currentPos.longitude,
-                'latitude' : currentPos.latitude,
-            });
+                'longitude': currentPos.longitude,
+                'latitude': currentPos.latitude,
+              });
             });
           });
         }
@@ -87,6 +88,14 @@ class Global {
         .get(DB.db().reference().child("member").child(user.uid))
         .then((var value) {
       return value;
+    });
+  }
+
+  static Future<dynamic> getUserPic(String uid) {
+    return DB
+        .get(DB.db().reference().child("member").child(uid))
+        .then((var value) {
+      return value["photoURL"];
     });
   }
 }

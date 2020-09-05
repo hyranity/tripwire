@@ -436,8 +436,8 @@ class _GroupProfile extends State<GroupProfile> {
       members.forEach((key, value) {
         for (int i = 0; i < list.length; i++) {
           if (list[i] == key) {
-            memberList
-                .add(new Member(name: value["name"], email: value["email"]));
+            memberList.add(new Member(
+                name: value["name"], email: value["email"], id: key));
           }
         }
       });
@@ -488,11 +488,7 @@ class _GroupProfile extends State<GroupProfile> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.start,
           children: <Widget>[
-            Icon(
-              Icons.face,
-              color: Color(0xff669260),
-              size: 30,
-            ),
+            Quick.getUserPic(member.id, 20),
             SizedBox(
               width: 16,
             ),

@@ -467,10 +467,10 @@ class _GroupPage extends State<GroupPage> {
                         .child(group.id)
                         .child("events")
                         .child(date.day.toString() +
-                        "-" +
-                        date.month.toString() +
-                        "-" +
-                        date.year.toString())
+                            "-" +
+                            date.month.toString() +
+                            "-" +
+                            date.year.toString())
                         .child(event["id"]);
 
                     // New attendant
@@ -1158,9 +1158,7 @@ class _GroupPage extends State<GroupPage> {
         .child(group.id)
         .onChildChanged
         .listen((event) {
-      setState(() {
-
-      });
+      setState(() {});
     });
     return Container(
       alignment: Alignment.topCenter,
@@ -1254,6 +1252,7 @@ class _GroupPage extends State<GroupPage> {
                             ),
                           ),
                           Container(
+                            alignment: Alignment.topLeft,
                             padding: EdgeInsets.all(10),
                             decoration: BoxDecoration(
                                 color: MyTheme.primaryColor,
@@ -1316,22 +1315,34 @@ class _GroupPage extends State<GroupPage> {
                                         .of(context)
                                         .size
                                         .width * 0.6,
-                                    child: Text(
-                                      event.attendees[event.attendees.keys
-                                          .elementAt(index)],
-                                      textAlign: TextAlign.left,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: GoogleFonts.poppins(
-                                        fontSize: 18,
-                                        color: Colors.black,
-                                        fontWeight: FontWeight.w500,
-                                      ),
+                                    child: Row(
+                                      children: [
+                                        Quick.getUserPic(event
+                                            .attendees.keys
+                                            .elementAt(index), 20),
+                                        SizedBox(
+                                            width: 10
+                                        ),
+                                        Text(
+                                          event.attendees[event.attendees.keys
+                                              .elementAt(index)],
+                                          textAlign: TextAlign.left,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: GoogleFonts.poppins(
+                                            fontSize: 18,
+                                            color: MyTheme.accentColor,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   );
                                 },
                                 separatorBuilder:
                                     (BuildContext context, index) {
-                                  return new Container();
+                                  return new Container(
+                                    height: 10,
+                                  );
                                 },
                                 itemCount: event.attendees.length),
                           ),

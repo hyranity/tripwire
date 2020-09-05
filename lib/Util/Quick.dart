@@ -3,7 +3,10 @@ import 'package:flutter/widgets.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:tripwire/Model/CurrentLocation.dart';
+import 'package:tripwire/Model/MyTheme.dart';
 import 'package:weather/weather.dart';
+
+import 'Global.dart';
 
 class Quick {
   static Widget makeText(String text, int color, double size,
@@ -83,5 +86,25 @@ class Quick {
 
 
     });
+  }
+
+  static Widget getUserPic(String uid, double radius) {
+    return FutureBuilder(
+      future: Global.getUserPic(uid),
+      builder: (BuildContext context, AsyncSnapshot snapshot) {
+        if (snapshot.connectionState != ConnectionState.done ||
+            !snapshot.hasData) {
+          return CircleAvatar(
+            backgroundImage: NetworkImage(MyTheme.defaultIcon),
+            radius: radius,
+          );
+        }
+
+        return CircleAvatar(
+          backgroundImage: NetworkImage(snapshot.data),
+          radius: radius,
+        );
+      },
+    );
   }
 }

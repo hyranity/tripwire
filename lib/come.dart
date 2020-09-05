@@ -9,6 +9,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'Model/Member.dart';
 import 'Model/MyTheme.dart';
 import 'Model/world_time.dart';
+import 'Util/Quick.dart';
 
 class ComePage extends StatefulWidget {
   ComePage({Key key, @required this.id}) : super(key: key);
@@ -101,8 +102,8 @@ class _ComePage extends State<ComePage> {
           if(list[i] == key) {
             // For each member
             if (value['name'] != user.displayName.trim())
-              memberList.add(
-                  new Member(name: value["name"], email: value["email"]));
+              memberList.add(new Member(
+                  name: value["name"], email: value["email"], id: key));
           }
         }
       });
@@ -134,11 +135,7 @@ class _ComePage extends State<ComePage> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.start,
             children: <Widget>[
-              Icon (
-                Icons.face,
-                color: Colors.white70,
-                size: 30,
-              ),
+              Quick.getUserPic(member.id, 20),
               SizedBox(
                 width: 16,
               ),

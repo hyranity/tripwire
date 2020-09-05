@@ -6,7 +6,7 @@ import 'package:tinycolor/tinycolor.dart';
 import 'package:tripwire/Model/MyTheme.dart';
 import 'package:tripwire/Model/world_time.dart';
 import 'Model/Member.dart';
-
+import 'Util/Quick.dart';
 
 class PingPage extends StatefulWidget {
   PingPage({Key key, @required this.id}) : super(key: key);
@@ -97,7 +97,8 @@ class _PingPage extends State<PingPage> {
           for (int i=0 ; i<list.length ; i++) {
             if(list[i] == key) {
               if (value['name'] != user.displayName.trim())
-                memberList.add( new Member(name: value["name"], email: value["email"]));
+                memberList.add(new Member(
+                    name: value["name"], email: value["email"], id: key));
             }
           }
         });
@@ -130,11 +131,7 @@ class _PingPage extends State<PingPage> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.start,
             children: <Widget>[
-              Icon (
-                Icons.face,
-                color: Colors.white70,
-                size: 30,
-              ),
+              Quick.getUserPic(member.id, 20),
 
               SizedBox(
                 width: 16,
