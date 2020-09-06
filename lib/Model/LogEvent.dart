@@ -98,6 +98,7 @@ class LogEvent{
     print('sentTime : $sentTime');
     print(DateTime.now());
     print('difference b');
+    print(difference);
     if(difference > 60){
       // Hour
       double hour = difference / 60;

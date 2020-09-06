@@ -247,7 +247,7 @@ class _JoinPage extends State<JoinPage> {
                 ),
                 InkWell(
                   onTap: () {
-                    Navigator.of(context).popUntil((route) => route.isFirst);
+                    Navigator.pop(context);
                   },
                   child: Container(
                     constraints: BoxConstraints(maxHeight: 100),
