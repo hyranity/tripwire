@@ -1169,7 +1169,7 @@ class _GroupPage extends State<GroupPage> {
         print(e.stackTrace);
       }
 
-      return new List.from(eventList.reversed);
+      return new List.from(eventList);
     });
   }
 
